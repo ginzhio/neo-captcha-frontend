@@ -59,7 +59,7 @@ async function getCaptcha() {
     startBtn.style.display = "none";
 
     const payload: any = id ? {id: id.toString()} : {};
-    const response = await fetch("http://localhost:8080/api/generate-captcha", {
+    const response = await fetch("https://neo-captcha-backend.fly.dev/api/generate-captcha", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload)
@@ -226,7 +226,7 @@ async function submitCaptcha() {
     activity.push({action: "end", time: duration});
     const payload = {id: id?.toString(), activity};
 
-    const response = await fetch("http://localhost:8080/api/validate-captcha", {
+    const response = await fetch("https://neo-captcha-backend.fly.dev/api/validate-captcha", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload)
