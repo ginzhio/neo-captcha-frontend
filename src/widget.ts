@@ -380,6 +380,10 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
                 beepStartTime = Date.now();
             }
         }
+        if (isMobile && "vibrate" in navigator) {
+            console.log("bzz?");
+            navigator.vibrate(200);
+        }
     });
     canvas.addEventListener("mousedown", (e) => {
         const rect = canvas.getBoundingClientRect();
