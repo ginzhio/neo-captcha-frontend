@@ -456,10 +456,12 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
     }
 
     overlay.addEventListener("mouseup", start);
-    overlay.addEventListener("touchend", start);
-    overlay.addEventListener("touchcancel", start);
+    window.addEventListener("touchend", start);
+    window.addEventListener("touchcancel", start);
 
     function up(e: MouseEvent | TouchEvent) {
+        if (!drawing) return;
+
         const rect = canvas.getBoundingClientRect();
         let {x, y} = getCoords(e, rect);
         if (startTime > 0) {
@@ -482,8 +484,8 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
     }
 
     canvas.addEventListener("mouseup", up);
-    canvas.addEventListener("touchend", up);
-    canvas.addEventListener("touchcancel", up);
+    window.addEventListener("touchend", up);
+    window.addEventListener("touchcancel", up);
 
     submitBtn?.addEventListener("click", submitCaptcha);
 
