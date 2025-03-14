@@ -380,6 +380,7 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
             }
         }
         if (isMobile && "vibrate" in navigator) {
+            console.log("bzz?")
             navigator.vibrate(200);
         }
     }
@@ -439,7 +440,7 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
     canvas.addEventListener("touchmove", move);
 
     function start() {
-        if (startTime == 0) {
+        if (beepStartTime > 0 && startTime == 0) {
             activity.push({action: "start", time: Date.now() - idleStartTime});
 
             enabled = true;
