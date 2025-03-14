@@ -379,6 +379,9 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
                 beepStartTime = Date.now();
             }
         }
+        if (isMobile && "vibrate" in navigator) {
+            navigator.vibrate(200);
+        }
     }
 
     overlay.addEventListener("mousedown", react);
