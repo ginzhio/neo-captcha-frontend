@@ -176,9 +176,9 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
 <div class="neo-captcha-box">
     <div class="neo-captcha-title">
         <picture>
-            <source class="neo-captcha-logo" srcset="/logo-dark.png" media="(prefers-color-scheme: dark)">
-            <source class="neo-captcha-logo" srcset="/logo.png" media="(prefers-color-scheme: light)">
-            <img class="neo-captcha-logo" src="/logo.png" alt="NeoCAPTCHA logo">
+            <source class="neo-captcha-logo" srcset="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend/dist/logo-dark.png" media="(prefers-color-scheme: dark)">
+            <source class="neo-captcha-logo" srcset="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend/dist/logo.png" media="(prefers-color-scheme: light)">
+            <img class="neo-captcha-logo" src="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend/dist/logo.png" alt="NeoCAPTCHA logo">
         </picture>
         <span class="neo-captcha-caption">NeoCAPTCHA</span>
     </div>
