@@ -372,7 +372,7 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
         ctx.fill();
     }
 
-    overlay.addEventListener("mousedown", () => {
+    function react() {
         if (startTime == 0) {
             if (beepStartTime > 0) {
                 activity.push({action: "react", time: Date.now() - beepStartTime});
@@ -380,15 +380,27 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
                 beepStartTime = Date.now();
             }
         }
-        if (isMobile && "vibrate" in navigator) {
-            console.log("bzz?");
-            navigator.vibrate(200);
+    }
+
+    overlay.addEventListener("mousedown", react);
+    overlay.addEventListener("touchstart", react);
+
+    function getCoords(e: MouseEvent | TouchEvent, rect: DOMRect) {
+        let x: number;
+        let y: number
+        if (e instanceof MouseEvent) {
+            x = e.clientX - rect.left;
+            y = e.clientY - rect.top;
+        } else {
+            x = e.touches[0].clientX - rect.left;
+            y = e.touches[0].clientY - rect.top;
         }
-    });
-    canvas.addEventListener("mousedown", (e) => {
+        return {x, y};
+    }
+
+    function down(e: MouseEvent | TouchEvent) {
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        let {x, y} = getCoords(e, rect);
         if (startTime > 0) {
             activity.push({action: "down", enabled: enabled, x: x, y: y, time: Date.now() - startTime});
         }
@@ -397,12 +409,14 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
             drawing = true;
             drawCurrentPos(x, y);
         }
-    });
+    }
 
-    canvas.addEventListener("mousemove", (e) => {
+    canvas.addEventListener("mousedown", down);
+    canvas.addEventListener("touchstart", down);
+
+    function move(e: MouseEvent | TouchEvent) {
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        let {x, y} = getCoords(e, rect);
         if (startTime > 0) {
             activity.push({
                 action: "move",
@@ -417,9 +431,12 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
         if (enabled && drawing) {
             drawCurrentPos(x, y);
         }
-    });
+    }
 
-    overlay.addEventListener("mouseup", () => {
+    canvas.addEventListener("mousemove", move);
+    canvas.addEventListener("touchmove", move);
+
+    function start() {
         if (startTime == 0) {
             activity.push({action: "start", time: Date.now() - idleStartTime});
 
@@ -434,11 +451,15 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             overlay.style.display = "none";
         }
-    });
-    canvas.addEventListener("mouseup", (e) => {
+    }
+
+    overlay.addEventListener("mouseup", start);
+    overlay.addEventListener("touchend", start);
+    overlay.addEventListener("touchcancel", start);
+
+    function up(e: MouseEvent | TouchEvent) {
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        let {x, y} = getCoords(e, rect);
         if (startTime > 0) {
             activity.push({action: "up", enabled: enabled, x: x, y: y, time: Date.now() - startTime});
         }
@@ -447,13 +468,20 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
             drawing = false;
             activity.push({action: "point", x: x, y: y, time: Date.now() - startTime});
 
+            if (!ctx) {
+                throw new Error("Canvas context could not be initialized.");
+            }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
             ctx.arc(x, y, pointSize / 2, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]})`;
             ctx.fill();
         }
-    });
+    }
+
+    canvas.addEventListener("mouseup", up);
+    canvas.addEventListener("touchend", up);
+    canvas.addEventListener("touchcancel", up);
 
     submitBtn?.addEventListener("click", submitCaptcha);
 
