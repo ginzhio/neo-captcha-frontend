@@ -6,174 +6,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <title>neoCAPTCHA</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;, sans-serif;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-
-            justify-content: center;
-            background: #111;
-            color: #ddd;
-        }
-
-        .caption {
-            font-size: 2em;
-            font-weight: bold;
-            color: #ddd;
-        }
-
-        .main-canvas {
-            border: 1px solid #ddd;
-            cursor: crosshair;
-            z-index: 2;
-            position: absolute;
-        }
-
-        .time {
-            background: #222;
-            border: 1px solid #ddd;
-        }
-
-        .bg {
-            border: 1px solid #ddd;
-            z-index: 1;
-            position: absolute;
-            display: none;
-        }
-
-        .container {
-            width: 320px;
-            height: 20px;
-            position: relative;
-            transform: translateX(-50%);
-        }
-
-        button {
-            width: 320px;
-            height: 64px;
-            font-size: 14pt !important;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .icon-div {
-            width: 320px;
-            height: 320px;
-            position: absolute;
-            z-index: 3;
-            display: none;
-            padding-top: 50%;
-            cursor: pointer;
-        }
-
-        .icon {
-            color: white;
-            font-size: 48pt;
-            transform: translateY(-50%);
-        }
-
-        .icon-dark {
-            color: #242424;
-            font-size: 48pt;
-        }
-
-        .wrapper {
-            display: none;
-        }
-
-        .title {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-self: center;
-            margin: 20px 0;
-        }
-
-        .logo {
-            margin-right: 10px;
-        }
-
-        .how-to {
-            max-width: 278px;
-            background: #222;
-            border: 1px solid #ddd;
-            text-align: start;
-            padding: 0 20px 0 20px;
-        }
-
-        .how-to-caption {
-            font-size: 1.2em;
-            font-weight: bold;
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        .how-to-text {
-            padding-bottom: 20px;
-        }
-
-        .wide-icon {
-            width: 180px;
-            text-align: end;
-            transform: translateY(4px);
-        }
-
-        .steps-numbers {
-            text-align: start;
-            vertical-align: top;
-            margin-right: 6px;
-            font-weight: bold;
-            color: #009696;
-        }
-    </style>
+    <link rel="stylesheet" href="/src/style.css"/>
 </head>
 <body>
-<div id="app">
-    <div class="title">
-        <img class="logo" width="64" height="64" src="/logo.png" alt="logo"/>
-        <span class="caption">NeoCAPTCHA</span>
+<div id="app" class="neo-captcha-box">
+    <div class="neo-captcha-title">
+        <picture>
+            <source class="neo-captcha-logo" srcset="/logo-dark.png" media="(prefers-color-scheme: dark)">
+            <source class="neo-captcha-logo" srcset="/logo.png" media="(prefers-color-scheme: light)">
+            <img class="neo-captcha-logo" src="/logo.png" alt="NeoCAPTCHA logo">
+        </picture>
+        <span class="neo-captcha-caption">NeoCAPTCHA</span>
     </div>
-    <div id="howTo" class="how-to">
-        <div id="howToCaption" class="how-to-caption">How-To:<span id="howToIcon" class="wide-icon material-icons">expand_less</span>
+    <div id="howTo" class="neo-captcha-how-to">
+        <div id="howToCaption" class="neo-captcha-how-to-caption">How-To:
+            <span id="howToIcon" class="neo-captcha-wide-icon material-icons">expand_less</span>
         </div>
-        <table id="howToText" class="how-to-text">
+        <table id="howToText" class="neo-captcha-how-to-text">
             <tr>
-                <td class="steps-numbers">1.</td>
+                <td class="neo-captcha-steps-numbers">1.</td>
                 <td>Press play</td>
             </tr>
             <tr>
-                <td class="steps-numbers">2.</td>
+                <td class="neo-captcha-steps-numbers">2.</td>
                 <td>Wait for the signal</td>
             </tr>
             <tr>
-                <td class="steps-numbers">3.</td>
-                <td>Click right after the signal to reveal the CAPTCHA</td>
+                <td class="neo-captcha-steps-numbers">3.</td>
+                <td>Just after the signal click to reveal the CAPTCHA</td>
             </tr>
             <tr>
-                <td class="steps-numbers">4.</td>
+                <td class="neo-captcha-steps-numbers">4.</td>
                 <td>Find the missing corner of the hidden shape</td>
             </tr>
         </table>
     </div>
-    <button id="start"><span class="icon-dark material-icons">play_arrow</span></button>
-    <div id="wrapper" class="wrapper">
-        <div id="container" class="container">
-            <img id="bg" class="bg" width="320" height="320" alt="background"/>
-            <canvas class="main-canvas" id="captchaCanvas" width="320" height="20"></canvas>
-            <div id="startOverlay" class="icon-div">
-                <span id="signalIcon" class="icon material-icons">hearing</span>
-                <span class="icon material-icons">trending_flat</span>
-                <span class="icon material-icons">touch_app</span>
+    <button id="start" class="neo-captcha-button">
+        <span class="neo-captcha-icon-dark material-icons">play_arrow</span>
+    </button>
+    <div id="wrapper" class="neo-captcha-wrapper">
+        <div id="container" class="neo-captcha-container">
+            <img id="bg" class="neo-captcha-bg" alt="background"/>
+            <canvas id="captchaCanvas" class="neo-captcha-main-canvas" width="320" height="20"></canvas>
+            <div id="startOverlay" class="neo-captcha-icon-div">
+                <span id="signalIcon" class="neo-captcha-icon material-icons">hearing</span>
+                <span class="neo-captcha-icon material-icons">trending_flat</span>
+                <span class="neo-captcha-icon material-icons">touch_app</span>
             </div>
         </div>
         <div>
-            <canvas class="time" id="timeCanvas" width="320" height="12"></canvas>
+            <canvas class="neo-captcha-time" id="timeCanvas"></canvas>
         </div>
-        <button id="submit" disabled>
-            <span class="icon-dark material-icons">check</span>
+        <button id="submit" class="neo-captcha-button" disabled>
+            <span class="neo-captcha-icon-dark material-icons">check</span>
         </button>
     </div>
 </div>

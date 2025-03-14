@@ -76,7 +76,7 @@ async function getCaptcha() {
         color = result.color;
         id = BigInt(result.id);
         const container = document.getElementById("container") as HTMLDivElement;
-        container.style.height = "320px";
+        container.style.height = "20em";
 
         canvas.height = canvas.width;
         if (!ctx || !bar) {

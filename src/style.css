@@ -1,96 +1,146 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    --neo-captcha-accent: #009696;
+    --neo-captcha-bg: #ddd;
+    --neo-captcha-bg2: #eee;
+    --neo-captcha-fg: #111;
+    --neo-captcha-dark: #111;
+    --neo-captcha-light: #eee;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+@media (prefers-color-scheme: dark) {
+    :root {
+        --neo-captcha-bg: #111;
+        --neo-captcha-bg2: #222;
+        --neo-captcha-fg: #ddd;
+    }
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.neo-captcha-box {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    justify-content: center;
+    background: var(--neo-captcha-bg);
+    color: var(--neo-captcha-fg);
+    padding: 1em;
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.neo-captcha-caption {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--neo-captcha-fg);
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em #3178c6aa);
+.neo-captcha-main-canvas {
+    border: 1px solid var(--neo-captcha-fg);
+    cursor: crosshair;
+    z-index: 2;
+    position: absolute;
+    touch-action: none;
 }
 
-.card {
-  padding: 2em;
+.neo-captcha-time {
+    width: 20em;
+    height: 1em;
+    background: var(--neo-captcha-bg2);
+    border: 1px solid var(--neo-captcha-fg);
 }
 
-.read-the-docs {
-  color: #888;
+.neo-captcha-bg {
+    width: 20em;
+    height: 20em;
+    border: 1px solid var(--neo-captcha-fg);
+    z-index: 1;
+    position: absolute;
+    display: none;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.neo-captcha-container {
+    width: 20em;
+    height: 1em;
+    position: relative;
+    transform: translateX(-50%);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.neo-captcha-button {
+    width: 20em;
+    height: 4em;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.neo-captcha-icon-div {
+    width: 20em;
+    height: 20em;
+    position: absolute;
+    z-index: 3;
+    display: none;
+    padding-top: 50%;
+    cursor: pointer;
+}
+
+.neo-captcha-icon {
+    font-size: 3em;
+    color: var(--neo-captcha-light);
+    transform: translateY(-50%);
+}
+
+.neo-captcha-icon-dark {
+    color: var(--neo-captcha-dark);
+    font-size: 3em;
+}
+
+.neo-captcha-wrapper {
+    display: none;
+}
+
+.neo-captcha-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-self: center;
+    margin: 0 0 1em 0;
+}
+
+.neo-captcha-logo {
+    margin-right: 1em;
+    width: 3.5em;
+    height: 3.5em;
+}
+
+.neo-captcha-how-to {
+    width: 18em;
+    background: var(--neo-captcha-bg2);
+    border: 1px solid var(--neo-captcha-fg);
+    text-align: start;
+    padding: 0 1em 0 1em;
+    margin-bottom: 0.5em;
+}
+
+.neo-captcha-how-to-caption {
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0.2em 0 0.5em 0;
+}
+
+.neo-captcha-how-to-text {
+    padding-bottom: 1em;
+}
+
+.neo-captcha-wide-icon {
+    width: 8em;
+    text-align: end;
+    transform: translateY(0.2em);
+}
+
+.neo-captcha-steps-numbers {
+    text-align: start;
+    vertical-align: top;
+    font-weight: bold;
+    color: var(--neo-captcha-accent);
 }
