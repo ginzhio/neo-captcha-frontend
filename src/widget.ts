@@ -280,7 +280,6 @@ export function renderCaptcha(target: HTMLElement, showHowTo: boolean, expandHow
         console.log("userAgent: " + navigator.userAgent);
         console.log("\"vibrate\" in navigator: " + ("vibrate" in navigator));
         if (isMobile && "vibrate" in navigator) {
-            console.log("bzzzz");
             navigator.vibrate(200);
             if (beepStartTime > 0) {
                 activity.push({action: "react", time: beepStartTime - Date.now()});
