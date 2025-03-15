@@ -333,7 +333,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         if (result.img) {
             const bg = document.getElementById("bg") as HTMLImageElement;
             bg.style.display = "inline-block";
-            overlay.style.display = "inline-block";
+            overlay.style.display = "flex";
             imgSrc = `data:image/png;base64,${result.img}`;
             pointSize = result.pointSize;
             thumbSize = result.thumbSize;
@@ -429,7 +429,6 @@ export function renderCaptcha(target: HTMLElement, config: any,
             activity.push({action: "start", time: Date.now() - idleStartTime});
 
             enabled = true;
-            submitBtn.disabled = false;
             const bg = document.getElementById("bg") as HTMLImageElement;
             bg.src = imgSrc;
             startTimer();
@@ -538,6 +537,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         if (startTime >= 0 && enabled) {
             drawing = false;
             activity.push({action: "point", x: x, y: y, time: Date.now() - startTime});
+            submitBtn.disabled = false;
 
             if (!ctx) {
                 throw new Error("Canvas context could not be initialized.");
