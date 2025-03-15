@@ -2,23 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/favicon-dark.ico"
+          media="(prefers-color-scheme: dark)" type="image/x-icon">
+    <link rel="icon" href="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/favicon.ico"
+          media="(prefers-color-scheme: light)" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <title>neoCAPTCHA</title>
+    <title>NeoCAPTCHA</title>
     <link rel="stylesheet" href="/src/style.css"/>
 </head>
 <body>
 <div id="app" class="neo-captcha-box">
     <div class="neo-captcha-title">
-        <picture>
-            <source class="neo-captcha-logo"
-                    srcset="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend/dist/logo-dark.png"
+        <picture class="neo-captcha-picture">
+            <source srcset="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/logo-dark.png"
                     media="(prefers-color-scheme: dark)">
-            <source class="neo-captcha-logo"
-                    srcset="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend/dist/logo.png"
+            <source srcset="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/logo.png"
                     media="(prefers-color-scheme: light)">
-            <img class="neo-captcha-logo" src="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend/dist/logo.png"
+            <img class="neo-captcha-logo"
+                 src="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/logo.png"
                  alt="logo">
         </picture>
         <span class="neo-captcha-caption">NeoCAPTCHA</span>
@@ -52,8 +54,9 @@
     <div id="wrapper" class="neo-captcha-wrapper">
         <div id="container" class="neo-captcha-container">
             <img id="bg" class="neo-captcha-bg" alt="background"/>
-            <canvas id="captchaCanvas" class="neo-captcha-main-canvas" width="320" height="20"></canvas>
+            <canvas id="captchaCanvas" class="neo-captcha-main-canvas"></canvas>
             <div id="startOverlay" class="neo-captcha-icon-div">
+                <div id="overlayBg" class="neo-captcha-overlay-bg"></div>
                 <span id="signalIcon" class="neo-captcha-icon material-icons">hearing</span>
                 <span class="neo-captcha-icon material-icons">trending_flat</span>
                 <span class="neo-captcha-icon material-icons">touch_app</span>

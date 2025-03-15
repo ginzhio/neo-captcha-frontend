@@ -35,6 +35,8 @@
 }
 
 .neo-captcha-main-canvas {
+    width: 20em;
+    height: 1em;
     border: 1px solid var(--neo-captcha-fg);
     cursor: crosshair;
     z-index: 2;
@@ -83,6 +85,14 @@
     cursor: pointer;
 }
 
+.neo-captcha-overlay-bg {
+    width: 20em;
+    height: 20em;
+    position: absolute;
+    background: #f008;
+    transform: translateY(-50%) translateY(1px) translateX(1px);
+}
+
 .neo-captcha-icon {
     font-size: 3em;
     color: var(--neo-captcha-light);
@@ -103,7 +113,7 @@
     flex-direction: row;
     align-items: center;
     justify-self: center;
-    margin: 0 0 1em 0;
+    margin: 0 0 0.5em 0;
 }
 
 .neo-captcha-logo {

@@ -1,3 +1,8 @@
+declare const __VERSION__: string;
+
+const VERSION = __VERSION__;
+const url = "http://localhost:8080";// "https://neo-captcha-backend.fly.dev";
+
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const overlay = document.getElementById("startOverlay") as HTMLDivElement;
 const submitBtn = document.getElementById("submit") as HTMLButtonElement;
@@ -20,46 +25,54 @@ let endTime: number = 0;
 let idleStartTime: number = 0;
 let beepStartTime: number = 0;
 let enabled = false;
+let ignoreNext = false;
 let imgSrc: string = "";
 let pointSize: number = 0;
 let thumbSize: number = 0;
 let id: BigInt | undefined = undefined;
 
-let howToExpanded = true;
-const howToCaption = document.getElementById("howToCaption") as HTMLDivElement;
-const howToText = document.getElementById("howToText") as HTMLTableElement;
-const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
-howToCaption.addEventListener("click", () => {
-    howToExpanded = !howToExpanded;
+let howToShown = false;
+if (howToShown) {
+    let howToExpanded = false;
+    const howToCaption = document.getElementById("howToCaption") as HTMLDivElement;
+    const howToText = document.getElementById("howToText") as HTMLTableElement;
+    const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
     howToText.style.display = howToExpanded ? "block" : "none";
     howToIcon.innerText = howToExpanded ? "expand_less" : "expand_more";
-});
+    howToCaption.addEventListener("click", () => {
+        howToExpanded = !howToExpanded;
+        howToText.style.display = howToExpanded ? "block" : "none";
+        howToIcon.innerText = howToExpanded ? "expand_less" : "expand_more";
+    });
+} else {
+    const howTo = document.getElementById("howTo") as HTMLDivElement;
+    howTo.style.display = "none";
+}
+
+const overlayBg = document.getElementById("overlayBg") as HTMLDivElement;
+if (!isMobile) {
+    overlayBg.style.display = "none";
+}
+const signalIcon = document.getElementById("signalIcon") as HTMLSpanElement;
+signalIcon.innerText = isMobile ? "visibility" : "hearing";
 
 startBtn.addEventListener("click", getCaptcha);
 
-const signalIcon = document.getElementById("signalIcon") as HTMLSpanElement;
-signalIcon.innerText = isMobile ? "vibration" : "hearing";
-
-function beep() {
-    if (isMobile && "vibrate" in navigator) {
-        navigator.vibrate(200);
-        if (beepStartTime > 0) {
-            activity.push({action: "react", time: beepStartTime - Date.now()});
-        } else {
-            beepStartTime = Date.now();
-        }
-    } else {
-        playTone();
-    }
-}
-
 async function getCaptcha() {
+    console.log("version: " + VERSION);
+    console.log("userAgent: " + navigator.userAgent);
+
     const wrapper = document.getElementById("wrapper") as HTMLDivElement;
     wrapper.style.display = "block";
     startBtn.style.display = "none";
 
-    const payload: any = id ? {id: id.toString()} : {};
-    const response = await fetch("https://neo-captcha-backend.fly.dev/api/generate-captcha", {
+    const payload: any = {
+        id: id ? id.toString() : undefined,
+        userAgent: navigator.userAgent,
+        mobile: isMobile,
+        version: VERSION,
+    };
+    const response = await fetch(url + "/api/generate-captcha", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload)
@@ -78,6 +91,9 @@ async function getCaptcha() {
         const container = document.getElementById("container") as HTMLDivElement;
         container.style.height = "20em";
 
+        canvas.style.width = "20em";
+        canvas.style.height = "20em";
+        canvas.width = canvas.clientWidth;
         canvas.height = canvas.width;
         if (!ctx || !bar) {
             throw new Error("Canvas context could not be initialized.");
@@ -92,6 +108,94 @@ async function getCaptcha() {
         setTimeout(() => beep(), result.suspense);
     }
 }
+
+function beep() {
+    if (isMobile) {
+        overlayBg.style.background = "#0f08";
+        if (beepStartTime > 0) {
+            activity.push({action: "react", time: beepStartTime - Date.now()});
+        } else {
+            beepStartTime = Date.now();
+        }
+    } else {
+        playTone();
+    }
+}
+
+const audio = new AudioContext();
+
+const playTone = () => {
+    if (audio.state === "suspended") {
+        // Wichtig für iOS/Chrome
+        audio.resume().then(() => actuallyPlayTone());
+    } else {
+        actuallyPlayTone();
+    }
+};
+
+const actuallyPlayTone = () => {
+    playSound(285, 0.12);
+    playSound(852, 0.12, 0.12);
+    playSound(528, 0.12, 0.24);
+
+    if (beepStartTime > 0) {
+        activity.push({action: "react", time: beepStartTime - Date.now()});
+    } else {
+        beepStartTime = Date.now();
+    }
+}
+
+function playSound(hz: number, duration: number, delay: number = 0) {
+    let oscillator = audio.createOscillator();
+    let gainNode = audio.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.value = hz;
+
+    gainNode.gain.value = 0.1;
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audio.destination);
+
+    oscillator.start(audio.currentTime + delay);
+    oscillator.stop(audio.currentTime + delay + duration);
+}
+
+function react() {
+    if (startTime == 0) {
+        if (beepStartTime > 0) {
+            activity.push({action: "react", time: Date.now() - beepStartTime});
+        } else {
+            beepStartTime = Date.now();
+        }
+    }
+}
+
+overlay.addEventListener("mousedown", react);
+overlay.addEventListener("touchstart", react);
+
+function start() {
+    if (beepStartTime > 0 && startTime == 0) {
+        activity.push({action: "start", time: Date.now() - idleStartTime});
+
+        enabled = true;
+        submitBtn.disabled = false;
+        const bg = document.getElementById("bg") as HTMLImageElement;
+        bg.src = imgSrc;
+        startTimer();
+        if (!ctx) {
+            throw new Error("Canvas context could not be initialized.");
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        overlay.style.display = "none";
+        if (isMobile) {
+            ignoreNext = true;
+        }
+    }
+}
+
+overlay.addEventListener("mouseup", start);
+overlay.addEventListener("touchend", start);
+overlay.addEventListener("touchcancel", start);
 
 function startTimer() {
     startTime = Date.now();
@@ -122,53 +226,19 @@ function drawTimerBar() {
     }
 }
 
-function drawCurrentPos(x: number, y: number) {
-    if (!ctx) {
-        throw new Error("Canvas context could not be initialized.");
-    }
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath();
-    ctx.arc(x - 1, y - 1, thumbSize / 2, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
-    ctx.fill();
-}
-
-function react() {
-    if (startTime == 0) {
-        if (beepStartTime > 0) {
-            activity.push({action: "react", time: Date.now() - beepStartTime});
-        } else {
-            beepStartTime = Date.now();
-        }
-    }
-}
-
-overlay.addEventListener("mousedown", react);
-overlay.addEventListener("touchstart", react);
-
-function getCoords(e: MouseEvent | TouchEvent, rect: DOMRect) {
-    let x: number;
-    let y: number
-    if (e instanceof MouseEvent) {
-        x = e.clientX - rect.left;
-        y = e.clientY - rect.top;
-    } else {
-        x = e.touches[0].clientX - rect.left;
-        y = e.touches[0].clientY - rect.top;
-    }
-    return {x, y};
-}
-
 function down(e: MouseEvent | TouchEvent) {
-    const rect = canvas.getBoundingClientRect();
-    let {x, y} = getCoords(e, rect);
-    if (startTime > 0) {
-        activity.push({action: "down", enabled: enabled, x: x, y: y, time: Date.now() - startTime});
-    }
+    e.preventDefault();
+    if (ignoreNext) return;
 
-    if (enabled) {
-        drawing = true;
-        drawCurrentPos(x, y);
+    if (startTime > 0) {
+        const rect = canvas.getBoundingClientRect();
+        let {x, y} = getCoords(e, rect);
+        activity.push({action: "down", enabled: enabled, x: x, y: y, time: Date.now() - startTime});
+
+        if (enabled) {
+            drawing = true;
+            drawCurrentPos(x, y);
+        }
     }
 }
 
@@ -176,6 +246,9 @@ canvas.addEventListener("mousedown", down);
 canvas.addEventListener("touchstart", down);
 
 function move(e: MouseEvent | TouchEvent) {
+    e.preventDefault();
+    if (ignoreNext) return;
+
     const rect = canvas.getBoundingClientRect();
     let {x, y} = getCoords(e, rect);
     if (startTime > 0) {
@@ -190,28 +263,14 @@ function move(e: MouseEvent | TouchEvent) {
 canvas.addEventListener("mousemove", move);
 canvas.addEventListener("touchmove", move);
 
-function start() {
-    if (startTime == 0) {
-        activity.push({action: "start", time: Date.now() - idleStartTime});
-
-        enabled = true;
-        submitBtn.disabled = false;
-        const bg = document.getElementById("bg") as HTMLImageElement;
-        bg.src = imgSrc;
-        startTimer();
-        if (!ctx) {
-            throw new Error("Canvas context could not be initialized.");
-        }
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        overlay.style.display = "none";
-    }
-}
-
-overlay.addEventListener("mouseup", start);
-overlay.addEventListener("touchend", start);
-overlay.addEventListener("touchcancel", start);
-
 function up(e: MouseEvent | TouchEvent) {
+    e.preventDefault();
+    if (ignoreNext) {
+        ignoreNext = false;
+        return;
+    }
+    if (!drawing) return;
+
     const rect = canvas.getBoundingClientRect();
     let {x, y} = getCoords(e, rect);
     if (startTime > 0) {
@@ -237,6 +296,30 @@ canvas.addEventListener("mouseup", up);
 canvas.addEventListener("touchend", up);
 canvas.addEventListener("touchcancel", up);
 
+function drawCurrentPos(x: number, y: number) {
+    if (!ctx) {
+        throw new Error("Canvas context could not be initialized.");
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+    ctx.arc(x - 1, y - 1, thumbSize / 2, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
+    ctx.fill();
+}
+
+function getCoords(e: MouseEvent | TouchEvent, rect: DOMRect) {
+    let x: number;
+    let y: number
+    if (e instanceof MouseEvent) {
+        x = e.clientX - rect.left;
+        y = e.clientY - rect.top;
+    } else {
+        x = e.changedTouches[0].clientX - rect.left;
+        y = e.changedTouches[0].clientY - rect.top;
+    }
+    return {x, y};
+}
+
 submitBtn?.addEventListener("click", submitCaptcha);
 
 async function submitCaptcha() {
@@ -258,20 +341,27 @@ async function submitCaptcha() {
     activity.push({action: "end", time: duration});
     const payload = {id: id?.toString(), activity};
 
-    const response = await fetch("https://neo-captcha-backend.fly.dev/api/validate-captcha", {
+    const response = await fetch(url + "/api/validate-captcha", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload)
     });
 
-    const result = await response.json();
+    let valid = false;
+    let retry = false;
+    try {
+        const result = await response.json();
+        valid = result.valid;
+        retry = result.retry;
+    } catch (e) {
+    }
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     const lineWidth = canvas.width * 0.1;
     let x = canvas.width / 2;
     let y = canvas.height / 2;
     const size = canvas.width / 3;
-    if (result.valid) {
+    if (valid) {
         ctx.strokeStyle = "rgba(0, 0, 0, 0.02)";
         ctx.lineWidth = lineWidth + 20;
         let sx = x + lineWidth / 8;
@@ -288,7 +378,7 @@ async function submitCaptcha() {
         ctx.strokeStyle = "rgba(0, 160, 0)";
         ctx.lineWidth = lineWidth;
         drawCheckMark(size, x, y);
-    } else if (result.retry) {
+    } else if (retry) {
         ctx.strokeStyle = "rgba(0, 0, 0, 0.02)";
         ctx.lineWidth = lineWidth + 20;
         let sx = x + lineWidth / 8;
@@ -323,13 +413,16 @@ async function submitCaptcha() {
         ctx.lineWidth = lineWidth;
         drawCross(size, x, y);
     }
-    console.log(result.valid ? "CAPTCHA Passed!" : "Try Again!");
 
-    if (result.retry) {
+    if (valid && true && true) {
+        console.log("Yippie!");
+    } else if (retry) {
         setTimeout(() => {
             reset();
             getCaptcha();
         }, 500);
+    } else if (true && true) {
+        console.log("Womp womp");
     }
 }
 
@@ -382,49 +475,17 @@ function reset() {
     idleStartTime = 0;
     beepStartTime = 0;
     enabled = false;
+    ignoreNext = false;
     imgSrc = "";
     pointSize = 0;
     thumbSize = 0;
     const wrapper = document.getElementById("wrapper") as HTMLDivElement;
     wrapper.style.display = "none";
     startBtn.style.display = "block";
-}
-
-const audio = new AudioContext();
-
-const playTone = () => {
-    if (audio.state === "suspended") {
-        // Wichtig für iOS/Chrome
-        audio.resume().then(() => actuallyPlayTone());
-    } else {
-        actuallyPlayTone();
+    if (bar) {
+        bar.clearRect(0, 0, timeCanvas.width, timeCanvas.height);
     }
-};
-
-const actuallyPlayTone = () => {
-    playSound(285, 0.12);
-    playSound(852, 0.12, 0.12);
-    playSound(528, 0.12, 0.24);
-
-    if (beepStartTime > 0) {
-        activity.push({action: "react", time: beepStartTime - Date.now()});
-    } else {
-        beepStartTime = Date.now();
+    if (isMobile) {
+        overlayBg.style.background = "#f008";
     }
-    console.log("beep");
-}
-
-function playSound(hz: number, duration: number, delay: number = 0) {
-    let oscillator = audio.createOscillator();
-    let gainNode = audio.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.value = hz;
-
-    gainNode.gain.value = 0.1;
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audio.destination);
-
-    oscillator.start(audio.currentTime + delay);
-    oscillator.stop(audio.currentTime + delay + duration);
 }
