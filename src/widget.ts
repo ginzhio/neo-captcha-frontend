@@ -314,7 +314,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         console.log("userAgent: " + navigator.userAgent);
 
         const wrapper = document.getElementById("wrapper") as HTMLDivElement;
-        wrapper.style.display = "block";
+        wrapper.style.display = "flex";
         startBtn.style.display = "none";
 
         const payload: any = {
