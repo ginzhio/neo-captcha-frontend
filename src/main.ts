@@ -1,7 +1,7 @@
 declare const __VERSION__: string;
 
 const VERSION = __VERSION__;
-const url = "http://localhost:8080";// "https://neo-captcha-backend.fly.dev";
+const url = "https://neo-captcha-backend.fly.dev";// http://localhost:8080";
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const overlay = document.getElementById("startOverlay") as HTMLDivElement;
@@ -63,7 +63,7 @@ async function getCaptcha() {
     console.log("userAgent: " + navigator.userAgent);
 
     const wrapper = document.getElementById("wrapper") as HTMLDivElement;
-    wrapper.style.display = "block";
+    wrapper.style.display = "flex";
     startBtn.style.display = "none";
 
     const payload: any = {
@@ -82,7 +82,7 @@ async function getCaptcha() {
     if (result.img) {
         const bg = document.getElementById("bg") as HTMLImageElement;
         bg.style.display = "inline-block";
-        overlay.style.display = "inline-block";
+        overlay.style.display = "flex";
         imgSrc = `data:image/png;base64,${result.img}`;
         pointSize = result.pointSize;
         thumbSize = result.thumbSize;
@@ -178,7 +178,6 @@ function start() {
         activity.push({action: "start", time: Date.now() - idleStartTime});
 
         enabled = true;
-        submitBtn.disabled = false;
         const bg = document.getElementById("bg") as HTMLImageElement;
         bg.src = imgSrc;
         startTimer();
@@ -280,6 +279,7 @@ function up(e: MouseEvent | TouchEvent) {
     if (startTime >= 0 && enabled) {
         drawing = false;
         activity.push({action: "point", x: x, y: y, time: Date.now() - startTime});
+        submitBtn.disabled = false;
 
         if (!ctx) {
             throw new Error("Canvas context could not be initialized.");
