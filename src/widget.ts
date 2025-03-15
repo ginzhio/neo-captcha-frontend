@@ -85,8 +85,10 @@ const widgetStyles = `
     position: absolute;
     z-index: 3;
     display: none;
-    padding-top: 50%;
     cursor: pointer;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }
 
 .neo-captcha-overlay-bg {
@@ -94,13 +96,13 @@ const widgetStyles = `
     height: 20em;
     position: absolute;
     background: #f008;
-    transform: translateY(-50%) translateY(1px) translateX(1px);
+    z-index: -1;
+    transform: translateY(1px) translateX(1px);
 }
 
 .neo-captcha-icon {
     font-size: 3em;
     color: var(--neo-captcha-light);
-    transform: translateY(-50%);
 }
 
 .neo-captcha-icon-dark {
@@ -110,6 +112,7 @@ const widgetStyles = `
 
 .neo-captcha-wrapper {
     display: none;
+    flex-direction: column;
 }
 
 .neo-captcha-title {
@@ -121,7 +124,7 @@ const widgetStyles = `
 }
 
 .neo-captcha-logo {
-    margin-right: 1em;
+    margin: 0 1em 0 0;
     width: 3.5em;
     height: 3.5em;
 }
@@ -206,19 +209,19 @@ export function renderCaptcha(target: HTMLElement, config: any,
             <table id="howToText" class="neo-captcha-how-to-text">
                 <tr>
                     <td class="neo-captcha-steps-numbers">1.</td>
-                    <td>Press play</td>
+                    <td>Hit ▶ Play</td>
                 </tr>
                 <tr>
                     <td class="neo-captcha-steps-numbers">2.</td>
-                    <td>Wait for the signal</td>
+                    <td>Wait for the signal – stay alert!</td>
                 </tr>
                 <tr>
                     <td class="neo-captcha-steps-numbers">3.</td>
-                    <td>Just after the signal click to reveal the CAPTCHA</td>
+                    <td>When it triggers, tap to uncover the CAPTCHA</td>
                 </tr>
                 <tr>
                     <td class="neo-captcha-steps-numbers">4.</td>
-                    <td>Find the missing corner of the hidden shape</td>
+                    <td>Find the missing corner and place your guess</td>
                 </tr>
             </table>
         </div>

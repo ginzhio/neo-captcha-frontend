@@ -31,9 +31,9 @@ let pointSize: number = 0;
 let thumbSize: number = 0;
 let id: BigInt | undefined = undefined;
 
-let howToShown = false;
+let howToShown = true;
 if (howToShown) {
-    let howToExpanded = false;
+    let howToExpanded = true;
     const howToCaption = document.getElementById("howToCaption") as HTMLDivElement;
     const howToText = document.getElementById("howToText") as HTMLTableElement;
     const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
