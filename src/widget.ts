@@ -31,6 +31,13 @@ const widgetStyles = `
     padding: 1em;
 }
 
+.neo-captcha-logo {
+    margin: 0 1em 0 0;
+    width: 3.5em;
+    height: 3.5em;
+    cursor: pointer;
+}
+
 .neo-captcha-caption {
     font-size: 1.8em;
     font-weight: bold;
@@ -123,12 +130,6 @@ const widgetStyles = `
     margin: 0 0 0.5em 0;
 }
 
-.neo-captcha-logo {
-    margin: 0 1em 0 0;
-    width: 3.5em;
-    height: 3.5em;
-}
-
 .neo-captcha-how-to {
     width: 18em;
     background: var(--neo-captcha-bg2);
@@ -191,15 +192,18 @@ export function renderCaptcha(target: HTMLElement, config: any,
     target.innerHTML = `
     <div class="neo-captcha-box">
         <div class="neo-captcha-title">
-            <picture class="neo-captcha-picture">
-                <source srcset="https://neo-captcha.com/assets/logo-dark.png"
-                        media="(prefers-color-scheme: dark)">
-                <source srcset="https://neo-captcha.com/assets/logo.png"
-                        media="(prefers-color-scheme: light)">
-                <img class="neo-captcha-logo"
-                     src="https://neo-captcha.com/assets/logo.png"
-                     alt="logo">
-            </picture>
+            <a href="https://neo-captcha.com" target="_blank" rel="noopener">
+                <picture class="neo-captcha-picture">
+                    <source srcset="https://neo-captcha.com/assets/logo-dark.png"
+                            media="(prefers-color-scheme: dark)">
+                    <source srcset="https://neo-captcha.com/assets/logo.png"
+                            media="(prefers-color-scheme: light)">
+    
+                    <img class="neo-captcha-logo" title="Visit neo-captcha.com"
+                         src="https://neo-captcha.com/assets/logo.png"
+                         alt="logo">
+                </picture>
+            </a>
             <span class="neo-captcha-caption">NeoCAPTCHA</span>
         </div>
         <div id="howTo" class="neo-captcha-how-to">
@@ -309,6 +313,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
 
     startBtn.addEventListener("click", getCaptcha);
 
+    const minDifficulty = config?.minDifficulty || "easy";
+
     async function getCaptcha() {
         console.log("version: " + VERSION);
         console.log("userAgent: " + navigator.userAgent);
@@ -322,6 +328,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
             userAgent: navigator.userAgent,
             mobile: isMobile,
             version: VERSION,
+            minDifficulty: minDifficulty,
         };
         const response = await fetch(url + "/generate-captcha", {
             method: "POST",
@@ -331,6 +338,14 @@ export function renderCaptcha(target: HTMLElement, config: any,
         const result = await response.json();
         console.log(result);
         if (result.img) {
+            const howToText = document.getElementById("howToText") as HTMLTableElement;
+            if (howToShown && howToText.style.display == "block") {
+                const howToText = document.getElementById("howToText") as HTMLTableElement;
+                const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
+                howToText.style.display = "none";
+                howToIcon.innerText = "expand_more";
+            }
+
             const bg = document.getElementById("bg") as HTMLImageElement;
             bg.style.display = "inline-block";
             overlay.style.display = "flex";

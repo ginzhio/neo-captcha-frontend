@@ -1,7 +1,7 @@
 declare const __VERSION__: string;
 
 const VERSION = __VERSION__;
-const url = "https://neo-captcha.com/api/v1";// http://localhost:8080";
+const url = "http://localhost:8080/api";
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const overlay = document.getElementById("startOverlay") as HTMLDivElement;
@@ -58,6 +58,8 @@ signalIcon.innerText = isMobile ? "visibility" : "hearing";
 
 startBtn.addEventListener("click", getCaptcha);
 
+const minDifficulty = "hard";
+
 async function getCaptcha() {
     console.log("version: " + VERSION);
     console.log("userAgent: " + navigator.userAgent);
@@ -71,6 +73,7 @@ async function getCaptcha() {
         userAgent: navigator.userAgent,
         mobile: isMobile,
         version: VERSION,
+        minDifficulty: minDifficulty,
     };
     const response = await fetch(url + "/generate-captcha", {
         method: "POST",
@@ -80,6 +83,14 @@ async function getCaptcha() {
     const result = await response.json();
     console.log(result);
     if (result.img) {
+        const howToText = document.getElementById("howToText") as HTMLTableElement;
+        if (howToShown && howToText.style.display == "block") {
+            const howToText = document.getElementById("howToText") as HTMLTableElement;
+            const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
+            howToText.style.display = "none";
+            howToIcon.innerText = "expand_more";
+        }
+
         const bg = document.getElementById("bg") as HTMLImageElement;
         bg.style.display = "inline-block";
         overlay.style.display = "flex";
