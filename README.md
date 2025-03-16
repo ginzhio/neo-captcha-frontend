@@ -24,4 +24,9 @@ coming soon...
 
 #
 # Stay tuned for additional features, customization options and security updates!
+Preview:
+<p align="center">
+  <img src="docs/neo-captcha-screenshot.png" alt="neoCAPTCHA Screenshot" width="386"/>
+</p>
+
 
