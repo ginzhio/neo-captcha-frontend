@@ -1,4 +1,5 @@
-# Easy peasy, lemon squeezy
+# How to use:
+Easy peasy, lemon squeezy. Just copy this and add it to your website, wherever you see fit.
 ```html
 <div id="neo-captcha"></div>
 <script src="https://neo-captcha.com/widget/v1/neo-captcha.js"></script>
@@ -16,6 +17,11 @@
     });
 </script>
 ```
+Use the callback methods ```onSuccess``` and ```onFailure``` to grant or deny access to the features you wanna protect from bots.
 
 # API keys / Licence keys
 coming soon...
+
+#
+# Stay tuned for additional features, customization options and security updates!
+
