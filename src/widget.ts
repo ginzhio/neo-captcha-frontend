@@ -184,20 +184,19 @@ function injectMaterialIcons() {
 }
 
 // @ts-ignore
-export function renderCaptcha(target: HTMLElement, config: any,
-                              callbacks?: { onSuccess?: () => void, onFailure?: () => void }) {
+export function renderCaptcha(target: HTMLElement) {
     injectMaterialIcons();
     injectStyles();
     target.innerHTML = `
     <div class="neo-captcha-box">
         <div class="neo-captcha-title">
             <picture class="neo-captcha-picture">
-                <source srcset="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/logo-dark.png"
+                <source srcset="https://neo-captcha.com/assets/logo-dark.png"
                         media="(prefers-color-scheme: dark)">
-                <source srcset="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/logo.png"
+                <source srcset="https://neo-captcha.com/assets/logo.png"
                         media="(prefers-color-scheme: light)">
                 <img class="neo-captcha-logo"
-                     src="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/logo.png"
+                     src="https://neo-captcha.com/assets/logo.png"
                      alt="logo">
             </picture>
             <span class="neo-captcha-caption">NeoCAPTCHA</span>
@@ -243,16 +242,16 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 <canvas class="neo-captcha-time" id="timeCanvas"></canvas>
             </div>
             <button id="submit" class="neo-captcha-button" disabled>
-                <span class="neo-captcha-icon-dark material-icons">check</span>
+                <span id="submitIcon" class="neo-captcha-icon-dark material-icons">check</span>
             </button>
         </div>
     </div>
     `;
-    const showHowTo = config?.showHowTo || false;
-    const expandHowTo = config?.expandHowTo || false;
+    const showHowTo = true;
+    const expandHowTo = false;
 
     const VERSION = __VERSION__;
-    const url = "https://neo-captcha-backend.fly.dev";
+    const url = "https://neo-captcha.com/api/v1";
 
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const overlay = document.getElementById("startOverlay") as HTMLDivElement;
@@ -323,7 +322,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
             mobile: isMobile,
             version: VERSION,
         };
-        const response = await fetch(url + "/api/generate-captcha", {
+        const response = await fetch(url + "/generate-captcha", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(payload)
@@ -422,7 +421,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     }
 
     overlay.addEventListener("mousedown", react);
-    overlay.addEventListener("touchstart", react);
+    overlay.addEventListener("touchstart", react, {passive: false});
 
     function start() {
         if (beepStartTime > 0 && startTime == 0) {
@@ -493,7 +492,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     }
 
     canvas.addEventListener("mousedown", down);
-    canvas.addEventListener("touchstart", down);
+    canvas.addEventListener("touchstart", down, {passive: false});
 
     function move(e: MouseEvent | TouchEvent) {
         e.preventDefault();
@@ -518,7 +517,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     }
 
     canvas.addEventListener("mousemove", move);
-    canvas.addEventListener("touchmove", move);
+    canvas.addEventListener("touchmove", move, {passive: false});
 
     function up(e: MouseEvent | TouchEvent) {
         e.preventDefault();
@@ -599,7 +598,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         activity.push({action: "end", time: duration});
         const payload = {id: id?.toString(), activity};
 
-        const response = await fetch(url + "/api/validate-captcha", {
+        const response = await fetch(url + "/validate-captcha", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(payload)
@@ -672,16 +671,34 @@ export function renderCaptcha(target: HTMLElement, config: any,
             drawCross(size, x, y);
         }
 
-        if (valid && callbacks && callbacks.onSuccess) {
-            callbacks.onSuccess();
+        let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
+        if (valid && true && true) {
+            console.log("Yippie!");
+            submitBtn.disabled = false;
+            submitBtn.removeEventListener("click", submitCaptcha);
+            submitBtn.addEventListener("click", restart);
+            submitIcon.innerText = "replay";
         } else if (retry) {
             setTimeout(() => {
                 reset();
                 getCaptcha();
             }, 500);
-        } else if (callbacks && callbacks.onFailure) {
-            callbacks.onFailure();
+        } else if (true && true) {
+            console.log("Womp, womp");
+            submitBtn.disabled = false;
+            submitBtn.removeEventListener("click", submitCaptcha);
+            submitBtn.addEventListener("click", restart);
+            submitIcon.innerText = "replay";
         }
+    }
+
+    function restart() {
+        reset();
+        id = undefined;
+        submitBtn.removeEventListener("click", restart);
+        submitBtn.addEventListener("click", submitCaptcha);
+        let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
+        submitIcon.innerText = "check";
     }
 
     function drawCheckMark(size: number, x: number, y: number) {
@@ -733,6 +750,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         idleStartTime = 0;
         beepStartTime = 0;
         enabled = false;
+        submitBtn.disabled = true;
         ignoreNext = false;
         imgSrc = "";
         pointSize = 0;

@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/favicon-dark.ico"
+    <link rel="icon" href="https://neo-captcha.com/assets/favicon-dark.ico"
           media="(prefers-color-scheme: dark)" type="image/x-icon">
-    <link rel="icon" href="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/favicon.ico"
+    <link rel="icon" href="https://neo-captcha.com/assets/favicon.ico"
           media="(prefers-color-scheme: light)" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -15,12 +15,12 @@
 <div id="app" class="neo-captcha-box">
     <div class="neo-captcha-title">
         <picture class="neo-captcha-picture">
-            <source srcset="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/logo-dark.png"
+            <source srcset="https://neo-captcha.com/assets/logo-dark.png"
                     media="(prefers-color-scheme: dark)">
-            <source srcset="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/logo.png"
+            <source srcset="https://neo-captcha.com/assets/logo.png"
                     media="(prefers-color-scheme: light)">
             <img class="neo-captcha-logo"
-                 src="https://cdn.jsdelivr.net/gh/ginzhio/neo-captcha-frontend@main/dist/logo.png"
+                 src="https://neo-captcha.com/assets/logo.png"
                  alt="logo">
         </picture>
         <span class="neo-captcha-caption">NeoCAPTCHA</span>
@@ -66,7 +66,7 @@
             <canvas class="neo-captcha-time" id="timeCanvas"></canvas>
         </div>
         <button id="submit" class="neo-captcha-button" disabled>
-            <span class="neo-captcha-icon-dark material-icons">check</span>
+            <span id="submitIcon" class="neo-captcha-icon-dark material-icons">check</span>
         </button>
     </div>
 </div>

@@ -1,7 +1,7 @@
 declare const __VERSION__: string;
 
 const VERSION = __VERSION__;
-const url = "https://neo-captcha-backend.fly.dev";// http://localhost:8080";
+const url = "https://neo-captcha.com/api/v1";// http://localhost:8080";
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const overlay = document.getElementById("startOverlay") as HTMLDivElement;
@@ -72,7 +72,7 @@ async function getCaptcha() {
         mobile: isMobile,
         version: VERSION,
     };
-    const response = await fetch(url + "/api/generate-captcha", {
+    const response = await fetch(url + "/generate-captcha", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload)
@@ -171,7 +171,7 @@ function react() {
 }
 
 overlay.addEventListener("mousedown", react);
-overlay.addEventListener("touchstart", react);
+overlay.addEventListener("touchstart", react, {passive: false});
 
 function start() {
     if (beepStartTime > 0 && startTime == 0) {
@@ -242,7 +242,7 @@ function down(e: MouseEvent | TouchEvent) {
 }
 
 canvas.addEventListener("mousedown", down);
-canvas.addEventListener("touchstart", down);
+canvas.addEventListener("touchstart", down, {passive: false});
 
 function move(e: MouseEvent | TouchEvent) {
     e.preventDefault();
@@ -260,7 +260,7 @@ function move(e: MouseEvent | TouchEvent) {
 }
 
 canvas.addEventListener("mousemove", move);
-canvas.addEventListener("touchmove", move);
+canvas.addEventListener("touchmove", move, {passive: false});
 
 function up(e: MouseEvent | TouchEvent) {
     e.preventDefault();
@@ -341,7 +341,7 @@ async function submitCaptcha() {
     activity.push({action: "end", time: duration});
     const payload = {id: id?.toString(), activity};
 
-    const response = await fetch(url + "/api/validate-captcha", {
+    const response = await fetch(url + "/validate-captcha", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload)
@@ -414,16 +414,34 @@ async function submitCaptcha() {
         drawCross(size, x, y);
     }
 
+    let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
     if (valid && true && true) {
         console.log("Yippie!");
+        submitBtn.disabled = false;
+        submitBtn.removeEventListener("click", submitCaptcha);
+        submitBtn.addEventListener("click", restart);
+        submitIcon.innerText = "replay";
     } else if (retry) {
         setTimeout(() => {
             reset();
             getCaptcha();
         }, 500);
     } else if (true && true) {
-        console.log("Womp womp");
+        console.log("Womp, womp");
+        submitBtn.disabled = false;
+        submitBtn.removeEventListener("click", submitCaptcha);
+        submitBtn.addEventListener("click", restart);
+        submitIcon.innerText = "replay";
     }
+}
+
+function restart() {
+    reset();
+    id = undefined;
+    submitBtn.removeEventListener("click", restart);
+    submitBtn.addEventListener("click", submitCaptcha);
+    let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
+    submitIcon.innerText = "check";
 }
 
 function drawCheckMark(size: number, x: number, y: number) {
@@ -475,6 +493,7 @@ function reset() {
     idleStartTime = 0;
     beepStartTime = 0;
     enabled = false;
+    submitBtn.disabled = true;
     ignoreNext = false;
     imgSrc = "";
     pointSize = 0;
