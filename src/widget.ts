@@ -184,7 +184,8 @@ function injectMaterialIcons() {
 }
 
 // @ts-ignore
-export function renderCaptcha(target: HTMLElement) {
+export function renderCaptcha(target: HTMLElement, config: any,
+                              callbacks?: { onSuccess?: () => void, onFailure?: () => void }) {
     injectMaterialIcons();
     injectStyles();
     target.innerHTML = `
@@ -242,13 +243,13 @@ export function renderCaptcha(target: HTMLElement) {
                 <canvas class="neo-captcha-time" id="timeCanvas"></canvas>
             </div>
             <button id="submit" class="neo-captcha-button" disabled>
-                <span id="submitIcon" class="neo-captcha-icon-dark material-icons">check</span>
+                <span class="neo-captcha-icon-dark material-icons">check</span>
             </button>
         </div>
     </div>
     `;
-    const showHowTo = true;
-    const expandHowTo = false;
+    const showHowTo = config?.showHowTo || false;
+    const expandHowTo = config?.expandHowTo || false;
 
     const VERSION = __VERSION__;
     const url = "https://neo-captcha.com/api/v1";
@@ -671,34 +672,16 @@ export function renderCaptcha(target: HTMLElement) {
             drawCross(size, x, y);
         }
 
-        let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
-        if (valid && true && true) {
-            console.log("Yippie!");
-            submitBtn.disabled = false;
-            submitBtn.removeEventListener("click", submitCaptcha);
-            submitBtn.addEventListener("click", restart);
-            submitIcon.innerText = "replay";
+        if (valid && callbacks && callbacks.onSuccess) {
+            callbacks.onSuccess();
         } else if (retry) {
             setTimeout(() => {
                 reset();
                 getCaptcha();
             }, 500);
-        } else if (true && true) {
-            console.log("Womp, womp");
-            submitBtn.disabled = false;
-            submitBtn.removeEventListener("click", submitCaptcha);
-            submitBtn.addEventListener("click", restart);
-            submitIcon.innerText = "replay";
+        } else if (callbacks && callbacks.onFailure) {
+            callbacks.onFailure();
         }
-    }
-
-    function restart() {
-        reset();
-        id = undefined;
-        submitBtn.removeEventListener("click", restart);
-        submitBtn.addEventListener("click", submitCaptcha);
-        let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
-        submitIcon.innerText = "check";
     }
 
     function drawCheckMark(size: number, x: number, y: number) {

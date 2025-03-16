@@ -414,34 +414,16 @@ async function submitCaptcha() {
         drawCross(size, x, y);
     }
 
-    let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
     if (valid && true && true) {
         console.log("Yippie!");
-        submitBtn.disabled = false;
-        submitBtn.removeEventListener("click", submitCaptcha);
-        submitBtn.addEventListener("click", restart);
-        submitIcon.innerText = "replay";
     } else if (retry) {
         setTimeout(() => {
             reset();
             getCaptcha();
         }, 500);
     } else if (true && true) {
-        console.log("Womp, womp");
-        submitBtn.disabled = false;
-        submitBtn.removeEventListener("click", submitCaptcha);
-        submitBtn.addEventListener("click", restart);
-        submitIcon.innerText = "replay";
+        console.log("Womp womp");
     }
-}
-
-function restart() {
-    reset();
-    id = undefined;
-    submitBtn.removeEventListener("click", restart);
-    submitBtn.addEventListener("click", submitCaptcha);
-    let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
-    submitIcon.innerText = "check";
 }
 
 function drawCheckMark(size: number, x: number, y: number) {
