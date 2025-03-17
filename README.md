@@ -88,7 +88,8 @@ Have a feature idea or integration suggestion?
 
 ## License
 
-MIT – see [LICENSE](./LICENSE)
+CC BY-NC 4.0 – see [LICENSE](./LICENSE)  
+Commercial use requires permission – contact hello@neo-captcha.com
 
 #
 # Stay tuned for additional features, customization options and security updates!
