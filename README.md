@@ -47,9 +47,9 @@
 </script>
 ```
 
-That’s it.
-Use the callback methods ```onSuccess``` and ```onFailure``` to grant or deny access to the features you wanna protect from bots.
-Configuration options:
+That’s it.  
+Use the callback methods ```onSuccess``` and ```onFailure``` to grant or deny access to the features you wanna protect from bots.  
+##### Configuration options:
 ```ts
 {
     showHowTo: true,       // shows instructions on how to solve the CAPTCHA
