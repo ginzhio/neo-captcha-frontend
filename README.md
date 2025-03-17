@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="docs/logo.png" alt="NeoCAPTCHA logo" width="100" />
+  <img src="public/logo-dark.png" alt="NeoCAPTCHA logo" width="100" />
 </p>
 
 <h1 align="center">NeoCAPTCHA</h1>
-<p align="center"><em>The CAPTCHA the internet deserves.</em></p>
+<p align="center"><em>What CAPTCHA was always meant to be.</em></p>
 
 <p align="center">
   <a href="https://neo-captcha.com">Website</a> •
