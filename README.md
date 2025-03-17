@@ -6,7 +6,7 @@
 <p align="center"><em>What CAPTCHA was always meant to be.</em></p>
 
 <p align="center">
-  <a href="https://neo-captcha.com">Website</a> •
+  <a href="https://neo-captcha.com" target="_blank">Website</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#about">About</a> •
   <a href="#license">License</a>
