@@ -200,8 +200,7 @@ function injectMaterialIcons() {
 }
 
 // @ts-ignore
-export function renderCaptcha(target: HTMLElement, config: any,
-                              callbacks?: { onSuccess?: () => void, onFailure?: () => void }) {
+export function renderCaptcha(target: HTMLElement) {
     injectMaterialIcons();
     injectStyles();
     target.innerHTML = `
@@ -270,8 +269,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
         </div>
     </div>
     `;
-    const showHowTo = config?.showHowTo || false;
-    const expandHowTo = config?.expandHowTo || false;
+    const showHowTo = true;
+    const expandHowTo = true;
 
     const VERSION = __VERSION__;
     const url = "https://neo-captcha.com/api/v1";
@@ -288,7 +287,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         throw new Error("Canvas context could not be initialized.");
     }
 
-    const minDifficulty = config?.minDifficulty || "easy";
+    const minDifficulty = "easy";
     const totalTime = 6000;
     let color: number[] = [255, 0, 0];
 
@@ -720,16 +719,35 @@ export function renderCaptcha(target: HTMLElement, config: any,
             drawCross(size, x, y);
         }
 
-        if (valid && callbacks && callbacks.onSuccess) {
-            callbacks.onSuccess();
+        let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
+        if (valid) {
+            console.log("Yippie!");
+            submitBtn.disabled = false;
+            submitBtn.removeEventListener("click", submitCaptcha);
+            submitBtn.addEventListener("click", restart);
+            submitIcon.innerText = "replay";
         } else if (retry) {
             setTimeout(() => {
                 reset();
                 getCaptcha();
             }, 500);
-        } else if (callbacks && callbacks.onFailure) {
-            callbacks.onFailure();
+        } else {
+            console.log("Womp, womp");
+            submitBtn.disabled = false;
+            submitBtn.removeEventListener("click", submitCaptcha);
+            submitBtn.addEventListener("click", restart);
+            submitIcon.innerText = "replay";
         }
+    }
+
+    function restart() {
+        reset();
+        challenge = undefined;
+        hmac = undefined;
+        submitBtn.removeEventListener("click", restart);
+        submitBtn.addEventListener("click", submitCaptcha);
+        let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
+        submitIcon.innerText = "check";
     }
 
     function drawCheckMark(size: number, x: number, y: number) {
