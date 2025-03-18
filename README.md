@@ -75,10 +75,11 @@ The frontend widget is open source. The backend is hosted and stateless, using s
 ✅ Interactive widget (click-to-reveal, [Kanizsa](https://en.wikipedia.org/wiki/Illusory_contours)-based challenge)  
 ✅ Mobile & touch support  
 ✅ Sound / visual start signal  
-⬜ Mode for visually impaired  
-⬜ Even more bot-proof but intuitive challenges  
+⬜ How-To translations or gif  
 ⬜ Customization / branding options  
 ⬜ Licence API keys for even more security  
+⬜ Mode for visually impaired  
+⬜ Even more bot-proof but intuitive challenges  
 
 ## Contribute
 
