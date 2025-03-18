@@ -264,7 +264,7 @@ export function renderCaptcha(target: HTMLElement) {
                 <canvas class="neo-captcha-time" id="timeCanvas"></canvas>
             </div>
             <button id="submit" class="neo-captcha-button" disabled>
-                <span class="neo-captcha-icon-dark material-icons">check</span>
+                <span id="submitIcon" class="neo-captcha-icon-dark material-icons">check</span>
             </button>
         </div>
     </div>
