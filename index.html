@@ -51,12 +51,15 @@
             </tr>
         </table>
     </div>
-    <button id="start" class="neo-captcha-button">
+    <button id="start" class="neo-captcha-start-button">
         <span class="neo-captcha-icon-dark material-icons">play_arrow</span>
     </button>
     <div id="wrapper" class="neo-captcha-wrapper">
         <div id="container" class="neo-captcha-container">
-            <img id="bg" class="neo-captcha-bg" alt="background"/>
+            <div class="neo-captcha-icon-div sync">
+                <span class="neo-captcha-icon material-icons">sync</span>
+            </div>
+            <img id="image" class="neo-captcha-image" alt="background"/>
             <canvas id="captchaCanvas" class="neo-captcha-main-canvas"></canvas>
             <div id="startOverlay" class="neo-captcha-icon-div">
                 <div id="overlayBg" class="neo-captcha-overlay-bg"></div>

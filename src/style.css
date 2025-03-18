@@ -44,7 +44,7 @@
 
 .neo-captcha-main-canvas {
     width: 20em;
-    height: 1em;
+    height: 20em;
     border: 1px solid var(--neo-captcha-fg);
     cursor: crosshair;
     z-index: 2;
@@ -59,7 +59,7 @@
     border: 1px solid var(--neo-captcha-fg);
 }
 
-.neo-captcha-bg {
+.neo-captcha-image {
     width: 20em;
     height: 20em;
     border: 1px solid var(--neo-captcha-fg);
@@ -70,7 +70,7 @@
 
 .neo-captcha-container {
     width: 20em;
-    height: 1em;
+    height: 20em;
     position: relative;
     display: flex;
 }
@@ -79,6 +79,14 @@
     width: 20em;
     height: 4em;
     font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.neo-captcha-start-button {
+    width: 20rem;
+    height: 15rem;
+    font-size: 1.5em;
     font-weight: bold;
     cursor: pointer;
 }
@@ -93,13 +101,20 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+
+    &.sync {
+        display: flex;
+        cursor: auto;
+        background: var(--neo-captcha-bg2);
+        transform: translateX(1px) translateY(1px);
+        z-index: 0;
+    }
 }
 
 .neo-captcha-overlay-bg {
     width: 20em;
     height: 20em;
     position: absolute;
-    background: #f008;
     z-index: -1;
     transform: translateY(1px) translateX(1px);
 }

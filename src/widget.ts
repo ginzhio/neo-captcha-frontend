@@ -47,7 +47,7 @@ const widgetStyles = `
 
 .neo-captcha-main-canvas {
     width: 20em;
-    height: 1em;
+    height: 20em;
     border: 1px solid var(--neo-captcha-fg);
     cursor: crosshair;
     z-index: 2;
@@ -62,7 +62,7 @@ const widgetStyles = `
     border: 1px solid var(--neo-captcha-fg);
 }
 
-.neo-captcha-bg {
+.neo-captcha-image {
     width: 20em;
     height: 20em;
     border: 1px solid var(--neo-captcha-fg);
@@ -73,7 +73,7 @@ const widgetStyles = `
 
 .neo-captcha-container {
     width: 20em;
-    height: 1em;
+    height: 20em;
     position: relative;
     display: flex;
 }
@@ -82,6 +82,14 @@ const widgetStyles = `
     width: 20em;
     height: 4em;
     font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.neo-captcha-start-button {
+    width: 20rem;
+    height: 15rem;
+    font-size: 1.5em;
     font-weight: bold;
     cursor: pointer;
 }
@@ -96,13 +104,20 @@ const widgetStyles = `
     flex-direction: row;
     align-items: center;
     justify-content: center;
+
+    &.sync {
+        display: flex;
+        cursor: auto;
+        background: var(--neo-captcha-bg2);
+        transform: translateX(1px) translateY(1px);
+        z-index: 0;
+    }
 }
 
 .neo-captcha-overlay-bg {
     width: 20em;
     height: 20em;
     position: absolute;
-    background: #f008;
     z-index: -1;
     transform: translateY(1px) translateX(1px);
 }
@@ -229,12 +244,15 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 </tr>
             </table>
         </div>
-        <button id="start" class="neo-captcha-button">
+        <button id="start" class="neo-captcha-start-button">
             <span class="neo-captcha-icon-dark material-icons">play_arrow</span>
         </button>
         <div id="wrapper" class="neo-captcha-wrapper">
             <div id="container" class="neo-captcha-container">
-                <img id="bg" class="neo-captcha-bg" alt="background"/>
+                <div class="neo-captcha-icon-div sync">
+                    <span class="neo-captcha-icon material-icons">sync</span>
+                </div>
+                <img id="image" class="neo-captcha-image" alt="background"/>
                 <canvas id="captchaCanvas" class="neo-captcha-main-canvas"></canvas>
                 <div id="startOverlay" class="neo-captcha-icon-div">
                     <div id="overlayBg" class="neo-captcha-overlay-bg"></div>
@@ -270,6 +288,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         throw new Error("Canvas context could not be initialized.");
     }
 
+    const minDifficulty = config?.minDifficulty || "easy";
     const totalTime = 6000;
     let color: number[] = [255, 0, 0];
 
@@ -284,7 +303,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
     let imgSrc: string = "";
     let pointSize: number = 0;
     let thumbSize: number = 0;
-    let id: BigInt | undefined = undefined;
+    let challenge: string | undefined = undefined;
+    let hmac: string | undefined = undefined;
 
     let howToShown = showHowTo;
     if (howToShown) {
@@ -305,30 +325,40 @@ export function renderCaptcha(target: HTMLElement, config: any,
     }
 
     const overlayBg = document.getElementById("overlayBg") as HTMLDivElement;
+    const mobileRed = "#f406";
+    const mobileGreen = "#0f4a";
     if (!isMobile) {
-        overlayBg.style.display = "none";
+        overlayBg.style.background = "#000";
+    } else {
+        overlayBg.style.background = mobileRed;
     }
     const signalIcon = document.getElementById("signalIcon") as HTMLSpanElement;
     signalIcon.innerText = isMobile ? "visibility" : "hearing";
 
     startBtn.addEventListener("click", getCaptcha);
 
-    const minDifficulty = config?.minDifficulty || "easy";
-
     async function getCaptcha() {
         console.log("version: " + VERSION);
         console.log("userAgent: " + navigator.userAgent);
+
+        const howToText = document.getElementById("howToText") as HTMLTableElement;
+        if (howToShown && howToText.style.display == "block") {
+            const howToText = document.getElementById("howToText") as HTMLTableElement;
+            const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
+            howToText.style.display = "none";
+            howToIcon.innerText = "expand_more";
+        }
 
         const wrapper = document.getElementById("wrapper") as HTMLDivElement;
         wrapper.style.display = "flex";
         startBtn.style.display = "none";
 
         const payload: any = {
-            id: id ? id.toString() : undefined,
+            challenge, hmac,
             userAgent: navigator.userAgent,
             mobile: isMobile,
             version: VERSION,
-            minDifficulty: minDifficulty,
+            minDifficulty,
         };
         const response = await fetch(url + "/generate-captcha", {
             method: "POST",
@@ -338,22 +368,15 @@ export function renderCaptcha(target: HTMLElement, config: any,
         const result = await response.json();
         console.log(result);
         if (result.img) {
-            const howToText = document.getElementById("howToText") as HTMLTableElement;
-            if (howToShown && howToText.style.display == "block") {
-                const howToText = document.getElementById("howToText") as HTMLTableElement;
-                const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
-                howToText.style.display = "none";
-                howToIcon.innerText = "expand_more";
-            }
-
-            const bg = document.getElementById("bg") as HTMLImageElement;
-            bg.style.display = "inline-block";
+            const image = document.getElementById("image") as HTMLImageElement;
+            image.style.display = "inline-block";
             overlay.style.display = "flex";
             imgSrc = `data:image/png;base64,${result.img}`;
             pointSize = result.pointSize;
             thumbSize = result.thumbSize;
             color = result.color;
-            id = BigInt(result.id);
+            challenge = result.challenge;
+            hmac = result.hmac;
             const container = document.getElementById("container") as HTMLDivElement;
             container.style.height = "20em";
 
@@ -377,7 +400,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
 
     function beep() {
         if (isMobile) {
-            overlayBg.style.background = "#0f08";
+            overlayBg.style.background = mobileGreen;
             if (beepStartTime > 0) {
                 activity.push({action: "react", time: beepStartTime - Date.now()});
             } else {
@@ -438,14 +461,16 @@ export function renderCaptcha(target: HTMLElement, config: any,
 
     overlay.addEventListener("mousedown", react);
     overlay.addEventListener("touchstart", react, {passive: false});
+    overlay.addEventListener("touchmove", () => {/*just consume event*/
+    }, {passive: false});
 
     function start() {
         if (beepStartTime > 0 && startTime == 0) {
             activity.push({action: "start", time: Date.now() - idleStartTime});
 
             enabled = true;
-            const bg = document.getElementById("bg") as HTMLImageElement;
-            bg.src = imgSrc;
+            const image = document.getElementById("image") as HTMLImageElement;
+            image.src = imgSrc;
             startTimer();
             if (!ctx) {
                 throw new Error("Canvas context could not be initialized.");
@@ -612,7 +637,11 @@ export function renderCaptcha(target: HTMLElement, config: any,
         if (endTime === 0) endTime = Date.now();
         const duration = endTime - startTime;
         activity.push({action: "end", time: duration});
-        const payload = {id: id?.toString(), activity};
+        const payload = {
+            challenge,
+            hmac,
+            activity
+        };
 
         const response = await fetch(url + "/validate-captcha", {
             method: "POST",
@@ -626,6 +655,10 @@ export function renderCaptcha(target: HTMLElement, config: any,
             const result = await response.json();
             valid = result.valid;
             retry = result.retry;
+            if (retry) {
+                challenge = result.challenge;
+                hmac = result.hmac;
+            }
         } catch (e) {
         }
         ctx.lineJoin = "round";
@@ -760,7 +793,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
             bar.clearRect(0, 0, timeCanvas.width, timeCanvas.height);
         }
         if (isMobile) {
-            overlayBg.style.background = "#f008";
+            overlayBg.style.background = mobileRed;
         }
     }
 

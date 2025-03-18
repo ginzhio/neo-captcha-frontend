@@ -15,6 +15,8 @@ if (!ctx || !bar) {
     throw new Error("Canvas context could not be initialized.");
 }
 
+
+const minDifficulty = "hard";
 const totalTime = 6000;
 let color: number[] = [255, 0, 0];
 
@@ -29,7 +31,8 @@ let ignoreNext = false;
 let imgSrc: string = "";
 let pointSize: number = 0;
 let thumbSize: number = 0;
-let id: BigInt | undefined = undefined;
+let challenge: string | undefined = undefined;
+let hmac: string | undefined = undefined;
 
 let howToShown = true;
 if (howToShown) {
@@ -50,30 +53,40 @@ if (howToShown) {
 }
 
 const overlayBg = document.getElementById("overlayBg") as HTMLDivElement;
+const mobileRed = "#f406";
+const mobileGreen = "#0f4a";
 if (!isMobile) {
-    overlayBg.style.display = "none";
+    overlayBg.style.background = "#000";
+} else {
+    overlayBg.style.background = mobileRed;
 }
 const signalIcon = document.getElementById("signalIcon") as HTMLSpanElement;
 signalIcon.innerText = isMobile ? "visibility" : "hearing";
 
 startBtn.addEventListener("click", getCaptcha);
 
-const minDifficulty = "hard";
-
 async function getCaptcha() {
     console.log("version: " + VERSION);
     console.log("userAgent: " + navigator.userAgent);
+
+    const howToText = document.getElementById("howToText") as HTMLTableElement;
+    if (howToShown && howToText.style.display == "block") {
+        const howToText = document.getElementById("howToText") as HTMLTableElement;
+        const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
+        howToText.style.display = "none";
+        howToIcon.innerText = "expand_more";
+    }
 
     const wrapper = document.getElementById("wrapper") as HTMLDivElement;
     wrapper.style.display = "flex";
     startBtn.style.display = "none";
 
     const payload: any = {
-        id: id ? id.toString() : undefined,
+        challenge, hmac,
         userAgent: navigator.userAgent,
         mobile: isMobile,
         version: VERSION,
-        minDifficulty: minDifficulty,
+        minDifficulty,
     };
     const response = await fetch(url + "/generate-captcha", {
         method: "POST",
@@ -83,22 +96,15 @@ async function getCaptcha() {
     const result = await response.json();
     console.log(result);
     if (result.img) {
-        const howToText = document.getElementById("howToText") as HTMLTableElement;
-        if (howToShown && howToText.style.display == "block") {
-            const howToText = document.getElementById("howToText") as HTMLTableElement;
-            const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
-            howToText.style.display = "none";
-            howToIcon.innerText = "expand_more";
-        }
-
-        const bg = document.getElementById("bg") as HTMLImageElement;
-        bg.style.display = "inline-block";
+        const image = document.getElementById("image") as HTMLImageElement;
+        image.style.display = "inline-block";
         overlay.style.display = "flex";
         imgSrc = `data:image/png;base64,${result.img}`;
         pointSize = result.pointSize;
         thumbSize = result.thumbSize;
         color = result.color;
-        id = BigInt(result.id);
+        challenge = result.challenge;
+        hmac = result.hmac;
         const container = document.getElementById("container") as HTMLDivElement;
         container.style.height = "20em";
 
@@ -122,7 +128,7 @@ async function getCaptcha() {
 
 function beep() {
     if (isMobile) {
-        overlayBg.style.background = "#0f08";
+        overlayBg.style.background = mobileGreen;
         if (beepStartTime > 0) {
             activity.push({action: "react", time: beepStartTime - Date.now()});
         } else {
@@ -183,14 +189,16 @@ function react() {
 
 overlay.addEventListener("mousedown", react);
 overlay.addEventListener("touchstart", react, {passive: false});
+overlay.addEventListener("touchmove", () => {/*just consume event*/
+}, {passive: false});
 
 function start() {
     if (beepStartTime > 0 && startTime == 0) {
         activity.push({action: "start", time: Date.now() - idleStartTime});
 
         enabled = true;
-        const bg = document.getElementById("bg") as HTMLImageElement;
-        bg.src = imgSrc;
+        const image = document.getElementById("image") as HTMLImageElement;
+        image.src = imgSrc;
         startTimer();
         if (!ctx) {
             throw new Error("Canvas context could not be initialized.");
@@ -350,7 +358,11 @@ async function submitCaptcha() {
     if (endTime === 0) endTime = Date.now();
     const duration = endTime - startTime;
     activity.push({action: "end", time: duration});
-    const payload = {id: id?.toString(), activity};
+    const payload = {
+        challenge,
+        hmac,
+        activity
+    };
 
     const response = await fetch(url + "/validate-captcha", {
         method: "POST",
@@ -364,6 +376,10 @@ async function submitCaptcha() {
         const result = await response.json();
         valid = result.valid;
         retry = result.retry;
+        if (retry) {
+            challenge = result.challenge;
+            hmac = result.hmac;
+        }
     } catch (e) {
     }
     ctx.lineJoin = "round";
@@ -498,6 +514,6 @@ function reset() {
         bar.clearRect(0, 0, timeCanvas.width, timeCanvas.height);
     }
     if (isMobile) {
-        overlayBg.style.background = "#f008";
+        overlayBg.style.background = mobileRed;
     }
 }
