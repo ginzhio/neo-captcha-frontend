@@ -29,7 +29,6 @@ const widgetStyles = `
     background: var(--neo-captcha-bg);
     color: var(--neo-captcha-fg);
     padding: 1em;
-    touch-action: none;
 }
 
 .neo-captcha-logo {
