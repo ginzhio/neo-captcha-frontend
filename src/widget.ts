@@ -29,6 +29,7 @@ const widgetStyles = `
     background: var(--neo-captcha-bg);
     color: var(--neo-captcha-fg);
     padding: 1em;
+    touch-action: none;
 }
 
 .neo-captcha-logo {
@@ -111,6 +112,7 @@ const widgetStyles = `
         background: var(--neo-captcha-bg2);
         transform: translateX(1px) translateY(1px);
         z-index: 0;
+        opacity: 50%;
     }
 }
 
@@ -306,8 +308,8 @@ export function renderCaptcha(target: HTMLElement) {
     let hmac: string | undefined = undefined;
 
     let howToShown = showHowTo;
+    let howToExpanded = expandHowTo;
     if (howToShown) {
-        let howToExpanded = expandHowTo;
         const howToCaption = document.getElementById("howToCaption") as HTMLDivElement;
         const howToText = document.getElementById("howToText") as HTMLTableElement;
         const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
@@ -340,8 +342,8 @@ export function renderCaptcha(target: HTMLElement) {
         console.log("version: " + VERSION);
         console.log("userAgent: " + navigator.userAgent);
 
-        const howToText = document.getElementById("howToText") as HTMLTableElement;
-        if (howToShown && howToText.style.display == "block") {
+        if (howToShown && howToExpanded) {
+            howToExpanded = false;
             const howToText = document.getElementById("howToText") as HTMLTableElement;
             const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
             howToText.style.display = "none";
@@ -748,6 +750,13 @@ export function renderCaptcha(target: HTMLElement) {
         submitBtn.addEventListener("click", submitCaptcha);
         let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
         submitIcon.innerText = "check";
+
+        if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        const image = document.getElementById("image") as HTMLImageElement;
+        image.style.display = "none";
+        overlay.style.display = "none";
     }
 
     function drawCheckMark(size: number, x: number, y: number) {

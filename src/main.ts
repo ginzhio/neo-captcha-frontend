@@ -35,8 +35,8 @@ let challenge: string | undefined = undefined;
 let hmac: string | undefined = undefined;
 
 let howToShown = true;
+let howToExpanded = true;
 if (howToShown) {
-    let howToExpanded = true;
     const howToCaption = document.getElementById("howToCaption") as HTMLDivElement;
     const howToText = document.getElementById("howToText") as HTMLTableElement;
     const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
@@ -69,8 +69,8 @@ async function getCaptcha() {
     console.log("version: " + VERSION);
     console.log("userAgent: " + navigator.userAgent);
 
-    const howToText = document.getElementById("howToText") as HTMLTableElement;
-    if (howToShown && howToText.style.display == "block") {
+    if (howToShown && howToExpanded) {
+        howToExpanded = false;
         const howToText = document.getElementById("howToText") as HTMLTableElement;
         const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
         howToText.style.display = "none";
@@ -441,16 +441,42 @@ async function submitCaptcha() {
         drawCross(size, x, y);
     }
 
-    if (valid && true && true) {
+    let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
+    if (valid) {
         console.log("Yippie!");
+        submitBtn.disabled = false;
+        submitBtn.removeEventListener("click", submitCaptcha);
+        submitBtn.addEventListener("click", restart);
+        submitIcon.innerText = "replay";
     } else if (retry) {
         setTimeout(() => {
             reset();
             getCaptcha();
         }, 500);
-    } else if (true && true) {
-        console.log("Womp womp");
+    } else {
+        console.log("Womp, womp");
+        submitBtn.disabled = false;
+        submitBtn.removeEventListener("click", submitCaptcha);
+        submitBtn.addEventListener("click", restart);
+        submitIcon.innerText = "replay";
     }
+}
+
+function restart() {
+    reset();
+    challenge = undefined;
+    hmac = undefined;
+    submitBtn.removeEventListener("click", restart);
+    submitBtn.addEventListener("click", submitCaptcha);
+    let submitIcon = document.getElementById("submitIcon") as HTMLSpanElement;
+    submitIcon.innerText = "check";
+
+    if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    const image = document.getElementById("image") as HTMLImageElement;
+    image.style.display = "none";
+    overlay.style.display = "none";
 }
 
 function drawCheckMark(size: number, x: number, y: number) {
