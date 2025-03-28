@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <link rel="icon" href="https://neo-captcha.com/assets/favicon-dark.ico"
@@ -12,66 +12,58 @@
     <link rel="stylesheet" href="/src/style.css"/>
 </head>
 <body>
-<div id="app" class="neo-captcha-box">
+<div id="neoCaptchaRoot" class="neo-captcha-box">
     <div class="neo-captcha-title">
         <a href="https://neo-captcha.com" target="_blank" rel="noopener">
             <picture class="neo-captcha-picture">
-                <source srcset="https://neo-captcha.com/assets/logo-dark.png"
-                        media="(prefers-color-scheme: dark)">
-                <source srcset="https://neo-captcha.com/assets/logo.png"
-                        media="(prefers-color-scheme: light)">
-
-                <img class="neo-captcha-logo" title="Visit neo-captcha.com"
+                <img id="neoCaptchaWidgetLogo" class="neo-captcha-logo" title="Visit neo-captcha.com"
                      src="https://neo-captcha.com/assets/logo.png"
                      alt="logo">
             </picture>
         </a>
         <span class="neo-captcha-caption">NeoCAPTCHA</span>
     </div>
-    <div id="howTo" class="neo-captcha-how-to">
-        <div id="howToCaption" class="neo-captcha-how-to-caption">How-To:
-            <span id="howToIcon" class="neo-captcha-wide-icon material-icons">expand_less</span>
+    <div id="neoCaptcha-howTo" class="neo-captcha-how-to">
+        <div id="neoCaptcha-howToCaption" class="neo-captcha-how-to-caption">
+            <span id="neoCaptcha-howToTitle"></span>
+            <span id="neoCaptcha-howToIcon" class="neo-captcha-wide-icon material-icons">expand_less</span>
         </div>
-        <table id="howToText" class="neo-captcha-how-to-text">
-            <tr>
-                <td class="neo-captcha-steps-numbers">1.</td>
-                <td>Hit ▶ Play</td>
-            </tr>
-            <tr>
-                <td class="neo-captcha-steps-numbers">2.</td>
-                <td>Wait for the signal – stay alert!</td>
-            </tr>
-            <tr>
-                <td class="neo-captcha-steps-numbers">3.</td>
-                <td>When it triggers, tap to uncover the CAPTCHA</td>
-            </tr>
-            <tr>
-                <td class="neo-captcha-steps-numbers">4.</td>
-                <td>Find the missing corner and place your guess</td>
-            </tr>
-        </table>
+        <div class="neo-captcha-how-to-text">
+            <table id="neoCaptcha-howToText" class="neo-captcha-how-to-table">
+                <tr>
+                    <td class="neo-captcha-steps-numbers">1.</td>
+                    <td id="neoCaptcha-step_1"></td>
+                </tr>
+                <tr>
+                    <td class="neo-captcha-steps-numbers">2.</td>
+                    <td id="neoCaptcha-step_2"></td>
+                </tr>
+            </table>
+            <div class="neo-captcha-how-to-footer">
+                <span id="neoCaptcha-mode" class="neo-captcha-how-to-footer-mode"></span>
+                <span id="neoCaptcha-modeText"></span>
+            </div>
+        </div>
     </div>
-    <button id="start" class="neo-captcha-start-button">
+    <button id="neoCaptcha-start" class="neo-captcha-start-button">
         <span class="neo-captcha-icon-dark material-icons">play_arrow</span>
     </button>
-    <div id="wrapper" class="neo-captcha-wrapper">
-        <div id="container" class="neo-captcha-container">
+    <div id="neoCaptcha-wrapper" class="neo-captcha-wrapper">
+        <div id="neoCaptcha-container" class="neo-captcha-container">
             <div class="neo-captcha-icon-div sync">
                 <span class="neo-captcha-icon material-icons">sync</span>
             </div>
-            <img id="image" class="neo-captcha-image" alt="background"/>
-            <canvas id="captchaCanvas" class="neo-captcha-main-canvas"></canvas>
-            <div id="startOverlay" class="neo-captcha-icon-div">
-                <div id="overlayBg" class="neo-captcha-overlay-bg"></div>
-                <span id="signalIcon" class="neo-captcha-icon material-icons">hearing</span>
-                <span class="neo-captcha-icon material-icons">trending_flat</span>
-                <span class="neo-captcha-icon material-icons">touch_app</span>
+            <img id="neoCaptcha-image" class="neo-captcha-image" alt="background"/>
+            <canvas id="neoCaptcha-captchaCanvas" class="neo-captcha-main-canvas"></canvas>
+            <div id="neoCaptcha-startOverlay" class="neo-captcha-icon-div">
+                <div id="neoCaptcha-overlayBg" class="neo-captcha-overlay-bg"></div>
+                <span id="neoCaptcha-signalIcon" class="neo-captcha-icon material-icons">hearing</span>
             </div>
         </div>
         <div>
-            <canvas class="neo-captcha-time" id="timeCanvas"></canvas>
+            <canvas class="neo-captcha-time" id="neoCaptcha-timeCanvas"></canvas>
         </div>
-        <button id="submit" class="neo-captcha-button" disabled>
+        <button id="neoCaptcha-submit" class="neo-captcha-button" disabled>
             <span class="neo-captcha-icon-dark material-icons">check</span>
         </button>
     </div>

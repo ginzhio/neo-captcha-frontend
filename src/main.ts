@@ -4,20 +4,67 @@ const VERSION = __VERSION__;
 const url = "http://localhost:8080/api";
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-const overlay = document.getElementById("startOverlay") as HTMLDivElement;
-const submitBtn = document.getElementById("submit") as HTMLButtonElement;
-const startBtn = document.getElementById("start") as HTMLButtonElement;
-const canvas = document.getElementById("captchaCanvas") as HTMLCanvasElement;
+const overlay = document.getElementById("neoCaptcha-startOverlay") as HTMLDivElement;
+const submitBtn = document.getElementById("neoCaptcha-submit") as HTMLButtonElement;
+const startBtn = document.getElementById("neoCaptcha-start") as HTMLButtonElement;
+const canvas = document.getElementById("neoCaptcha-captchaCanvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d");
-const timeCanvas = document.getElementById("timeCanvas") as HTMLCanvasElement;
+const timeCanvas = document.getElementById("neoCaptcha-timeCanvas") as HTMLCanvasElement;
 const bar = timeCanvas.getContext("2d");
 if (!ctx || !bar) {
     throw new Error("Canvas context could not be initialized.");
 }
 
+const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+const theme = (prefersDark ? 'dark' : 'light');
+document.getElementById("neoCaptchaRoot")!.classList.add(`neo-captcha-theme-${theme}`);
+(document.getElementById("neoCaptchaWidgetLogo") as HTMLImageElement).src = theme === 'dark'
+    ? 'https://neo-captcha.com/assets/logo-dark.png'
+    : 'https://neo-captcha.com/assets/logo.png';
 
-const minDifficulty = "hard";
-const totalTime = 6000;
+const mobileRed = "#f406";
+const mobileGreen = "#0f4a";
+
+let userLang = (navigator.language || navigator.languages[0]).split("-")[0];
+// userLang = 'en';
+console.log("lang: " + userLang);
+const translations: Record<string, {
+    howto: string,
+    step_1: string,
+    step_2: string,
+    step_2_s: string,
+    mode_1: string,
+    mode_1_text: string,
+}> = {
+    en: {
+        howto: 'How-To:',
+        step_1: 'Hit ▶ Play',
+        step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
+        step_2_s: `Tap when you <b>hear a signal!</b>`,
+        mode_1: 'Implied square:',
+        mode_1_text: 'Mark the missing corner!',
+    },
+    de: {
+        howto: 'Wie man\'s macht:',
+        step_1: 'Drücke ▶ Start',
+        step_2: `Tippe bei <b><span style="color: rgba(0, 160, 0)">GRÜN</span>!<b/>`,
+        step_2_s: 'Tippe beim <b>Signalton!</b>',
+        mode_1: 'Angedeutetes Viereck:',
+        mode_1_text: 'Markiere die fehlende Ecke!',
+    },
+};
+document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
+document.getElementById("neoCaptcha-step_1")!.innerHTML = (translations[userLang] || translations['en']).step_1;
+if (isMobile) {
+    document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2;
+} else {
+    document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
+}
+document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
+document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
+
+const minDifficulty = "easy";
+let totalTime = 6000;
 let color: number[] = [255, 0, 0];
 
 let drawing = false;
@@ -37,9 +84,9 @@ let hmac: string | undefined = undefined;
 let howToShown = true;
 let howToExpanded = true;
 if (howToShown) {
-    const howToCaption = document.getElementById("howToCaption") as HTMLDivElement;
-    const howToText = document.getElementById("howToText") as HTMLTableElement;
-    const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
+    const howToCaption = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
+    const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
+    const howToIcon = document.getElementById("neoCaptcha-howToIcon") as HTMLSpanElement;
     howToText.style.display = howToExpanded ? "block" : "none";
     howToIcon.innerText = howToExpanded ? "expand_less" : "expand_more";
     howToCaption.addEventListener("click", () => {
@@ -48,20 +95,20 @@ if (howToShown) {
         howToIcon.innerText = howToExpanded ? "expand_less" : "expand_more";
     });
 } else {
-    const howTo = document.getElementById("howTo") as HTMLDivElement;
+    const howTo = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
+    const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
     howTo.style.display = "none";
+    howToText.style.display = "none";
 }
 
-const overlayBg = document.getElementById("overlayBg") as HTMLDivElement;
-const mobileRed = "#f406";
-const mobileGreen = "#0f4a";
+const overlayBg = document.getElementById("neoCaptcha-overlayBg") as HTMLDivElement;
 if (!isMobile) {
     overlayBg.style.background = "#000";
 } else {
     overlayBg.style.background = mobileRed;
 }
-const signalIcon = document.getElementById("signalIcon") as HTMLSpanElement;
-signalIcon.innerText = isMobile ? "visibility" : "hearing";
+const signalIcon = document.getElementById("neoCaptcha-signalIcon") as HTMLSpanElement;
+signalIcon.innerText = isMobile ? "do_not_touch" : "hearing";
 
 startBtn.addEventListener("click", getCaptcha);
 
@@ -69,15 +116,15 @@ async function getCaptcha() {
     console.log("version: " + VERSION);
     console.log("userAgent: " + navigator.userAgent);
 
-    if (howToShown && howToExpanded) {
-        howToExpanded = false;
-        const howToText = document.getElementById("howToText") as HTMLTableElement;
-        const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
-        howToText.style.display = "none";
-        howToIcon.innerText = "expand_more";
-    }
+    // if (howToShown && howToExpanded) {
+    //     howToExpanded = false;
+    //     const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
+    //     const howToIcon = document.getElementById("neoCaptcha-howToIcon") as HTMLSpanElement;
+    //     howToText.style.display = "none";
+    //     howToIcon.innerText = "expand_more";
+    // }
 
-    const wrapper = document.getElementById("wrapper") as HTMLDivElement;
+    const wrapper = document.getElementById("neoCaptcha-wrapper") as HTMLDivElement;
     wrapper.style.display = "flex";
     startBtn.style.display = "none";
 
@@ -96,7 +143,7 @@ async function getCaptcha() {
     const result = await response.json();
     console.log(result);
     if (result.img) {
-        const image = document.getElementById("image") as HTMLImageElement;
+        const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
         image.style.display = "inline-block";
         overlay.style.display = "flex";
         imgSrc = `data:image/png;base64,${result.img}`;
@@ -105,7 +152,8 @@ async function getCaptcha() {
         color = result.color;
         challenge = result.challenge;
         hmac = result.hmac;
-        const container = document.getElementById("container") as HTMLDivElement;
+        totalTime = result.totalTime || totalTime;
+        const container = document.getElementById("neoCaptcha-container") as HTMLDivElement;
         container.style.height = "20em";
 
         canvas.style.width = "20em";
@@ -129,6 +177,7 @@ async function getCaptcha() {
 function beep() {
     if (isMobile) {
         overlayBg.style.background = mobileGreen;
+        signalIcon.innerText = "touch_app";
         if (beepStartTime > 0) {
             activity.push({action: "react", time: beepStartTime - Date.now()});
         } else {
@@ -197,7 +246,7 @@ function start() {
         activity.push({action: "start", time: Date.now() - idleStartTime});
 
         enabled = true;
-        const image = document.getElementById("image") as HTMLImageElement;
+        const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
         image.src = imgSrc;
         startTimer();
         if (!ctx) {
@@ -507,7 +556,7 @@ function reset() {
     imgSrc = "";
     pointSize = 0;
     thumbSize = 0;
-    const wrapper = document.getElementById("wrapper") as HTMLDivElement;
+    const wrapper = document.getElementById("neoCaptcha-wrapper") as HTMLDivElement;
     wrapper.style.display = "none";
     startBtn.style.display = "block";
     if (bar) {
@@ -515,5 +564,6 @@ function reset() {
     }
     if (isMobile) {
         overlayBg.style.background = mobileRed;
+        signalIcon.innerText = "do_not_touch";
     }
 }

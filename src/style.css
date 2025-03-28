@@ -1,18 +1,27 @@
 :root {
     --neo-captcha-accent: #009696;
-    --neo-captcha-bg: #ddd;
-    --neo-captcha-bg2: #eee;
-    --neo-captcha-fg: #111;
     --neo-captcha-dark: #111;
     --neo-captcha-light: #eee;
+
+    --neo-captcha-bg-light: #C8DCDCFF;
+    --neo-captcha-bg2-light: #eee;
+    --neo-captcha-fg-light: #111;
+
+    --neo-captcha-bg-dark: #111;
+    --neo-captcha-bg2-dark: #222;
+    --neo-captcha-fg-dark: #ddd;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --neo-captcha-bg: #111;
-        --neo-captcha-bg2: #222;
-        --neo-captcha-fg: #ddd;
-    }
+.neo-captcha-theme-light {
+    --neo-captcha-bg: var(--neo-captcha-bg-light);
+    --neo-captcha-bg2: var(--neo-captcha-bg2-light);
+    --neo-captcha-fg: var(--neo-captcha-fg-light);
+}
+
+.neo-captcha-theme-dark {
+    --neo-captcha-bg: var(--neo-captcha-bg-dark);
+    --neo-captcha-bg2: var(--neo-captcha-bg2-dark);
+    --neo-captcha-fg: var(--neo-captcha-fg-dark);
 }
 
 .neo-captcha-box {
@@ -81,6 +90,10 @@
     font-size: 1em;
     font-weight: bold;
     cursor: pointer;
+
+    &:disabled {
+        opacity: 0.66;
+    }
 }
 
 .neo-captcha-start-button {
@@ -144,29 +157,47 @@
 }
 
 .neo-captcha-how-to {
-    width: 18em;
+    width: 20em;
     background: var(--neo-captcha-bg2);
     border: 1px solid var(--neo-captcha-fg);
     text-align: start;
-    padding: 0 1em 0 1em;
     margin-bottom: 0.5em;
 }
 
 .neo-captcha-how-to-caption {
-    font-size: 1.2em;
+    font-size: 1.1em;
     font-weight: bold;
     cursor: pointer;
-    padding: 0.2em 0 0.5em 0;
+    padding: 0.5em 1em 0.5em 1em;
+    background: color-mix(in srgb, var(--neo-captcha-fg) 10%, transparent);
+    display: flex;
+    flex-direction: row;
 }
 
 .neo-captcha-how-to-text {
-    padding-bottom: 1em;
+}
+
+.neo-captcha-how-to-table {
+    padding: 0 1em 0.5em 1em;
+    background: color-mix(in srgb, var(--neo-captcha-fg) 10%, transparent);
+}
+
+.neo-captcha-how-to-footer {
+    font-size: 1.1em;
+    padding: 0.5em 1em 0.5em 1em;
+    display: flex;
+    flex-direction: column;
+}
+
+.neo-captcha-how-to-footer-mode {
+    color: var(--neo-captcha-accent);
+    font-weight: bold;
 }
 
 .neo-captcha-wide-icon {
-    width: 8em;
+    flex: 1;
     text-align: end;
-    transform: translateY(0.2em);
+    transform: translateY(0.1em);
 }
 
 .neo-captcha-steps-numbers {

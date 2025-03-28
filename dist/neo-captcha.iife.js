@@ -1,19 +1,28 @@
-var NeoCAPTCHA=function(H){"use strict";const se=`
+var NeoCAPTCHA=function(j){"use strict";const he=`
 :root {
     --neo-captcha-accent: #009696;
-    --neo-captcha-bg: #ddd;
-    --neo-captcha-bg2: #eee;
-    --neo-captcha-fg: #111;
     --neo-captcha-dark: #111;
     --neo-captcha-light: #eee;
+
+    --neo-captcha-bg-light: #C8DCDCFF;
+    --neo-captcha-bg2-light: #eee;
+    --neo-captcha-fg-light: #111;
+
+    --neo-captcha-bg-dark: #111;
+    --neo-captcha-bg2-dark: #222;
+    --neo-captcha-fg-dark: #ddd;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --neo-captcha-bg: #111;
-        --neo-captcha-bg2: #222;
-        --neo-captcha-fg: #ddd;
-    }
+.neo-captcha-theme-light {
+    --neo-captcha-bg: var(--neo-captcha-bg-light);
+    --neo-captcha-bg2: var(--neo-captcha-bg2-light);
+    --neo-captcha-fg: var(--neo-captcha-fg-light);
+}
+
+.neo-captcha-theme-dark {
+    --neo-captcha-bg: var(--neo-captcha-bg-dark);
+    --neo-captcha-bg2: var(--neo-captcha-bg2-dark);
+    --neo-captcha-fg: var(--neo-captcha-fg-dark);
 }
 
 .neo-captcha-box {
@@ -82,6 +91,10 @@ var NeoCAPTCHA=function(H){"use strict";const se=`
     font-size: 1em;
     font-weight: bold;
     cursor: pointer;
+
+    &:disabled {
+        opacity: 0.66;
+    }
 }
 
 .neo-captcha-start-button {
@@ -145,29 +158,47 @@ var NeoCAPTCHA=function(H){"use strict";const se=`
 }
 
 .neo-captcha-how-to {
-    width: 18em;
+    width: 20em;
     background: var(--neo-captcha-bg2);
     border: 1px solid var(--neo-captcha-fg);
     text-align: start;
-    padding: 0 1em 0 1em;
     margin-bottom: 0.5em;
 }
 
 .neo-captcha-how-to-caption {
-    font-size: 1.2em;
+    font-size: 1.1em;
     font-weight: bold;
     cursor: pointer;
-    padding: 0.2em 0 0.5em 0;
+    padding: 0.5em 1em 0.5em 1em;
+    background: color-mix(in srgb, var(--neo-captcha-fg) 10%, transparent);
+    display: flex;
+    flex-direction: row;
 }
 
 .neo-captcha-how-to-text {
-    padding-bottom: 1em;
+}
+
+.neo-captcha-how-to-table {
+    padding: 0 1em 0.5em 1em;
+    background: color-mix(in srgb, var(--neo-captcha-fg) 10%, transparent);
+}
+
+.neo-captcha-how-to-footer {
+    font-size: 1.1em;
+    padding: 0.5em 1em 0.5em 1em;
+    display: flex;
+    flex-direction: column;
+}
+
+.neo-captcha-how-to-footer-mode {
+    color: var(--neo-captcha-accent);
+    font-weight: bold;
 }
 
 .neo-captcha-wide-icon {
-    width: 8em;
+    flex: 1;
     text-align: end;
-    transform: translateY(0.2em);
+    transform: translateY(0.1em);
 }
 
 .neo-captcha-steps-numbers {
@@ -176,69 +207,61 @@ var NeoCAPTCHA=function(H){"use strict";const se=`
     font-weight: bold;
     color: var(--neo-captcha-accent);
 }
-`;function le(){if(document.getElementById("neo-captcha-style"))return;const v=document.createElement("style");v.id="neo-captcha-style",v.textContent=se,document.head.appendChild(v)}function re(){if(document.getElementById("neo-captcha-material-icons"))return;const v=document.createElement("link");v.id="neo-captcha-material-icons",v.rel="stylesheet",v.href="https://fonts.googleapis.com/icon?family=Material+Icons",document.head.appendChild(v)}function V(v,y,E){re(),le(),v.innerHTML=`
-    <div class="neo-captcha-box">
+`;function pe(){if(document.getElementById("neo-captcha-style"))return;const y=document.createElement("style");y.id="neo-captcha-style",y.textContent=he,document.head.appendChild(y)}function me(){if(document.getElementById("neo-captcha-material-icons"))return;const y=document.createElement("link");y.id="neo-captcha-material-icons",y.rel="stylesheet",y.href="https://fonts.googleapis.com/icon?family=Material+Icons",document.head.appendChild(y)}function K(y,l,k){var de;me(),pe(),y.innerHTML=`
+    <div id="neoCaptchaRoot" class="neo-captcha-box">
         <div class="neo-captcha-title">
             <a href="https://neo-captcha.com" target="_blank" rel="noopener">
                 <picture class="neo-captcha-picture">
-                    <source srcset="https://neo-captcha.com/assets/logo-dark.png"
-                            media="(prefers-color-scheme: dark)">
-                    <source srcset="https://neo-captcha.com/assets/logo.png"
-                            media="(prefers-color-scheme: light)">
-    
-                    <img class="neo-captcha-logo" title="Visit neo-captcha.com"
+                    <img id="neoCaptchaWidgetLogo" class="neo-captcha-logo" title="Visit neo-captcha.com"
                          src="https://neo-captcha.com/assets/logo.png"
                          alt="logo">
                 </picture>
             </a>
             <span class="neo-captcha-caption">NeoCAPTCHA</span>
         </div>
-        <div id="howTo" class="neo-captcha-how-to">
-            <div id="howToCaption" class="neo-captcha-how-to-caption">How-To:
-                <span id="howToIcon" class="neo-captcha-wide-icon material-icons">expand_less</span>
+        <div id="neoCaptcha-howTo" class="neo-captcha-how-to">
+            <div id="neoCaptcha-howToCaption" class="neo-captcha-how-to-caption">
+                <span id="neoCaptcha-howToTitle"></span>
+                <span id="neoCaptcha-howToIcon" class="neo-captcha-wide-icon material-icons">expand_less</span>
             </div>
-            <table id="howToText" class="neo-captcha-how-to-text">
-                <tr>
-                    <td class="neo-captcha-steps-numbers">1.</td>
-                    <td>Hit ▶ Play</td>
-                </tr>
-                <tr>
-                    <td class="neo-captcha-steps-numbers">2.</td>
-                    <td>Wait for the signal – stay alert!</td>
-                </tr>
-                <tr>
-                    <td class="neo-captcha-steps-numbers">3.</td>
-                    <td>When it triggers, tap to uncover the CAPTCHA</td>
-                </tr>
-                <tr>
-                    <td class="neo-captcha-steps-numbers">4.</td>
-                    <td>Find the missing corner and place your guess</td>
-                </tr>
-            </table>
+            <div class="neo-captcha-how-to-text">
+                <table id="neoCaptcha-howToText" class="neo-captcha-how-to-table">
+                    <tr>
+                        <td class="neo-captcha-steps-numbers">1.</td>
+                        <td id="neoCaptcha-step_1"></td>
+                    </tr>
+                    <tr>
+                        <td class="neo-captcha-steps-numbers">2.</td>
+                        <td id="neoCaptcha-step_2"></td>
+                    </tr>
+                </table>
+                <div class="neo-captcha-how-to-footer">
+                    <span id="neoCaptcha-mode" class="neo-captcha-how-to-footer-mode"></span>
+                    <span id="neoCaptcha-modeText"></span>
+                </div>
+            </div>
         </div>
-        <button id="start" class="neo-captcha-start-button">
+        <button id="neoCaptcha-start" class="neo-captcha-start-button">
             <span class="neo-captcha-icon-dark material-icons">play_arrow</span>
         </button>
-        <div id="wrapper" class="neo-captcha-wrapper">
-            <div id="container" class="neo-captcha-container">
+        <div id="neoCaptcha-wrapper" class="neo-captcha-wrapper">
+            <div id="neoCaptcha-container" class="neo-captcha-container">
                 <div class="neo-captcha-icon-div sync">
                     <span class="neo-captcha-icon material-icons">sync</span>
                 </div>
-                <img id="image" class="neo-captcha-image" alt="background"/>
-                <canvas id="captchaCanvas" class="neo-captcha-main-canvas"></canvas>
-                <div id="startOverlay" class="neo-captcha-icon-div">
-                    <div id="overlayBg" class="neo-captcha-overlay-bg"></div>
-                    <span id="signalIcon" class="neo-captcha-icon material-icons">hearing</span>
-                    <span class="neo-captcha-icon material-icons">trending_flat</span>
-                    <span class="neo-captcha-icon material-icons">touch_app</span>
+                <img id="neoCaptcha-image" class="neo-captcha-image" alt="background"/>
+                <canvas id="neoCaptcha-captchaCanvas" class="neo-captcha-main-canvas"></canvas>
+                <div id="neoCaptcha-startOverlay" class="neo-captcha-icon-div">
+                    <div id="neoCaptcha-overlayBg" class="neo-captcha-overlay-bg"></div>
+                    <span id="neoCaptcha-signalIcon" class="neo-captcha-icon material-icons">hearing</span>
                 </div>
             </div>
             <div>
-                <canvas class="neo-captcha-time" id="timeCanvas"></canvas>
+                <canvas class="neo-captcha-time" id="neoCaptcha-timeCanvas"></canvas>
             </div>
-            <button id="submit" class="neo-captcha-button" disabled>
+            <button id="neoCaptcha-submit" class="neo-captcha-button" disabled>
                 <span class="neo-captcha-icon-dark material-icons">check</span>
             </button>
         </div>
     </div>
-    `;const de=(y==null?void 0:y.showHowTo)||!1,he=(y==null?void 0:y.expandHowTo)||!1,q="1.0.0",U="https://neo-captcha.com/api/v1",C=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent),b=document.getElementById("startOverlay"),S=document.getElementById("submit"),M=document.getElementById("start"),i=document.getElementById("captchaCanvas"),e=i.getContext("2d"),g=document.getElementById("timeCanvas"),h=g.getContext("2d");if(!e||!h)throw new Error("Canvas context could not be initialized.");const pe=(y==null?void 0:y.minDifficulty)||"easy",j=6e3;let p=[255,0,0],k=!1,f=[],d=0,L=0,_=0,w=0,m=!1,I=!1,O="",N=0,Y=0,A,R,K=de,T=he;if(K){const o=document.getElementById("howToCaption"),n=document.getElementById("howToText"),a=document.getElementById("howToIcon");n.style.display=T?"block":"none",a.innerText=T?"expand_less":"expand_more",o.addEventListener("click",()=>{T=!T,n.style.display=T?"block":"none",a.innerText=T?"expand_less":"expand_more"})}else{const o=document.getElementById("howTo");o.style.display="none"}const $=document.getElementById("overlayBg"),Q="#f406",me="#0f4a";C?$.style.background=Q:$.style.background="#000";const ue=document.getElementById("signalIcon");ue.innerText=C?"visibility":"hearing",M.addEventListener("click",Z);async function Z(){if(console.log("version: "+q),console.log("userAgent: "+navigator.userAgent),K&&T){T=!1;const u=document.getElementById("howToText"),c=document.getElementById("howToIcon");u.style.display="none",c.innerText="expand_more"}const o=document.getElementById("wrapper");o.style.display="flex",M.style.display="none";const n={challenge:A,hmac:R,userAgent:navigator.userAgent,mobile:C,version:q,minDifficulty:pe},t=await(await fetch(U+"/generate-captcha",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(n)})).json();if(console.log(t),t.img){const u=document.getElementById("image");u.style.display="inline-block",b.style.display="flex",O=`data:image/png;base64,${t.img}`,N=t.pointSize,Y=t.thumbSize,p=t.color,A=t.challenge,R=t.hmac;const c=document.getElementById("container");if(c.style.height="20em",i.style.width="20em",i.style.height="20em",i.width=i.clientWidth,i.height=i.width,!e||!h)throw new Error("Canvas context could not be initialized.");e.fillStyle="rgba(0, 0, 0)",e.fillRect(0,0,i.width,i.height),h.fillStyle=`rgba(${p[0]}, ${p[1]}, ${p[2]})`,_=Date.now(),setTimeout(()=>ge(),t.suspense)}}function ge(){C?($.style.background=me,w>0?f.push({action:"react",time:w-Date.now()}):w=Date.now()):fe()}const x=new AudioContext,fe=()=>{x.state==="suspended"?x.resume().then(()=>ee()):ee()},ee=()=>{F(285,.12),F(852,.12,.12),F(528,.12,.24),w>0?f.push({action:"react",time:w-Date.now()}):w=Date.now()};function F(o,n,a=0){let t=x.createOscillator(),u=x.createGain();t.type="sine",t.frequency.value=o,u.gain.value=.1,t.connect(u),u.connect(x.destination),t.start(x.currentTime+a),t.stop(x.currentTime+a+n)}function te(){d==0&&(w>0?f.push({action:"react",time:Date.now()-w}):w=Date.now())}b.addEventListener("mousedown",te),b.addEventListener("touchstart",te,{passive:!1}),b.addEventListener("touchmove",()=>{},{passive:!1});function X(){if(w>0&&d==0){f.push({action:"start",time:Date.now()-_}),m=!0;const o=document.getElementById("image");if(o.src=O,we(),!e)throw new Error("Canvas context could not be initialized.");e.clearRect(0,0,i.width,i.height),b.style.display="none",C&&(I=!0)}}b.addEventListener("mouseup",X),b.addEventListener("touchend",X),b.addEventListener("touchcancel",X);function we(){d=Date.now(),ne()}function ne(){if(!h)throw new Error("Canvas context could not be initialized.");const o=Date.now()-d,n=Math.max(j-o,0),a=n/j*g.width;h.clearRect(0,0,g.width,g.height),h.fillStyle=`rgba(${p[0]}, ${p[1]}, ${p[2]})`,h.fillRect(0,0,a,g.height),n>0&&m?requestAnimationFrame(ne):n<=0&&m?(console.log("Time's up!"),L=d+j,ce()):(h.fillStyle="rgba(255, 255, 255, 0.8)",h.fillRect(0,0,g.width,g.height))}function ae(o){if(o.preventDefault(),!I&&d>0){const n=i.getBoundingClientRect();let{x:a,y:t}=J(o,n);f.push({action:"down",enabled:m,x:a,y:t,time:Date.now()-d}),m&&(k=!0,ie(a,t))}}i.addEventListener("mousedown",ae),i.addEventListener("touchstart",ae,{passive:!1});function oe(o){if(o.preventDefault(),I)return;const n=i.getBoundingClientRect();let{x:a,y:t}=J(o,n);d>0&&f.push({action:"move",enabled:m,drawing:k,x:a,y:t,time:Date.now()-d}),m&&k&&ie(a,t)}i.addEventListener("mousemove",oe),i.addEventListener("touchmove",oe,{passive:!1});function G(o){if(o.preventDefault(),I){I=!1;return}if(!k)return;const n=i.getBoundingClientRect();let{x:a,y:t}=J(o,n);if(d>0&&f.push({action:"up",enabled:m,x:a,y:t,time:Date.now()-d}),d>=0&&m){if(k=!1,f.push({action:"point",x:a,y:t,time:Date.now()-d}),S.disabled=!1,!e)throw new Error("Canvas context could not be initialized.");e.clearRect(0,0,i.width,i.height),e.beginPath(),e.arc(a,t,N/2,0,Math.PI*2),e.fillStyle=`rgba(${p[0]}, ${p[1]}, ${p[2]})`,e.fill()}}i.addEventListener("mouseup",G),i.addEventListener("touchend",G),i.addEventListener("touchcancel",G);function ie(o,n){if(!e)throw new Error("Canvas context could not be initialized.");e.clearRect(0,0,i.width,i.height),e.beginPath(),e.arc(o-1,n-1,Y/2,0,Math.PI*2),e.fillStyle=`rgba(${p[0]}, ${p[1]}, ${p[2]}, 0.2)`,e.fill()}function J(o,n){let a,t;return o instanceof MouseEvent?(a=o.clientX-n.left,t=o.clientY-n.top):(a=o.changedTouches[0].clientX-n.left,t=o.changedTouches[0].clientY-n.top),{x:a,y:t}}S==null||S.addEventListener("click",ce);async function ce(){if(!m)return;if(m=!1,S.disabled=!0,!e||!h)throw new Error("Canvas context could not be initialized.");e.fillStyle="rgba(255, 255, 255, 0.8)",e.fillRect(0,0,i.width,i.height),h.fillStyle="rgba(255, 255, 255, 0.8)",h.fillRect(0,0,g.width,g.height),L===0&&(L=Date.now());const o=L-d;f.push({action:"end",time:o});const n={challenge:A,hmac:R,activity:f},a=await fetch(U+"/validate-captcha",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(n)});let t=!1,u=!1;try{const s=await a.json();t=s.valid,u=s.retry,u&&(A=s.challenge,R=s.hmac)}catch{}e.lineJoin="round",e.lineCap="round";const c=i.width*.1;let D=i.width/2,P=i.height/2;const l=i.width/3;if(t){e.strokeStyle="rgba(0, 0, 0, 0.02)",e.lineWidth=c+20;let s=D+c/8,r=P+c/4;z(l,s,r),e.lineWidth=c+17,z(l,s,r),e.lineWidth=c+14,z(l,s,r),e.lineWidth=c+11,z(l,s,r),e.lineWidth=c+8,z(l,s,r),e.strokeStyle="rgba(0, 160, 0)",e.lineWidth=c,z(l,D,P)}else if(u){e.strokeStyle="rgba(0, 0, 0, 0.02)",e.lineWidth=c+20;let s=D+c/8,r=P+c/4;W(l,s,r),e.lineWidth=c+17,W(l,s,r),e.lineWidth=c+14,W(l,s,r),e.lineWidth=c+11,W(l,s,r),e.lineWidth=c+8,W(l,s,r),e.strokeStyle="rgba(0, 80, 255)",e.lineWidth=c,W(l,D,P)}else{e.strokeStyle="rgba(0, 0, 0, 0.02)",e.lineWidth=c+20;let s=D+c/8,r=P+c/4;B(l,s,r),e.lineWidth=c+17,B(l,s,r),e.lineWidth=c+14,B(l,s,r),e.lineWidth=c+11,B(l,s,r),e.lineWidth=c+8,B(l,s,r),e.strokeStyle="rgba(255, 0, 0)",e.lineWidth=c,B(l,D,P)}t&&E&&E.onSuccess?E.onSuccess():u?setTimeout(()=>{ve(),Z()},500):E&&E.onFailure&&E.onFailure()}function z(o,n,a){if(!e)throw new Error("Canvas context could not be initialized.");const t=o/2;e.beginPath(),e.moveTo(n-t/2,a+t),e.lineTo(n-t-t/2,a),e.moveTo(n-t/2,a+t),e.lineTo(n+o-t/2,a-t),e.stroke()}function B(o,n,a){if(!e)throw new Error("Canvas context could not be initialized.");const t=o/2;e.beginPath(),e.moveTo(n-t,a-t),e.lineTo(n+t,a+t),e.moveTo(n+t,a-t),e.lineTo(n-t,a+t),e.stroke()}function W(o,n,a){if(!e)throw new Error("Canvas context could not be initialized.");const t=o/2;e.beginPath(),e.moveTo(n-t,a),e.lineTo(n-t+1,a),e.moveTo(n,a),e.lineTo(n+1,a),e.moveTo(n+t,a),e.lineTo(n+t+1,a),e.stroke()}function ve(){k=!1,f=[],d=0,L=0,_=0,w=0,m=!1,S.disabled=!0,I=!1,O="",N=0,Y=0;const o=document.getElementById("wrapper");o.style.display="none",M.style.display="block",h&&h.clearRect(0,0,g.width,g.height),C&&($.style.background=Q)}}return window.NeoCAPTCHA={render:V},H.renderCaptcha=V,Object.defineProperty(H,Symbol.toStringTag,{value:"Module"}),H}({});
+    `;const Q="1.0.1",Z="https://neo-captcha.com/api/v1",x=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent),C=document.getElementById("neoCaptcha-startOverlay"),I=document.getElementById("neoCaptcha-submit"),N=document.getElementById("neoCaptcha-start"),i=document.getElementById("neoCaptcha-captchaCanvas"),e=i.getContext("2d"),f=document.getElementById("neoCaptcha-timeCanvas"),p=f.getContext("2d");if(!e||!p)throw new Error("Canvas context could not be initialized.");const ge=(de=window.matchMedia)==null?void 0:de.call(window,"(prefers-color-scheme: dark)").matches,ee=(l==null?void 0:l.theme)==="dark"||(l==null?void 0:l.theme)==="light"?l.theme:ge?"dark":"light";document.getElementById("neoCaptchaRoot").classList.add(`neo-captcha-theme-${ee}`),document.getElementById("neoCaptchaWidgetLogo").src=ee==="dark"?"https://neo-captcha.com/assets/logo-dark.png":"https://neo-captcha.com/assets/logo.png";const te="#f406",ue="#0f4a";let T=(navigator.language||navigator.languages[0]).split("-")[0];T=(l==null?void 0:l.lang)||T;const g={en:{howto:"How-To:",step_1:"Hit ▶ Play",step_2:'Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>',step_2_s:"Tap when you <b>hear a signal!</b>",mode_1:"Implied square:",mode_1_text:"Mark the missing corner!"},de:{howto:"Wie man's macht:",step_1:"Drücke ▶ Start",step_2:'Tippe bei <b><span style="color: rgba(0, 160, 0)">GRÜN</span>!<b/>',step_2_s:"Tippe beim <b>Signalton!</b>",mode_1:"Angedeutetes Viereck:",mode_1_text:"Markiere die fehlende Ecke!"}};document.getElementById("neoCaptcha-howToTitle").innerHTML=(g[T]||g.en).howto,document.getElementById("neoCaptcha-step_1").innerHTML=(g[T]||g.en).step_1,x?document.getElementById("neoCaptcha-step_2").innerHTML=(g[T]||g.en).step_2:document.getElementById("neoCaptcha-step_2").innerHTML=(g[T]||g.en).step_2_s,document.getElementById("neoCaptcha-mode").innerHTML=(g[T]||g.en).mode_1,document.getElementById("neoCaptcha-modeText").innerHTML=(g[T]||g.en).mode_1_text;const fe=(l==null?void 0:l.minDifficulty)||"easy";let P=6e3,m=[255,0,0],S=!1,w=[],h=0,R=0,O=0,v=0,u=!1,_=!1,F="",G=0,Y=0,A,H,we=(l==null?void 0:l.showHowTo)||!1,B=(l==null?void 0:l.expandHowTo)||!1;if(we){const o=document.getElementById("neoCaptcha-howToCaption"),a=document.getElementById("neoCaptcha-howToText"),n=document.getElementById("neoCaptcha-howToIcon");a.style.display=B?"block":"none",n.innerText=B?"expand_less":"expand_more",o.addEventListener("click",()=>{B=!B,a.style.display=B?"block":"none",n.innerText=B?"expand_less":"expand_more"})}else{const o=document.getElementById("neoCaptcha-howToCaption"),a=document.getElementById("neoCaptcha-howToText");o.style.display="none",a.style.display="none"}const $=document.getElementById("neoCaptcha-overlayBg");x?$.style.background=te:$.style.background="#000";const V=document.getElementById("neoCaptcha-signalIcon");V.innerText=x?"do_not_touch":"hearing",N.addEventListener("click",ae);async function ae(){console.log("version: "+Q),console.log("userAgent: "+navigator.userAgent);const o=document.getElementById("neoCaptcha-wrapper");o.style.display="flex",N.style.display="none";const a={challenge:A,hmac:H,userAgent:navigator.userAgent,mobile:x,version:Q,minDifficulty:fe},t=await(await fetch(Z+"/generate-captcha",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(a)})).json();if(console.log(t),t.img){const b=document.getElementById("neoCaptcha-image");b.style.display="inline-block",C.style.display="flex",F=`data:image/png;base64,${t.img}`,G=t.pointSize,Y=t.thumbSize,m=t.color,A=t.challenge,H=t.hmac,P=t.totalTime||P;const c=document.getElementById("neoCaptcha-container");if(c.style.height="20em",i.style.width="20em",i.style.height="20em",i.width=i.clientWidth,i.height=i.width,!e||!p)throw new Error("Canvas context could not be initialized.");e.fillStyle="rgba(0, 0, 0)",e.fillRect(0,0,i.width,i.height),p.fillStyle=`rgba(${m[0]}, ${m[1]}, ${m[2]})`,O=Date.now(),setTimeout(()=>ve(),t.suspense)}}function ve(){x?($.style.background=ue,V.innerText="touch_app",v>0?w.push({action:"react",time:v-Date.now()}):v=Date.now()):ye()}const E=new AudioContext,ye=()=>{E.state==="suspended"?E.resume().then(()=>ne()):ne()},ne=()=>{X(285,.12),X(852,.12,.12),X(528,.12,.24),v>0?w.push({action:"react",time:v-Date.now()}):v=Date.now()};function X(o,a,n=0){let t=E.createOscillator(),b=E.createGain();t.type="sine",t.frequency.value=o,b.gain.value=.1,t.connect(b),b.connect(E.destination),t.start(E.currentTime+n),t.stop(E.currentTime+n+a)}function oe(){h==0&&(v>0?w.push({action:"react",time:Date.now()-v}):v=Date.now())}C.addEventListener("mousedown",oe),C.addEventListener("touchstart",oe,{passive:!1}),C.addEventListener("touchmove",()=>{},{passive:!1});function q(){if(v>0&&h==0){w.push({action:"start",time:Date.now()-O}),u=!0;const o=document.getElementById("neoCaptcha-image");if(o.src=F,be(),!e)throw new Error("Canvas context could not be initialized.");e.clearRect(0,0,i.width,i.height),C.style.display="none",x&&(_=!0)}}C.addEventListener("mouseup",q),C.addEventListener("touchend",q),C.addEventListener("touchcancel",q);function be(){h=Date.now(),ie()}function ie(){if(!p)throw new Error("Canvas context could not be initialized.");const o=Date.now()-h,a=Math.max(P-o,0),n=a/P*f.width;p.clearRect(0,0,f.width,f.height),p.fillStyle=`rgba(${m[0]}, ${m[1]}, ${m[2]})`,p.fillRect(0,0,n,f.height),a>0&&u?requestAnimationFrame(ie):a<=0&&u?(console.log("Time's up!"),R=h+P,re()):(p.fillStyle="rgba(255, 255, 255, 0.8)",p.fillRect(0,0,f.width,f.height))}function ce(o){if(o.preventDefault(),!_&&h>0){const a=i.getBoundingClientRect();let{x:n,y:t}=U(o,a);w.push({action:"down",enabled:u,x:n,y:t,time:Date.now()-h}),u&&(S=!0,le(n,t))}}i.addEventListener("mousedown",ce),i.addEventListener("touchstart",ce,{passive:!1});function se(o){if(o.preventDefault(),_)return;const a=i.getBoundingClientRect();let{x:n,y:t}=U(o,a);h>0&&w.push({action:"move",enabled:u,drawing:S,x:n,y:t,time:Date.now()-h}),u&&S&&le(n,t)}i.addEventListener("mousemove",se),i.addEventListener("touchmove",se,{passive:!1});function J(o){if(o.preventDefault(),_){_=!1;return}if(!S)return;const a=i.getBoundingClientRect();let{x:n,y:t}=U(o,a);if(h>0&&w.push({action:"up",enabled:u,x:n,y:t,time:Date.now()-h}),h>=0&&u){if(S=!1,w.push({action:"point",x:n,y:t,time:Date.now()-h}),I.disabled=!1,!e)throw new Error("Canvas context could not be initialized.");e.clearRect(0,0,i.width,i.height),e.beginPath(),e.arc(n,t,G/2,0,Math.PI*2),e.fillStyle=`rgba(${m[0]}, ${m[1]}, ${m[2]})`,e.fill()}}i.addEventListener("mouseup",J),i.addEventListener("touchend",J),i.addEventListener("touchcancel",J);function le(o,a){if(!e)throw new Error("Canvas context could not be initialized.");e.clearRect(0,0,i.width,i.height),e.beginPath(),e.arc(o-1,a-1,Y/2,0,Math.PI*2),e.fillStyle=`rgba(${m[0]}, ${m[1]}, ${m[2]}, 0.2)`,e.fill()}function U(o,a){let n,t;return o instanceof MouseEvent?(n=o.clientX-a.left,t=o.clientY-a.top):(n=o.changedTouches[0].clientX-a.left,t=o.changedTouches[0].clientY-a.top),{x:n,y:t}}I==null||I.addEventListener("click",re);async function re(){if(!u)return;if(u=!1,I.disabled=!0,!e||!p)throw new Error("Canvas context could not be initialized.");e.fillStyle="rgba(255, 255, 255, 0.8)",e.fillRect(0,0,i.width,i.height),p.fillStyle="rgba(255, 255, 255, 0.8)",p.fillRect(0,0,f.width,f.height),R===0&&(R=Date.now());const o=R-h;w.push({action:"end",time:o});const a={challenge:A,hmac:H,activity:w},n=await fetch(Z+"/validate-captcha",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(a)});let t=!1,b=!1;try{const s=await n.json();t=s.valid,b=s.retry,b&&(A=s.challenge,H=s.hmac)}catch{}e.lineJoin="round",e.lineCap="round";const c=i.width*.1;let W=i.width/2,M=i.height/2;const r=i.width/3;if(t){e.strokeStyle="rgba(0, 0, 0, 0.02)",e.lineWidth=c+20;let s=W+c/8,d=M+c/4;z(r,s,d),e.lineWidth=c+17,z(r,s,d),e.lineWidth=c+14,z(r,s,d),e.lineWidth=c+11,z(r,s,d),e.lineWidth=c+8,z(r,s,d),e.strokeStyle="rgba(0, 160, 0)",e.lineWidth=c,z(r,W,M)}else if(b){e.strokeStyle="rgba(0, 0, 0, 0.02)",e.lineWidth=c+20;let s=W+c/8,d=M+c/4;D(r,s,d),e.lineWidth=c+17,D(r,s,d),e.lineWidth=c+14,D(r,s,d),e.lineWidth=c+11,D(r,s,d),e.lineWidth=c+8,D(r,s,d),e.strokeStyle="rgba(0, 80, 255)",e.lineWidth=c,D(r,W,M)}else{e.strokeStyle="rgba(0, 0, 0, 0.02)",e.lineWidth=c+20;let s=W+c/8,d=M+c/4;L(r,s,d),e.lineWidth=c+17,L(r,s,d),e.lineWidth=c+14,L(r,s,d),e.lineWidth=c+11,L(r,s,d),e.lineWidth=c+8,L(r,s,d),e.strokeStyle="rgba(255, 0, 0)",e.lineWidth=c,L(r,W,M)}t&&k&&k.onSuccess?k.onSuccess():b?setTimeout(()=>{Ce(),ae()},500):k&&k.onFailure&&k.onFailure()}function z(o,a,n){if(!e)throw new Error("Canvas context could not be initialized.");const t=o/2;e.beginPath(),e.moveTo(a-t/2,n+t),e.lineTo(a-t-t/2,n),e.moveTo(a-t/2,n+t),e.lineTo(a+o-t/2,n-t),e.stroke()}function L(o,a,n){if(!e)throw new Error("Canvas context could not be initialized.");const t=o/2;e.beginPath(),e.moveTo(a-t,n-t),e.lineTo(a+t,n+t),e.moveTo(a+t,n-t),e.lineTo(a-t,n+t),e.stroke()}function D(o,a,n){if(!e)throw new Error("Canvas context could not be initialized.");const t=o/2;e.beginPath(),e.moveTo(a-t,n),e.lineTo(a-t+1,n),e.moveTo(a,n),e.lineTo(a+1,n),e.moveTo(a+t,n),e.lineTo(a+t+1,n),e.stroke()}function Ce(){S=!1,w=[],h=0,R=0,O=0,v=0,u=!1,I.disabled=!0,_=!1,F="",G=0,Y=0;const o=document.getElementById("neoCaptcha-wrapper");o.style.display="none",N.style.display="block",p&&p.clearRect(0,0,f.width,f.height),x&&($.style.background=te,V.innerText="do_not_touch")}}return window.NeoCAPTCHA={render:K},j.renderCaptcha=K,Object.defineProperty(j,Symbol.toStringTag,{value:"Module"}),j}({});

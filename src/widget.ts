@@ -3,19 +3,28 @@ declare const __VERSION__: string;
 const widgetStyles = `
 :root {
     --neo-captcha-accent: #009696;
-    --neo-captcha-bg: #ddd;
-    --neo-captcha-bg2: #eee;
-    --neo-captcha-fg: #111;
     --neo-captcha-dark: #111;
     --neo-captcha-light: #eee;
+
+    --neo-captcha-bg-light: #C8DCDCFF;
+    --neo-captcha-bg2-light: #eee;
+    --neo-captcha-fg-light: #111;
+
+    --neo-captcha-bg-dark: #111;
+    --neo-captcha-bg2-dark: #222;
+    --neo-captcha-fg-dark: #ddd;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --neo-captcha-bg: #111;
-        --neo-captcha-bg2: #222;
-        --neo-captcha-fg: #ddd;
-    }
+.neo-captcha-theme-light {
+    --neo-captcha-bg: var(--neo-captcha-bg-light);
+    --neo-captcha-bg2: var(--neo-captcha-bg2-light);
+    --neo-captcha-fg: var(--neo-captcha-fg-light);
+}
+
+.neo-captcha-theme-dark {
+    --neo-captcha-bg: var(--neo-captcha-bg-dark);
+    --neo-captcha-bg2: var(--neo-captcha-bg2-dark);
+    --neo-captcha-fg: var(--neo-captcha-fg-dark);
 }
 
 .neo-captcha-box {
@@ -84,6 +93,10 @@ const widgetStyles = `
     font-size: 1em;
     font-weight: bold;
     cursor: pointer;
+
+    &:disabled {
+        opacity: 0.66;
+    }
 }
 
 .neo-captcha-start-button {
@@ -147,29 +160,47 @@ const widgetStyles = `
 }
 
 .neo-captcha-how-to {
-    width: 18em;
+    width: 20em;
     background: var(--neo-captcha-bg2);
     border: 1px solid var(--neo-captcha-fg);
     text-align: start;
-    padding: 0 1em 0 1em;
     margin-bottom: 0.5em;
 }
 
 .neo-captcha-how-to-caption {
-    font-size: 1.2em;
+    font-size: 1.1em;
     font-weight: bold;
     cursor: pointer;
-    padding: 0.2em 0 0.5em 0;
+    padding: 0.5em 1em 0.5em 1em;
+    background: color-mix(in srgb, var(--neo-captcha-fg) 10%, transparent);
+    display: flex;
+    flex-direction: row;
 }
 
 .neo-captcha-how-to-text {
-    padding-bottom: 1em;
+}
+
+.neo-captcha-how-to-table {
+    padding: 0 1em 0.5em 1em;
+    background: color-mix(in srgb, var(--neo-captcha-fg) 10%, transparent);
+}
+
+.neo-captcha-how-to-footer {
+    font-size: 1.1em;
+    padding: 0.5em 1em 0.5em 1em;
+    display: flex;
+    flex-direction: column;
+}
+
+.neo-captcha-how-to-footer-mode {
+    color: var(--neo-captcha-accent);
+    font-weight: bold;
 }
 
 .neo-captcha-wide-icon {
-    width: 8em;
+    flex: 1;
     text-align: end;
-    transform: translateY(0.2em);
+    transform: translateY(0.1em);
 }
 
 .neo-captcha-steps-numbers {
@@ -206,91 +237,128 @@ export function renderCaptcha(target: HTMLElement, config: any,
     injectMaterialIcons();
     injectStyles();
     target.innerHTML = `
-    <div class="neo-captcha-box">
+    <div id="neoCaptchaRoot" class="neo-captcha-box">
         <div class="neo-captcha-title">
             <a href="https://neo-captcha.com" target="_blank" rel="noopener">
                 <picture class="neo-captcha-picture">
-                    <source srcset="https://neo-captcha.com/assets/logo-dark.png"
-                            media="(prefers-color-scheme: dark)">
-                    <source srcset="https://neo-captcha.com/assets/logo.png"
-                            media="(prefers-color-scheme: light)">
-    
-                    <img class="neo-captcha-logo" title="Visit neo-captcha.com"
+                    <img id="neoCaptchaWidgetLogo" class="neo-captcha-logo" title="Visit neo-captcha.com"
                          src="https://neo-captcha.com/assets/logo.png"
                          alt="logo">
                 </picture>
             </a>
             <span class="neo-captcha-caption">NeoCAPTCHA</span>
         </div>
-        <div id="howTo" class="neo-captcha-how-to">
-            <div id="howToCaption" class="neo-captcha-how-to-caption">How-To:
-                <span id="howToIcon" class="neo-captcha-wide-icon material-icons">expand_less</span>
+        <div id="neoCaptcha-howTo" class="neo-captcha-how-to">
+            <div id="neoCaptcha-howToCaption" class="neo-captcha-how-to-caption">
+                <span id="neoCaptcha-howToTitle"></span>
+                <span id="neoCaptcha-howToIcon" class="neo-captcha-wide-icon material-icons">expand_less</span>
             </div>
-            <table id="howToText" class="neo-captcha-how-to-text">
-                <tr>
-                    <td class="neo-captcha-steps-numbers">1.</td>
-                    <td>Hit ▶ Play</td>
-                </tr>
-                <tr>
-                    <td class="neo-captcha-steps-numbers">2.</td>
-                    <td>Wait for the signal – stay alert!</td>
-                </tr>
-                <tr>
-                    <td class="neo-captcha-steps-numbers">3.</td>
-                    <td>When it triggers, tap to uncover the CAPTCHA</td>
-                </tr>
-                <tr>
-                    <td class="neo-captcha-steps-numbers">4.</td>
-                    <td>Find the missing corner and place your guess</td>
-                </tr>
-            </table>
+            <div class="neo-captcha-how-to-text">
+                <table id="neoCaptcha-howToText" class="neo-captcha-how-to-table">
+                    <tr>
+                        <td class="neo-captcha-steps-numbers">1.</td>
+                        <td id="neoCaptcha-step_1"></td>
+                    </tr>
+                    <tr>
+                        <td class="neo-captcha-steps-numbers">2.</td>
+                        <td id="neoCaptcha-step_2"></td>
+                    </tr>
+                </table>
+                <div class="neo-captcha-how-to-footer">
+                    <span id="neoCaptcha-mode" class="neo-captcha-how-to-footer-mode"></span>
+                    <span id="neoCaptcha-modeText"></span>
+                </div>
+            </div>
         </div>
-        <button id="start" class="neo-captcha-start-button">
+        <button id="neoCaptcha-start" class="neo-captcha-start-button">
             <span class="neo-captcha-icon-dark material-icons">play_arrow</span>
         </button>
-        <div id="wrapper" class="neo-captcha-wrapper">
-            <div id="container" class="neo-captcha-container">
+        <div id="neoCaptcha-wrapper" class="neo-captcha-wrapper">
+            <div id="neoCaptcha-container" class="neo-captcha-container">
                 <div class="neo-captcha-icon-div sync">
                     <span class="neo-captcha-icon material-icons">sync</span>
                 </div>
-                <img id="image" class="neo-captcha-image" alt="background"/>
-                <canvas id="captchaCanvas" class="neo-captcha-main-canvas"></canvas>
-                <div id="startOverlay" class="neo-captcha-icon-div">
-                    <div id="overlayBg" class="neo-captcha-overlay-bg"></div>
-                    <span id="signalIcon" class="neo-captcha-icon material-icons">hearing</span>
-                    <span class="neo-captcha-icon material-icons">trending_flat</span>
-                    <span class="neo-captcha-icon material-icons">touch_app</span>
+                <img id="neoCaptcha-image" class="neo-captcha-image" alt="background"/>
+                <canvas id="neoCaptcha-captchaCanvas" class="neo-captcha-main-canvas"></canvas>
+                <div id="neoCaptcha-startOverlay" class="neo-captcha-icon-div">
+                    <div id="neoCaptcha-overlayBg" class="neo-captcha-overlay-bg"></div>
+                    <span id="neoCaptcha-signalIcon" class="neo-captcha-icon material-icons">hearing</span>
                 </div>
             </div>
             <div>
-                <canvas class="neo-captcha-time" id="timeCanvas"></canvas>
+                <canvas class="neo-captcha-time" id="neoCaptcha-timeCanvas"></canvas>
             </div>
-            <button id="submit" class="neo-captcha-button" disabled>
+            <button id="neoCaptcha-submit" class="neo-captcha-button" disabled>
                 <span class="neo-captcha-icon-dark material-icons">check</span>
             </button>
         </div>
     </div>
     `;
-    const showHowTo = config?.showHowTo || false;
-    const expandHowTo = config?.expandHowTo || false;
 
     const VERSION = __VERSION__;
     const url = "https://neo-captcha.com/api/v1";
 
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const overlay = document.getElementById("startOverlay") as HTMLDivElement;
-    const submitBtn = document.getElementById("submit") as HTMLButtonElement;
-    const startBtn = document.getElementById("start") as HTMLButtonElement;
-    const canvas = document.getElementById("captchaCanvas") as HTMLCanvasElement;
+    const overlay = document.getElementById("neoCaptcha-startOverlay") as HTMLDivElement;
+    const submitBtn = document.getElementById("neoCaptcha-submit") as HTMLButtonElement;
+    const startBtn = document.getElementById("neoCaptcha-start") as HTMLButtonElement;
+    const canvas = document.getElementById("neoCaptcha-captchaCanvas") as HTMLCanvasElement;
     const ctx = canvas.getContext("2d");
-    const timeCanvas = document.getElementById("timeCanvas") as HTMLCanvasElement;
+    const timeCanvas = document.getElementById("neoCaptcha-timeCanvas") as HTMLCanvasElement;
     const bar = timeCanvas.getContext("2d");
     if (!ctx || !bar) {
         throw new Error("Canvas context could not be initialized.");
     }
 
+    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+    const theme = (config?.theme === 'dark' || config?.theme === 'light') ? config.theme : (prefersDark ? 'dark' : 'light');
+    document.getElementById("neoCaptchaRoot")!.classList.add(`neo-captcha-theme-${theme}`);
+    (document.getElementById("neoCaptchaWidgetLogo") as HTMLImageElement).src = theme === 'dark'
+        ? 'https://neo-captcha.com/assets/logo-dark.png'
+        : 'https://neo-captcha.com/assets/logo.png';
+
+    const mobileRed = "#f406";
+    const mobileGreen = "#0f4a";
+
+    let userLang = (navigator.language || navigator.languages[0]).split("-")[0];
+    userLang = config?.lang || userLang;
+    const translations: Record<string, {
+        howto: string,
+        step_1: string,
+        step_2: string,
+        step_2_s: string,
+        mode_1: string,
+        mode_1_text: string,
+    }> = {
+        en: {
+            howto: 'How-To:',
+            step_1: 'Hit ▶ Play',
+            step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
+            step_2_s: `Tap when you <b>hear a signal!</b>`,
+            mode_1: 'Implied square:',
+            mode_1_text: 'Mark the missing corner!',
+        },
+        de: {
+            howto: 'Wie man\'s macht:',
+            step_1: 'Drücke ▶ Start',
+            step_2: `Tippe bei <b><span style="color: rgba(0, 160, 0)">GRÜN</span>!<b/>`,
+            step_2_s: 'Tippe beim <b>Signalton!</b>',
+            mode_1: 'Angedeutetes Viereck:',
+            mode_1_text: 'Markiere die fehlende Ecke!',
+        },
+    };
+    document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
+    document.getElementById("neoCaptcha-step_1")!.innerHTML = (translations[userLang] || translations['en']).step_1;
+    if (isMobile) {
+        document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2;
+    } else {
+        document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
+    }
+    document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
+    document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
+
     const minDifficulty = config?.minDifficulty || "easy";
-    const totalTime = 6000;
+    let totalTime = 6000;
     let color: number[] = [255, 0, 0];
 
     let drawing = false;
@@ -307,12 +375,12 @@ export function renderCaptcha(target: HTMLElement, config: any,
     let challenge: string | undefined = undefined;
     let hmac: string | undefined = undefined;
 
-    let howToShown = showHowTo;
-    let howToExpanded = expandHowTo;
+    let howToShown = config?.showHowTo || false;
+    let howToExpanded = config?.expandHowTo || false;
     if (howToShown) {
-        const howToCaption = document.getElementById("howToCaption") as HTMLDivElement;
-        const howToText = document.getElementById("howToText") as HTMLTableElement;
-        const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
+        const howToCaption = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
+        const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
+        const howToIcon = document.getElementById("neoCaptcha-howToIcon") as HTMLSpanElement;
         howToText.style.display = howToExpanded ? "block" : "none";
         howToIcon.innerText = howToExpanded ? "expand_less" : "expand_more";
         howToCaption.addEventListener("click", () => {
@@ -321,20 +389,20 @@ export function renderCaptcha(target: HTMLElement, config: any,
             howToIcon.innerText = howToExpanded ? "expand_less" : "expand_more";
         });
     } else {
-        const howTo = document.getElementById("howTo") as HTMLDivElement;
+        const howTo = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
+        const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
         howTo.style.display = "none";
+        howToText.style.display = "none";
     }
 
-    const overlayBg = document.getElementById("overlayBg") as HTMLDivElement;
-    const mobileRed = "#f406";
-    const mobileGreen = "#0f4a";
+    const overlayBg = document.getElementById("neoCaptcha-overlayBg") as HTMLDivElement;
     if (!isMobile) {
         overlayBg.style.background = "#000";
     } else {
         overlayBg.style.background = mobileRed;
     }
-    const signalIcon = document.getElementById("signalIcon") as HTMLSpanElement;
-    signalIcon.innerText = isMobile ? "visibility" : "hearing";
+    const signalIcon = document.getElementById("neoCaptcha-signalIcon") as HTMLSpanElement;
+    signalIcon.innerText = isMobile ? "do_not_touch" : "hearing";
 
     startBtn.addEventListener("click", getCaptcha);
 
@@ -342,15 +410,15 @@ export function renderCaptcha(target: HTMLElement, config: any,
         console.log("version: " + VERSION);
         console.log("userAgent: " + navigator.userAgent);
 
-        if (howToShown && howToExpanded) {
-            howToExpanded = false;
-            const howToText = document.getElementById("howToText") as HTMLTableElement;
-            const howToIcon = document.getElementById("howToIcon") as HTMLSpanElement;
-            howToText.style.display = "none";
-            howToIcon.innerText = "expand_more";
-        }
+        // if (howToShown && howToExpanded) {
+        //     howToExpanded = false;
+        //     const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
+        //     const howToIcon = document.getElementById("neoCaptcha-howToIcon") as HTMLSpanElement;
+        //     howToText.style.display = "none";
+        //     howToIcon.innerText = "expand_more";
+        // }
 
-        const wrapper = document.getElementById("wrapper") as HTMLDivElement;
+        const wrapper = document.getElementById("neoCaptcha-wrapper") as HTMLDivElement;
         wrapper.style.display = "flex";
         startBtn.style.display = "none";
 
@@ -369,7 +437,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         const result = await response.json();
         console.log(result);
         if (result.img) {
-            const image = document.getElementById("image") as HTMLImageElement;
+            const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
             image.style.display = "inline-block";
             overlay.style.display = "flex";
             imgSrc = `data:image/png;base64,${result.img}`;
@@ -378,7 +446,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
             color = result.color;
             challenge = result.challenge;
             hmac = result.hmac;
-            const container = document.getElementById("container") as HTMLDivElement;
+            totalTime = result.totalTime || totalTime;
+            const container = document.getElementById("neoCaptcha-container") as HTMLDivElement;
             container.style.height = "20em";
 
             canvas.style.width = "20em";
@@ -402,6 +471,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     function beep() {
         if (isMobile) {
             overlayBg.style.background = mobileGreen;
+            signalIcon.innerText = "touch_app";
             if (beepStartTime > 0) {
                 activity.push({action: "react", time: beepStartTime - Date.now()});
             } else {
@@ -470,7 +540,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
             activity.push({action: "start", time: Date.now() - idleStartTime});
 
             enabled = true;
-            const image = document.getElementById("image") as HTMLImageElement;
+            const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
             image.src = imgSrc;
             startTimer();
             if (!ctx) {
@@ -787,7 +857,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         imgSrc = "";
         pointSize = 0;
         thumbSize = 0;
-        const wrapper = document.getElementById("wrapper") as HTMLDivElement;
+        const wrapper = document.getElementById("neoCaptcha-wrapper") as HTMLDivElement;
         wrapper.style.display = "none";
         startBtn.style.display = "block";
         if (bar) {
@@ -795,9 +865,9 @@ export function renderCaptcha(target: HTMLElement, config: any,
         }
         if (isMobile) {
             overlayBg.style.background = mobileRed;
+            signalIcon.innerText = "do_not_touch";
         }
     }
-
 
 }
 
