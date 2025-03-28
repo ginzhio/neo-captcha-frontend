@@ -35,7 +35,7 @@
 <script>
     window.NeoCAPTCHA.renderCaptcha(document.getElementById("neo-captcha"), {
         showHowTo: true,
-        expandHowTo: false,
+        expandHowTo: true,
     }, {
         onSuccess: () => {
             console.log("CAPTCHA passed!");
@@ -54,7 +54,9 @@ Use the callback methods ```onSuccess``` and ```onFailure``` to grant or deny ac
 {
     showHowTo: true,       // shows instructions on how to solve the CAPTCHA
     expandHowTo: false,    // expand or collapse the "How-To" section initially
-    minDifficulty: 'easy', // ['easy', 'medium', 'hard']
+    minDifficulty: 'easy', // ['easy', 'medium', 'hard'] default is 'easy'
+    lang: 'en',            // currently: ['en', 'de'] forces the text to be in that language, omit for browser-default
+    theme: 'dark',         // ['light', 'dark'] forces ui theme, omit for browser-default
 }
 ```
 
