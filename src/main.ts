@@ -15,8 +15,7 @@ if (!ctx || !bar) {
     throw new Error("Canvas context could not be initialized.");
 }
 
-const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-const theme = (prefersDark ? 'dark' : 'light');
+const theme = 'dark';
 document.getElementById("neoCaptchaRoot")!.classList.add(`neo-captcha-theme-${theme}`);
 (document.getElementById("neoCaptchaWidgetLogo") as HTMLImageElement).src = theme === 'dark'
     ? 'https://neo-captcha.com/assets/logo-dark.png'
@@ -490,16 +489,42 @@ async function submitCaptcha() {
         drawCross(size, x, y);
     }
 
-    if (valid && true && true) {
+    let submitIcon = document.getElementById("neoCaptcha-submitIcon") as HTMLSpanElement;
+    if (valid) {
         console.log("Yippie!");
+        submitBtn.disabled = false;
+        submitBtn.removeEventListener("click", submitCaptcha);
+        submitBtn.addEventListener("click", restart);
+        submitIcon.innerText = "replay";
     } else if (retry) {
         setTimeout(() => {
             reset();
             getCaptcha();
         }, 500);
-    } else if (true && true) {
+    } else {
         console.log("Womp, womp");
+        submitBtn.disabled = false;
+        submitBtn.removeEventListener("click", submitCaptcha);
+        submitBtn.addEventListener("click", restart);
+        submitIcon.innerText = "replay";
     }
+}
+
+function restart() {
+    reset();
+    challenge = undefined;
+    hmac = undefined;
+    submitBtn.removeEventListener("click", restart);
+    submitBtn.addEventListener("click", submitCaptcha);
+    let submitIcon = document.getElementById("neoCaptcha-submitIcon") as HTMLSpanElement;
+    submitIcon.innerText = "check";
+
+    if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
+    image.style.display = "none";
+    overlay.style.display = "none";
 }
 
 function drawCheckMark(size: number, x: number, y: number) {

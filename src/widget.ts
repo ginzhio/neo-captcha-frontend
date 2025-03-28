@@ -232,8 +232,7 @@ function injectMaterialIcons() {
 }
 
 // @ts-ignore
-export function renderCaptcha(target: HTMLElement, config: any,
-                              callbacks?: { onSuccess?: () => void, onFailure?: () => void }) {
+export function renderCaptcha(target: HTMLElement) {
     injectMaterialIcons();
     injectStyles();
     target.innerHTML = `
@@ -289,7 +288,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 <canvas class="neo-captcha-time" id="neoCaptcha-timeCanvas"></canvas>
             </div>
             <button id="neoCaptcha-submit" class="neo-captcha-button" disabled>
-                <span class="neo-captcha-icon-dark material-icons">check</span>
+                <span id="neoCaptcha-submitIcon" class="neo-captcha-icon-dark material-icons">check</span>
             </button>
         </div>
     </div>
@@ -310,8 +309,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         throw new Error("Canvas context could not be initialized.");
     }
 
-    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-    const theme = (config?.theme === 'dark' || config?.theme === 'light') ? config.theme : (prefersDark ? 'dark' : 'light');
+    const theme = 'dark';
     document.getElementById("neoCaptchaRoot")!.classList.add(`neo-captcha-theme-${theme}`);
     (document.getElementById("neoCaptchaWidgetLogo") as HTMLImageElement).src = theme === 'dark'
         ? 'https://neo-captcha.com/assets/logo-dark.png'
@@ -321,7 +319,6 @@ export function renderCaptcha(target: HTMLElement, config: any,
     const mobileGreen = "#0f4a";
 
     let userLang = (navigator.language || navigator.languages[0]).split("-")[0];
-    userLang = config?.lang || userLang;
     const translations: Record<string, {
         howto: string,
         step_1: string,
@@ -357,7 +354,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
     document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
 
-    const minDifficulty = config?.minDifficulty || "easy";
+    const minDifficulty = "easy";
     let totalTime = 6000;
     let color: number[] = [255, 0, 0];
 
@@ -375,8 +372,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
     let challenge: string | undefined = undefined;
     let hmac: string | undefined = undefined;
 
-    let howToShown = config?.showHowTo || false;
-    let howToExpanded = config?.expandHowTo || false;
+    let howToShown = true;
+    let howToExpanded = true;
     if (howToShown) {
         const howToCaption = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
         const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
@@ -791,16 +788,42 @@ export function renderCaptcha(target: HTMLElement, config: any,
             drawCross(size, x, y);
         }
 
-        if (valid && callbacks && callbacks.onSuccess) {
-            callbacks.onSuccess();
+        let submitIcon = document.getElementById("neoCaptcha-submitIcon") as HTMLSpanElement;
+        if (valid) {
+            console.log("Yippie!");
+            submitBtn.disabled = false;
+            submitBtn.removeEventListener("click", submitCaptcha);
+            submitBtn.addEventListener("click", restart);
+            submitIcon.innerText = "replay";
         } else if (retry) {
             setTimeout(() => {
                 reset();
                 getCaptcha();
             }, 500);
-        } else if (callbacks && callbacks.onFailure) {
-            callbacks.onFailure();
+        } else {
+            console.log("Womp, womp");
+            submitBtn.disabled = false;
+            submitBtn.removeEventListener("click", submitCaptcha);
+            submitBtn.addEventListener("click", restart);
+            submitIcon.innerText = "replay";
         }
+    }
+
+    function restart() {
+        reset();
+        challenge = undefined;
+        hmac = undefined;
+        submitBtn.removeEventListener("click", restart);
+        submitBtn.addEventListener("click", submitCaptcha);
+        let submitIcon = document.getElementById("neoCaptcha-submitIcon") as HTMLSpanElement;
+        submitIcon.innerText = "check";
+
+        if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
+        image.style.display = "none";
+        overlay.style.display = "none";
     }
 
     function drawCheckMark(size: number, x: number, y: number) {
