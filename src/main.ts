@@ -1,7 +1,7 @@
 declare const __VERSION__: string;
 
 const VERSION = __VERSION__;
-const url = "http://localhost:8080/api";
+const url = "http://localhost:8080/api"; // "https://neo-captcha.com/api/v1";
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const overlay = document.getElementById("neoCaptcha-startOverlay") as HTMLDivElement;
@@ -15,11 +15,23 @@ if (!ctx || !bar) {
     throw new Error("Canvas context could not be initialized.");
 }
 
-const theme = 'dark';
+const variant: string = "iq";
+
+const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+const theme = (prefersDark ? 'dark' : 'light');
 document.getElementById("neoCaptchaRoot")!.classList.add(`neo-captcha-theme-${theme}`);
 (document.getElementById("neoCaptchaWidgetLogo") as HTMLImageElement).src = theme === 'dark'
     ? 'https://neo-captcha.com/assets/logo-dark.png'
     : 'https://neo-captcha.com/assets/logo.png';
+if (variant === 'ns' || variant === 'ncs') {
+    (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
+        ? 'https://neo-captcha.com/assets/icon-see-shape-dark.png'
+        : 'https://neo-captcha.com/assets/icon-see-shape.png';
+} else {
+    (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
+        ? 'https://neo-captcha.com/assets/icon-find-corner-dark.png'
+        : 'https://neo-captcha.com/assets/icon-find-corner.png';
+}
 
 const mobileRed = "#f406";
 const mobileGreen = "#0f4a";
@@ -34,22 +46,28 @@ const translations: Record<string, {
     step_2_s: string,
     mode_1: string,
     mode_1_text: string,
+    mode_2: string,
+    mode_2_text: string,
 }> = {
     en: {
         howto: 'How-To:',
         step_1: 'Hit ▶ Play',
         step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
-        step_2_s: `Tap when you <b>hear a signal!</b>`,
+        step_2_s: `Click when you <b>hear a signal!</b>`,
         mode_1: 'Implied square:',
         mode_1_text: 'Mark the missing corner!',
+        mode_2: 'Neon Shape:',
+        mode_2_text: 'Select the shape you see!',
     },
     de: {
         howto: 'Wie man\'s macht:',
         step_1: 'Drücke ▶ Start',
         step_2: `Tippe bei <b><span style="color: rgba(0, 160, 0)">GRÜN</span>!<b/>`,
-        step_2_s: 'Tippe beim <b>Signalton!</b>',
+        step_2_s: 'Klicke beim <b>Signalton!</b>',
         mode_1: 'Angedeutetes Viereck:',
         mode_1_text: 'Markiere die fehlende Ecke!',
+        mode_2: 'Neon-Form:',
+        mode_2_text: 'Welche Form siehst du?',
     },
 };
 document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
@@ -59,10 +77,16 @@ if (isMobile) {
 } else {
     document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
 }
-document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
-document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
+if (variant === 'ns' || variant === 'ncs') {
+    document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_2;
+    document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_2_text;
+} else {
+    document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
+    document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
+}
 
 const minDifficulty = "easy";
+
 let totalTime = 6000;
 let color: number[] = [255, 0, 0];
 
@@ -115,14 +139,6 @@ async function getCaptcha() {
     console.log("version: " + VERSION);
     console.log("userAgent: " + navigator.userAgent);
 
-    // if (howToShown && howToExpanded) {
-    //     howToExpanded = false;
-    //     const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
-    //     const howToIcon = document.getElementById("neoCaptcha-howToIcon") as HTMLSpanElement;
-    //     howToText.style.display = "none";
-    //     howToIcon.innerText = "expand_more";
-    // }
-
     const wrapper = document.getElementById("neoCaptcha-wrapper") as HTMLDivElement;
     wrapper.style.display = "flex";
     startBtn.style.display = "none";
@@ -133,6 +149,7 @@ async function getCaptcha() {
         mobile: isMobile,
         version: VERSION,
         minDifficulty,
+        variant
     };
     const response = await fetch(url + "/generate-captcha", {
         method: "POST",
@@ -146,8 +163,6 @@ async function getCaptcha() {
         image.style.display = "inline-block";
         overlay.style.display = "flex";
         imgSrc = `data:image/png;base64,${result.img}`;
-        pointSize = result.pointSize;
-        thumbSize = result.thumbSize;
         color = result.color;
         challenge = result.challenge;
         hmac = result.hmac;
@@ -159,6 +174,8 @@ async function getCaptcha() {
         canvas.style.height = "20em";
         canvas.width = canvas.clientWidth;
         canvas.height = canvas.width;
+        pointSize = canvas.width * result.pointSize;
+        thumbSize = canvas.width * result.thumbSize;
         if (!ctx || !bar) {
             throw new Error("Canvas context could not be initialized.");
         }
@@ -345,7 +362,7 @@ function up(e: MouseEvent | TouchEvent) {
 
     if (startTime >= 0 && enabled) {
         drawing = false;
-        activity.push({action: "point", x: x, y: y, time: Date.now() - startTime});
+        activity.push({action: "point", x: x / canvas.width, y: y / canvas.height, time: Date.now() - startTime});
         submitBtn.disabled = false;
 
         if (!ctx) {
@@ -489,42 +506,16 @@ async function submitCaptcha() {
         drawCross(size, x, y);
     }
 
-    let submitIcon = document.getElementById("neoCaptcha-submitIcon") as HTMLSpanElement;
-    if (valid) {
+    if (valid && true && true) {
         console.log("Yippie!");
-        submitBtn.disabled = false;
-        submitBtn.removeEventListener("click", submitCaptcha);
-        submitBtn.addEventListener("click", restart);
-        submitIcon.innerText = "replay";
     } else if (retry) {
         setTimeout(() => {
             reset();
             getCaptcha();
         }, 500);
-    } else {
+    } else if (true && true) {
         console.log("Womp, womp");
-        submitBtn.disabled = false;
-        submitBtn.removeEventListener("click", submitCaptcha);
-        submitBtn.addEventListener("click", restart);
-        submitIcon.innerText = "replay";
     }
-}
-
-function restart() {
-    reset();
-    challenge = undefined;
-    hmac = undefined;
-    submitBtn.removeEventListener("click", restart);
-    submitBtn.addEventListener("click", submitCaptcha);
-    let submitIcon = document.getElementById("neoCaptcha-submitIcon") as HTMLSpanElement;
-    submitIcon.innerText = "check";
-
-    if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-    const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
-    image.style.display = "none";
-    overlay.style.display = "none";
 }
 
 function drawCheckMark(size: number, x: number, y: number) {

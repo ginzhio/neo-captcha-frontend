@@ -124,7 +124,6 @@ const widgetStyles = `
         background: var(--neo-captcha-bg2);
         transform: translateX(1px) translateY(1px);
         z-index: 0;
-        opacity: 50%;
     }
 }
 
@@ -139,6 +138,11 @@ const widgetStyles = `
 .neo-captcha-icon {
     font-size: 3em;
     color: var(--neo-captcha-light);
+}
+
+.neo-captcha-fg-icon {
+    font-size: 3em;
+    color: var(--neo-captcha-fg);
 }
 
 .neo-captcha-icon-dark {
@@ -177,17 +181,26 @@ const widgetStyles = `
     flex-direction: row;
 }
 
-.neo-captcha-how-to-text {
-}
-
 .neo-captcha-how-to-table {
     padding: 0 1em 0.5em 1em;
     background: color-mix(in srgb, var(--neo-captcha-fg) 10%, transparent);
 }
 
+.neo-captcha-how-to-description {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0.5em 0.5em 0.5em 1em;
+}
+
+.neo-captcha-mode-icon {
+    width: 2.5em;
+    height: 2.5em;
+    margin-right: 1em;
+}
+
 .neo-captcha-how-to-footer {
     font-size: 1.1em;
-    padding: 0.5em 1em 0.5em 1em;
     display: flex;
     flex-direction: column;
 }
@@ -232,7 +245,8 @@ function injectMaterialIcons() {
 }
 
 // @ts-ignore
-export function renderCaptcha(target: HTMLElement) {
+export function renderCaptcha(target: HTMLElement, config: any,
+                              callbacks?: { onSuccess?: () => void, onFailure?: () => void }) {
     injectMaterialIcons();
     injectStyles();
     target.innerHTML = `
@@ -263,9 +277,12 @@ export function renderCaptcha(target: HTMLElement) {
                         <td id="neoCaptcha-step_2"></td>
                     </tr>
                 </table>
-                <div class="neo-captcha-how-to-footer">
-                    <span id="neoCaptcha-mode" class="neo-captcha-how-to-footer-mode"></span>
-                    <span id="neoCaptcha-modeText"></span>
+                <div class="neo-captcha-how-to-description">
+                    <img id="neoCaptcha-modeIcon" class="neo-captcha-mode-icon" alt="icon variant">
+                    <div class="neo-captcha-how-to-footer">
+                        <span id="neoCaptcha-mode" class="neo-captcha-how-to-footer-mode"></span>
+                        <span id="neoCaptcha-modeText"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -275,7 +292,7 @@ export function renderCaptcha(target: HTMLElement) {
         <div id="neoCaptcha-wrapper" class="neo-captcha-wrapper">
             <div id="neoCaptcha-container" class="neo-captcha-container">
                 <div class="neo-captcha-icon-div sync">
-                    <span class="neo-captcha-icon material-icons">sync</span>
+                    <span class="neo-captcha-fg-icon material-icons">more_horiz</span>
                 </div>
                 <img id="neoCaptcha-image" class="neo-captcha-image" alt="background"/>
                 <canvas id="neoCaptcha-captchaCanvas" class="neo-captcha-main-canvas"></canvas>
@@ -288,7 +305,7 @@ export function renderCaptcha(target: HTMLElement) {
                 <canvas class="neo-captcha-time" id="neoCaptcha-timeCanvas"></canvas>
             </div>
             <button id="neoCaptcha-submit" class="neo-captcha-button" disabled>
-                <span id="neoCaptcha-submitIcon" class="neo-captcha-icon-dark material-icons">check</span>
+                <span class="neo-captcha-icon-dark material-icons">check</span>
             </button>
         </div>
     </div>
@@ -309,16 +326,29 @@ export function renderCaptcha(target: HTMLElement) {
         throw new Error("Canvas context could not be initialized.");
     }
 
-    const theme = 'dark';
+    const variant = config?.variant || "iq";
+
+    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+    const theme = (config?.theme === 'dark' || config?.theme === 'light') ? config.theme : (prefersDark ? 'dark' : 'light');
     document.getElementById("neoCaptchaRoot")!.classList.add(`neo-captcha-theme-${theme}`);
     (document.getElementById("neoCaptchaWidgetLogo") as HTMLImageElement).src = theme === 'dark'
         ? 'https://neo-captcha.com/assets/logo-dark.png'
         : 'https://neo-captcha.com/assets/logo.png';
+    if (variant === 'ns' || variant === 'ncs') {
+        (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
+            ? 'https://neo-captcha.com/assets/icon-see-shape-dark.png'
+            : 'https://neo-captcha.com/assets/icon-see-shape.png';
+    } else {
+        (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
+            ? 'https://neo-captcha.com/assets/icon-find-corner-dark.png'
+            : 'https://neo-captcha.com/assets/icon-find-corner.png';
+    }
 
     const mobileRed = "#f406";
     const mobileGreen = "#0f4a";
 
     let userLang = (navigator.language || navigator.languages[0]).split("-")[0];
+    userLang = config?.lang || userLang;
     const translations: Record<string, {
         howto: string,
         step_1: string,
@@ -326,22 +356,28 @@ export function renderCaptcha(target: HTMLElement) {
         step_2_s: string,
         mode_1: string,
         mode_1_text: string,
+        mode_2: string,
+        mode_2_text: string,
     }> = {
         en: {
             howto: 'How-To:',
             step_1: 'Hit ▶ Play',
             step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
-            step_2_s: `Tap when you <b>hear a signal!</b>`,
+            step_2_s: `Click when you <b>hear a signal!</b>`,
             mode_1: 'Implied square:',
             mode_1_text: 'Mark the missing corner!',
+            mode_2: 'Neon Shape:',
+            mode_2_text: 'Select the shape you see!',
         },
         de: {
             howto: 'Wie man\'s macht:',
             step_1: 'Drücke ▶ Start',
             step_2: `Tippe bei <b><span style="color: rgba(0, 160, 0)">GRÜN</span>!<b/>`,
-            step_2_s: 'Tippe beim <b>Signalton!</b>',
+            step_2_s: 'Klicke beim <b>Signalton!</b>',
             mode_1: 'Angedeutetes Viereck:',
             mode_1_text: 'Markiere die fehlende Ecke!',
+            mode_2: 'Neon-Form:',
+            mode_2_text: 'Welche Form siehst du?',
         },
     };
     document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
@@ -351,10 +387,16 @@ export function renderCaptcha(target: HTMLElement) {
     } else {
         document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
     }
-    document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
-    document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
+    if (variant === 'ns' || variant === 'ncs') {
+        document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_2;
+        document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_2_text;
+    } else {
+        document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
+        document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
+    }
 
-    const minDifficulty = "easy";
+    const minDifficulty = config?.minDifficulty || "easy";
+
     let totalTime = 6000;
     let color: number[] = [255, 0, 0];
 
@@ -372,8 +414,8 @@ export function renderCaptcha(target: HTMLElement) {
     let challenge: string | undefined = undefined;
     let hmac: string | undefined = undefined;
 
-    let howToShown = true;
-    let howToExpanded = true;
+    let howToShown = config?.showHowTo || false;
+    let howToExpanded = config?.expandHowTo || false;
     if (howToShown) {
         const howToCaption = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
         const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
@@ -407,14 +449,6 @@ export function renderCaptcha(target: HTMLElement) {
         console.log("version: " + VERSION);
         console.log("userAgent: " + navigator.userAgent);
 
-        // if (howToShown && howToExpanded) {
-        //     howToExpanded = false;
-        //     const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
-        //     const howToIcon = document.getElementById("neoCaptcha-howToIcon") as HTMLSpanElement;
-        //     howToText.style.display = "none";
-        //     howToIcon.innerText = "expand_more";
-        // }
-
         const wrapper = document.getElementById("neoCaptcha-wrapper") as HTMLDivElement;
         wrapper.style.display = "flex";
         startBtn.style.display = "none";
@@ -425,6 +459,7 @@ export function renderCaptcha(target: HTMLElement) {
             mobile: isMobile,
             version: VERSION,
             minDifficulty,
+            variant
         };
         const response = await fetch(url + "/generate-captcha", {
             method: "POST",
@@ -438,8 +473,6 @@ export function renderCaptcha(target: HTMLElement) {
             image.style.display = "inline-block";
             overlay.style.display = "flex";
             imgSrc = `data:image/png;base64,${result.img}`;
-            pointSize = result.pointSize;
-            thumbSize = result.thumbSize;
             color = result.color;
             challenge = result.challenge;
             hmac = result.hmac;
@@ -451,6 +484,8 @@ export function renderCaptcha(target: HTMLElement) {
             canvas.style.height = "20em";
             canvas.width = canvas.clientWidth;
             canvas.height = canvas.width;
+            pointSize = canvas.width * result.pointSize;
+            thumbSize = canvas.width * result.thumbSize;
             if (!ctx || !bar) {
                 throw new Error("Canvas context could not be initialized.");
             }
@@ -644,7 +679,7 @@ export function renderCaptcha(target: HTMLElement) {
 
         if (startTime >= 0 && enabled) {
             drawing = false;
-            activity.push({action: "point", x: x, y: y, time: Date.now() - startTime});
+            activity.push({action: "point", x: x / canvas.width, y: y / canvas.height, time: Date.now() - startTime});
             submitBtn.disabled = false;
 
             if (!ctx) {
@@ -788,42 +823,16 @@ export function renderCaptcha(target: HTMLElement) {
             drawCross(size, x, y);
         }
 
-        let submitIcon = document.getElementById("neoCaptcha-submitIcon") as HTMLSpanElement;
-        if (valid) {
-            console.log("Yippie!");
-            submitBtn.disabled = false;
-            submitBtn.removeEventListener("click", submitCaptcha);
-            submitBtn.addEventListener("click", restart);
-            submitIcon.innerText = "replay";
+        if (valid && callbacks && callbacks.onSuccess) {
+            callbacks.onSuccess();
         } else if (retry) {
             setTimeout(() => {
                 reset();
                 getCaptcha();
             }, 500);
-        } else {
-            console.log("Womp, womp");
-            submitBtn.disabled = false;
-            submitBtn.removeEventListener("click", submitCaptcha);
-            submitBtn.addEventListener("click", restart);
-            submitIcon.innerText = "replay";
+        } else if (callbacks && callbacks.onFailure) {
+            callbacks.onFailure();
         }
-    }
-
-    function restart() {
-        reset();
-        challenge = undefined;
-        hmac = undefined;
-        submitBtn.removeEventListener("click", restart);
-        submitBtn.addEventListener("click", submitCaptcha);
-        let submitIcon = document.getElementById("neoCaptcha-submitIcon") as HTMLSpanElement;
-        submitIcon.innerText = "check";
-
-        if (ctx) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-        const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
-        image.style.display = "none";
-        overlay.style.display = "none";
     }
 
     function drawCheckMark(size: number, x: number, y: number) {
