@@ -5,6 +5,7 @@ const widgetStyles = `
     --neo-captcha-accent: #009696;
     --neo-captcha-dark: #111;
     --neo-captcha-light: #eee;
+    --neo-captcha-button: #009bb8;
 
     --neo-captcha-bg-light: #C8DCDCFF;
     --neo-captcha-bg2-light: #eee;
@@ -88,23 +89,53 @@ const widgetStyles = `
 }
 
 .neo-captcha-button {
-    width: 20em;
-    height: 4em;
     font-size: 1em;
     font-weight: bold;
     cursor: pointer;
+    transition: all 0.2s ease;
+
+    background: var(--neo-captcha-button);
+    border: none;
+    border-radius: 0.5em;
+    box-shadow: 0 4px 0.5em color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
 
     &:disabled {
-        opacity: 0.66;
+        opacity: 0.5;
+        box-shadow: none;
     }
+
+    &:hover:enabled {
+        background: color-mix(in srgb, var(--neo-captcha-button) 80%, var(--neo-captcha-light));
+        box-shadow: 0 6px 0.75em color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
+        transform: translateY(-1px);
+    }
+
+    &:active:enabled {
+        background: var(--neo-captcha-button);
+        box-shadow: none;
+    }
+}
+
+.neo-captcha-submit-button {
+    width: 20em;
+    height: 4em;
+}
+
+.neo-captcha-guess-region {
+    width: 20em;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 0.25em;
+}
+
+.neo-captcha-multi-button {
 }
 
 .neo-captcha-start-button {
     width: 20rem;
     height: 15rem;
     font-size: 1.5em;
-    font-weight: bold;
-    cursor: pointer;
+    margin-top: 0.25em;
 }
 
 .neo-captcha-icon-div {
@@ -148,6 +179,8 @@ const widgetStyles = `
 .neo-captcha-icon-dark {
     color: var(--neo-captcha-dark);
     font-size: 3em;
+    width: 1em;
+    height: 1em;
 }
 
 .neo-captcha-wrapper {
@@ -168,7 +201,6 @@ const widgetStyles = `
     background: var(--neo-captcha-bg2);
     border: 1px solid var(--neo-captcha-fg);
     text-align: start;
-    margin-bottom: 0.5em;
 }
 
 .neo-captcha-how-to-caption {
@@ -276,6 +308,10 @@ export function renderCaptcha(target: HTMLElement, config: any,
                         <td class="neo-captcha-steps-numbers">2.</td>
                         <td id="neoCaptcha-step_2"></td>
                     </tr>
+                    <tr>
+                        <td class="neo-captcha-steps-numbers">3.</td>
+                        <td id="neoCaptcha-step_3"></td>
+                    </tr>
                 </table>
                 <div class="neo-captcha-how-to-description">
                     <img id="neoCaptcha-modeIcon" class="neo-captcha-mode-icon" alt="icon variant">
@@ -286,7 +322,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 </div>
             </div>
         </div>
-        <button id="neoCaptcha-start" class="neo-captcha-start-button">
+        <button id="neoCaptcha-start" class="neo-captcha-button neo-captcha-start-button">
             <span class="neo-captcha-icon-dark material-icons">play_arrow</span>
         </button>
         <div id="neoCaptcha-wrapper" class="neo-captcha-wrapper">
@@ -304,9 +340,23 @@ export function renderCaptcha(target: HTMLElement, config: any,
             <div>
                 <canvas class="neo-captcha-time" id="neoCaptcha-timeCanvas"></canvas>
             </div>
-            <button id="neoCaptcha-submit" class="neo-captcha-button" disabled>
-                <span class="neo-captcha-icon-dark material-icons">check</span>
+            <button id="neoCaptcha-submit" class="neo-captcha-button neo-captcha-submit-button" disabled>
+                <span id="neoCaptcha-submitIcon" class="neo-captcha-icon-dark material-icons">check</span>
             </button>
+            <div id="neoCaptcha-guess" class="neo-captcha-guess-region">
+                <button id="neoCaptcha-guess-button-1" class="neo-captcha-button neo-captcha-multi-button" disabled>
+                    <img id="neoCaptcha-guess-icon-1" class="neo-captcha-icon-dark" src="/icon_shape_777.png"/>
+                </button>
+                <button id="neoCaptcha-guess-button-2" class="neo-captcha-button neo-captcha-multi-button" disabled>
+                    <img id="neoCaptcha-guess-icon-2" class="neo-captcha-icon-dark" src="/icon_shape_777.png"/>
+                </button>
+                <button id="neoCaptcha-guess-button-3" class="neo-captcha-button neo-captcha-multi-button" disabled>
+                    <img id="neoCaptcha-guess-icon-3" class="neo-captcha-icon-dark" src="/icon_shape_777.png"/>
+                </button>
+                <button id="neoCaptcha-guess-button-4" class="neo-captcha-button neo-captcha-multi-button" disabled>
+                    <img id="neoCaptcha-guess-icon-4" class="neo-captcha-icon-dark" src="/icon_shape_777.png"/>
+                </button>
+            </div>
         </div>
     </div>
     `;
@@ -327,6 +377,15 @@ export function renderCaptcha(target: HTMLElement, config: any,
     }
 
     const variant = config?.variant || "iq";
+    const variantNs = variant === 'ns' || variant === 'ncs';
+    let interactive = true;
+    if (variantNs) {
+        document.getElementById("neoCaptcha-submit")!.style.display = "none";
+        canvas!.style.cursor = "auto";
+        interactive = false;
+    } else {
+        document.getElementById("neoCaptcha-guess")!.style.display = "none";
+    }
 
     const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
     const theme = (config?.theme === 'dark' || config?.theme === 'light') ? config.theme : (prefersDark ? 'dark' : 'light');
@@ -334,14 +393,14 @@ export function renderCaptcha(target: HTMLElement, config: any,
     (document.getElementById("neoCaptchaWidgetLogo") as HTMLImageElement).src = theme === 'dark'
         ? 'https://neo-captcha.com/assets/logo-dark.png'
         : 'https://neo-captcha.com/assets/logo.png';
-    if (variant === 'ns' || variant === 'ncs') {
+    if (variantNs) {
         (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
-            ? 'https://neo-captcha.com/assets/icon-see-shape-dark.png'
-            : 'https://neo-captcha.com/assets/icon-see-shape.png';
+            ? 'https://neo-captcha.com/assets/icon_see_shape_dark.png'
+            : 'https://neo-captcha.com/assets/icon_see_shape.png';
     } else {
         (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
-            ? 'https://neo-captcha.com/assets/icon-find-corner-dark.png'
-            : 'https://neo-captcha.com/assets/icon-find-corner.png';
+            ? 'https://neo-captcha.com/assets/icon_find_corner_dark.png'
+            : 'https://neo-captcha.com/assets/icon_find_corner.png';
     }
 
     const mobileRed = "#f406";
@@ -354,26 +413,29 @@ export function renderCaptcha(target: HTMLElement, config: any,
         step_1: string,
         step_2: string,
         step_2_s: string,
+        step_3: string,
         mode_1: string,
         mode_1_text: string,
         mode_2: string,
         mode_2_text: string,
     }> = {
         en: {
-            howto: 'How-To:',
+            howto: '?   How-To:',
             step_1: 'Hit ▶ Play',
             step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
             step_2_s: `Click when you <b>hear a signal!</b>`,
+            step_3: '<b>Solve the CAPTCHA</b>',
             mode_1: 'Implied square:',
             mode_1_text: 'Mark the missing corner!',
             mode_2: 'Neon Shape:',
             mode_2_text: 'Select the shape you see!',
         },
         de: {
-            howto: 'Wie man\'s macht:',
+            howto: '?   Wie man\'s macht:',
             step_1: 'Drücke ▶ Start',
             step_2: `Tippe bei <b><span style="color: rgba(0, 160, 0)">GRÜN</span>!<b/>`,
-            step_2_s: 'Klicke beim <b>Signalton!</b>',
+            step_2_s: 'Klicke beim <b>Signalton</b>',
+            step_3: '<b>Löse das CAPTCHA!</b>',
             mode_1: 'Angedeutetes Viereck:',
             mode_1_text: 'Markiere die fehlende Ecke!',
             mode_2: 'Neon-Form:',
@@ -387,7 +449,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
     } else {
         document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
     }
-    if (variant === 'ns' || variant === 'ncs') {
+    document.getElementById("neoCaptcha-step_3")!.innerHTML = (translations[userLang] || translations['en']).step_3;
+    if (variantNs) {
         document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_2;
         document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_2_text;
     } else {
@@ -479,6 +542,12 @@ export function renderCaptcha(target: HTMLElement, config: any,
             totalTime = result.totalTime || totalTime;
             const container = document.getElementById("neoCaptcha-container") as HTMLDivElement;
             container.style.height = "20em";
+            if (result.variant === 'ns') {
+                for (let i = 1; i <= 4; i++) {
+                    (document.getElementById("neoCaptcha-guess-icon-" + i) as HTMLImageElement)
+                        .src = `/icon_shape_${result.icons[i - 1]}.png`;
+                }
+            }
 
             canvas.style.width = "20em";
             canvas.style.height = "20em";
@@ -559,6 +628,11 @@ export function renderCaptcha(target: HTMLElement, config: any,
             } else {
                 beepStartTime = Date.now();
             }
+            if (variantNs) {
+                for (let i = 1; i <= 4; i++) {
+                    (document.getElementById("neoCaptcha-guess-button-" + i) as HTMLButtonElement).disabled = false;
+                }
+            }
         }
     }
 
@@ -635,8 +709,10 @@ export function renderCaptcha(target: HTMLElement, config: any,
         }
     }
 
-    canvas.addEventListener("mousedown", down);
-    canvas.addEventListener("touchstart", down, {passive: false});
+    if (interactive) {
+        canvas.addEventListener("mousedown", down);
+        canvas.addEventListener("touchstart", down, {passive: false});
+    }
 
     function move(e: MouseEvent | TouchEvent) {
         e.preventDefault();
@@ -721,6 +797,19 @@ export function renderCaptcha(target: HTMLElement, config: any,
         return {x, y};
     }
 
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("click", () => submitGuess(i));
+    }
+
+    function submitGuess(id: number) {
+        let src = (document.getElementById("neoCaptcha-guess-icon-" + id) as HTMLImageElement).src;
+        let split = src.split("/");
+        src = split[split.length - 1].split(".")[0];
+        activity.push({action: "guess", tag: src, time: Date.now() - startTime});
+
+        submitCaptcha();
+    }
+
     submitBtn?.addEventListener("click", submitCaptcha);
 
     async function submitCaptcha() {
@@ -728,6 +817,9 @@ export function renderCaptcha(target: HTMLElement, config: any,
 
         enabled = false;
         submitBtn.disabled = true;
+        for (let i = 1; i <= 4; i++) {
+            (document.getElementById("neoCaptcha-guess-button-" + i) as HTMLButtonElement).disabled = true;
+        }
 
         if (!ctx || !bar) {
             throw new Error("Canvas context could not be initialized.");

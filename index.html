@@ -38,6 +38,10 @@
                     <td class="neo-captcha-steps-numbers">2.</td>
                     <td id="neoCaptcha-step_2"></td>
                 </tr>
+                <tr>
+                    <td class="neo-captcha-steps-numbers">3.</td>
+                    <td id="neoCaptcha-step_3"></td>
+                </tr>
             </table>
             <div class="neo-captcha-how-to-description">
                 <img id="neoCaptcha-modeIcon" class="neo-captcha-mode-icon" alt="icon variant">
@@ -48,7 +52,7 @@
             </div>
         </div>
     </div>
-    <button id="neoCaptcha-start" class="neo-captcha-start-button">
+    <button id="neoCaptcha-start" class="neo-captcha-button neo-captcha-start-button">
         <span class="neo-captcha-icon-dark material-icons">play_arrow</span>
     </button>
     <div id="neoCaptcha-wrapper" class="neo-captcha-wrapper">
@@ -66,9 +70,23 @@
         <div>
             <canvas class="neo-captcha-time" id="neoCaptcha-timeCanvas"></canvas>
         </div>
-        <button id="neoCaptcha-submit" class="neo-captcha-button" disabled>
+        <button id="neoCaptcha-submit" class="neo-captcha-button neo-captcha-submit-button" disabled>
             <span id="neoCaptcha-submitIcon" class="neo-captcha-icon-dark material-icons">check</span>
         </button>
+        <div id="neoCaptcha-guess" class="neo-captcha-guess-region">
+            <button id="neoCaptcha-guess-button-1" class="neo-captcha-button neo-captcha-multi-button" disabled>
+                <img id="neoCaptcha-guess-icon-1" class="neo-captcha-icon-dark" src="/icon_shape_777.png"/>
+            </button>
+            <button id="neoCaptcha-guess-button-2" class="neo-captcha-button neo-captcha-multi-button" disabled>
+                <img id="neoCaptcha-guess-icon-2" class="neo-captcha-icon-dark" src="/icon_shape_777.png"/>
+            </button>
+            <button id="neoCaptcha-guess-button-3" class="neo-captcha-button neo-captcha-multi-button" disabled>
+                <img id="neoCaptcha-guess-icon-3" class="neo-captcha-icon-dark" src="/icon_shape_777.png"/>
+            </button>
+            <button id="neoCaptcha-guess-button-4" class="neo-captcha-button neo-captcha-multi-button" disabled>
+                <img id="neoCaptcha-guess-icon-4" class="neo-captcha-icon-dark" src="/icon_shape_777.png"/>
+            </button>
+        </div>
     </div>
 </div>
 <script type="module" src="/src/main.ts"></script>

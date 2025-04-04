@@ -15,7 +15,16 @@ if (!ctx || !bar) {
     throw new Error("Canvas context could not be initialized.");
 }
 
-const variant: string = "iq";
+const variant: string = "ns";
+const variantNs = variant === 'ns' || variant === 'ncs';
+let interactive = true;
+if (variantNs) {
+    document.getElementById("neoCaptcha-submit")!.style.display = "none";
+    canvas!.style.cursor = "auto";
+    interactive = false;
+} else {
+    document.getElementById("neoCaptcha-guess")!.style.display = "none";
+}
 
 const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
 const theme = (prefersDark ? 'dark' : 'light');
@@ -23,14 +32,14 @@ document.getElementById("neoCaptchaRoot")!.classList.add(`neo-captcha-theme-${th
 (document.getElementById("neoCaptchaWidgetLogo") as HTMLImageElement).src = theme === 'dark'
     ? 'https://neo-captcha.com/assets/logo-dark.png'
     : 'https://neo-captcha.com/assets/logo.png';
-if (variant === 'ns' || variant === 'ncs') {
+if (variantNs) {
     (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
-        ? 'https://neo-captcha.com/assets/icon-see-shape-dark.png'
-        : 'https://neo-captcha.com/assets/icon-see-shape.png';
+        ? 'https://neo-captcha.com/assets/icon_see_shape_dark.png'
+        : 'https://neo-captcha.com/assets/icon_see_shape.png';
 } else {
     (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
-        ? 'https://neo-captcha.com/assets/icon-find-corner-dark.png'
-        : 'https://neo-captcha.com/assets/icon-find-corner.png';
+        ? 'https://neo-captcha.com/assets/icon_find_corner_dark.png'
+        : 'https://neo-captcha.com/assets/icon_find_corner.png';
 }
 
 const mobileRed = "#f406";
@@ -44,26 +53,29 @@ const translations: Record<string, {
     step_1: string,
     step_2: string,
     step_2_s: string,
+    step_3: string,
     mode_1: string,
     mode_1_text: string,
     mode_2: string,
     mode_2_text: string,
 }> = {
     en: {
-        howto: 'How-To:',
+        howto: '?   How-To:',
         step_1: 'Hit ▶ Play',
         step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
         step_2_s: `Click when you <b>hear a signal!</b>`,
+        step_3: '<b>Solve the CAPTCHA</b>',
         mode_1: 'Implied square:',
         mode_1_text: 'Mark the missing corner!',
         mode_2: 'Neon Shape:',
         mode_2_text: 'Select the shape you see!',
     },
     de: {
-        howto: 'Wie man\'s macht:',
+        howto: '?   Wie man\'s macht:',
         step_1: 'Drücke ▶ Start',
         step_2: `Tippe bei <b><span style="color: rgba(0, 160, 0)">GRÜN</span>!<b/>`,
-        step_2_s: 'Klicke beim <b>Signalton!</b>',
+        step_2_s: 'Klicke beim <b>Signalton</b>',
+        step_3: '<b>Löse das CAPTCHA!</b>',
         mode_1: 'Angedeutetes Viereck:',
         mode_1_text: 'Markiere die fehlende Ecke!',
         mode_2: 'Neon-Form:',
@@ -77,7 +89,8 @@ if (isMobile) {
 } else {
     document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
 }
-if (variant === 'ns' || variant === 'ncs') {
+document.getElementById("neoCaptcha-step_3")!.innerHTML = (translations[userLang] || translations['en']).step_3;
+if (variantNs) {
     document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_2;
     document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_2_text;
 } else {
@@ -105,7 +118,7 @@ let challenge: string | undefined = undefined;
 let hmac: string | undefined = undefined;
 
 let howToShown = true;
-let howToExpanded = true;
+let howToExpanded = false;
 if (howToShown) {
     const howToCaption = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
     const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
@@ -169,6 +182,12 @@ async function getCaptcha() {
         totalTime = result.totalTime || totalTime;
         const container = document.getElementById("neoCaptcha-container") as HTMLDivElement;
         container.style.height = "20em";
+        if (result.variant === 'ns') {
+            for (let i = 1; i <= 4; i++) {
+                (document.getElementById("neoCaptcha-guess-icon-" + i) as HTMLImageElement)
+                    .src = `/icon_shape_${result.icons[i - 1]}.png`;
+            }
+        }
 
         canvas.style.width = "20em";
         canvas.style.height = "20em";
@@ -249,6 +268,11 @@ function react() {
         } else {
             beepStartTime = Date.now();
         }
+        if (variantNs) {
+            for (let i = 1; i <= 4; i++) {
+                (document.getElementById("neoCaptcha-guess-button-" + i) as HTMLButtonElement).disabled = false;
+            }
+        }
     }
 }
 
@@ -325,8 +349,10 @@ function down(e: MouseEvent | TouchEvent) {
     }
 }
 
-canvas.addEventListener("mousedown", down);
-canvas.addEventListener("touchstart", down, {passive: false});
+if (interactive) {
+    canvas.addEventListener("mousedown", down);
+    canvas.addEventListener("touchstart", down, {passive: false});
+}
 
 function move(e: MouseEvent | TouchEvent) {
     e.preventDefault();
@@ -404,6 +430,19 @@ function getCoords(e: MouseEvent | TouchEvent, rect: DOMRect) {
     return {x, y};
 }
 
+for (let i = 1; i <= 4; i++) {
+    document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("click", () => submitGuess(i));
+}
+
+function submitGuess(id: number) {
+    let src = (document.getElementById("neoCaptcha-guess-icon-" + id) as HTMLImageElement).src;
+    let split = src.split("/");
+    src = split[split.length - 1].split(".")[0];
+    activity.push({action: "guess", tag: src, time: Date.now() - startTime});
+
+    submitCaptcha();
+}
+
 submitBtn?.addEventListener("click", submitCaptcha);
 
 async function submitCaptcha() {
@@ -411,6 +450,9 @@ async function submitCaptcha() {
 
     enabled = false;
     submitBtn.disabled = true;
+    for (let i = 1; i <= 4; i++) {
+        (document.getElementById("neoCaptcha-guess-button-" + i) as HTMLButtonElement).disabled = true;
+    }
 
     if (!ctx || !bar) {
         throw new Error("Canvas context could not be initialized.");
