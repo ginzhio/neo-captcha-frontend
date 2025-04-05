@@ -1,7 +1,7 @@
 declare const __VERSION__: string;
 
 const VERSION = __VERSION__;
-const url = "http://localhost:8080/api"; // "https://neo-captcha.com/api/v1";
+const url = "https://neo-captcha.com/api/v1";
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const overlay = document.getElementById("neoCaptcha-startOverlay") as HTMLDivElement;
@@ -15,38 +15,20 @@ if (!ctx || !bar) {
     throw new Error("Canvas context could not be initialized.");
 }
 
-const variant: string = "ns";
-const variantNs = variant === 'ns' || variant === 'ncs';
-let interactive = true;
-if (variantNs) {
-    document.getElementById("neoCaptcha-submit")!.style.display = "none";
-    canvas!.style.cursor = "auto";
-    interactive = false;
-} else {
-    document.getElementById("neoCaptcha-guess")!.style.display = "none";
-}
+let variant: string = "ns";
+let variantNs = variant === 'ns' || variant === 'ncs';
+let interactive = false;
 
-const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-const theme = (prefersDark ? 'dark' : 'light');
+const theme = 'dark';
 document.getElementById("neoCaptchaRoot")!.classList.add(`neo-captcha-theme-${theme}`);
 (document.getElementById("neoCaptchaWidgetLogo") as HTMLImageElement).src = theme === 'dark'
     ? 'https://neo-captcha.com/assets/logo-dark.png'
     : 'https://neo-captcha.com/assets/logo.png';
-if (variantNs) {
-    (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
-        ? 'https://neo-captcha.com/assets/icon_see_shape_dark.png'
-        : 'https://neo-captcha.com/assets/icon_see_shape.png';
-} else {
-    (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
-        ? 'https://neo-captcha.com/assets/icon_find_corner_dark.png'
-        : 'https://neo-captcha.com/assets/icon_find_corner.png';
-}
 
 const mobileRed = "#f406";
 const mobileGreen = "#0f4a";
 
 let userLang = (navigator.language || navigator.languages[0]).split("-")[0];
-// userLang = 'en';
 console.log("lang: " + userLang);
 const translations: Record<string, {
     howto: string,
@@ -58,6 +40,14 @@ const translations: Record<string, {
     mode_1_text: string,
     mode_2: string,
     mode_2_text: string,
+    settings: string,
+    settings_variant: string,
+    settings_difficulty: string,
+    opt_ns: string,
+    opt_iq: string,
+    opt_easy: string,
+    opt_medium: string,
+    opt_hard: string,
 }> = {
     en: {
         howto: '?   How-To:',
@@ -69,17 +59,33 @@ const translations: Record<string, {
         mode_1_text: 'Mark the missing corner!',
         mode_2: 'Neon Shape:',
         mode_2_text: 'Select the shape you see!',
+        settings: 'Settings',
+        settings_variant: 'Variant:',
+        settings_difficulty: 'Difficulty:',
+        opt_ns: 'Neon Shape',
+        opt_iq: 'Implied Square',
+        opt_easy: 'Easy',
+        opt_medium: 'Medium',
+        opt_hard: 'Hard',
     },
     de: {
         howto: '?   Wie man\'s macht:',
         step_1: 'Drücke ▶ Start',
         step_2: `Tippe bei <b><span style="color: rgba(0, 160, 0)">GRÜN</span>!<b/>`,
-        step_2_s: 'Klicke beim <b>Signalton</b>',
+        step_2_s: 'Klicke beim <b>Signalton!</b>',
         step_3: '<b>Löse das CAPTCHA!</b>',
         mode_1: 'Angedeutetes Viereck:',
         mode_1_text: 'Markiere die fehlende Ecke!',
         mode_2: 'Neon-Form:',
         mode_2_text: 'Welche Form siehst du?',
+        settings: 'Einstellungen',
+        settings_variant: 'Variante:',
+        settings_difficulty: 'Schwierigkeit:',
+        opt_ns: 'Neon-Form',
+        opt_iq: 'Angedeutetes Viereck',
+        opt_easy: 'Einfach',
+        opt_medium: 'Mittel',
+        opt_hard: 'Schwer',
     },
 };
 document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
@@ -97,8 +103,38 @@ if (variantNs) {
     document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
     document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
 }
+document.getElementById("neoCaptcha-settings")!.innerHTML = (translations[userLang] || translations['en']).settings;
+document.getElementById("neoCaptcha-labelVari")!.innerHTML = (translations[userLang] || translations['en']).settings_variant;
+document.getElementById("neoCaptcha-labelDiff")!.innerHTML = (translations[userLang] || translations['en']).settings_difficulty;
+document.getElementById("neoCaptcha-optNs")!.innerHTML = (translations[userLang] || translations['en']).opt_ns;
+document.getElementById("neoCaptcha-optIq")!.innerHTML = (translations[userLang] || translations['en']).opt_iq;
+document.getElementById("neoCaptcha-optEasy")!.innerHTML = (translations[userLang] || translations['en']).opt_easy;
+document.getElementById("neoCaptcha-optMedium")!.innerHTML = (translations[userLang] || translations['en']).opt_medium;
+document.getElementById("neoCaptcha-optHard")!.innerHTML = (translations[userLang] || translations['en']).opt_hard;
 
-const minDifficulty = "easy";
+let minDifficulty = "easy";
+
+let selectVari = document.getElementById("neoCaptcha-selectVari") as HTMLSelectElement;
+selectVari!.addEventListener("change", () => {
+    if (selectVari.selectedIndex == 0) {
+        variant = 'ns';
+    } else {
+        variant = 'iq';
+    }
+    variantNs = variant === 'ns';
+    restart();
+})
+
+let selectDiff = document.getElementById("neoCaptcha-selectDiff") as HTMLSelectElement;
+selectDiff!.addEventListener("change", () => {
+    if (selectDiff.selectedIndex == 0) {
+        minDifficulty = 'easy';
+    } else if (selectDiff.selectedIndex == 1) {
+        minDifficulty = 'medium';
+    } else {
+        minDifficulty = 'hard';
+    }
+})
 
 let totalTime = 6000;
 let color: number[] = [255, 0, 0];
@@ -118,7 +154,7 @@ let challenge: string | undefined = undefined;
 let hmac: string | undefined = undefined;
 
 let howToShown = true;
-let howToExpanded = false;
+let howToExpanded = true;
 if (howToShown) {
     const howToCaption = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
     const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
@@ -147,6 +183,8 @@ const signalIcon = document.getElementById("neoCaptcha-signalIcon") as HTMLSpanE
 signalIcon.innerText = isMobile ? "do_not_touch" : "hearing";
 
 startBtn.addEventListener("click", getCaptcha);
+
+reset();
 
 async function getCaptcha() {
     console.log("version: " + VERSION);
@@ -349,11 +387,6 @@ function down(e: MouseEvent | TouchEvent) {
     }
 }
 
-if (interactive) {
-    canvas.addEventListener("mousedown", down);
-    canvas.addEventListener("touchstart", down, {passive: false});
-}
-
 function move(e: MouseEvent | TouchEvent) {
     e.preventDefault();
     if (ignoreNext) return;
@@ -548,16 +581,45 @@ async function submitCaptcha() {
         drawCross(size, x, y);
     }
 
-    if (valid && true && true) {
+    if (valid) {
         console.log("Yippie!");
+        prepareRestart();
     } else if (retry) {
         setTimeout(() => {
             reset();
             getCaptcha();
         }, 500);
-    } else if (true && true) {
+    } else {
         console.log("Womp, womp");
+        prepareRestart();
     }
+}
+
+function prepareRestart() {
+    document.getElementById("neoCaptcha-guess")!.style.display = "none";
+    document.getElementById("neoCaptcha-submit")!.style.display = "block";
+    submitBtn.disabled = false;
+    submitBtn.removeEventListener("click", submitCaptcha);
+    submitBtn.addEventListener("click", restart);
+    let submitIcon = document.getElementById("neoCaptcha-submitIcon") as HTMLSpanElement;
+    submitIcon.innerText = "replay";
+}
+
+function restart() {
+    reset();
+    challenge = undefined;
+    hmac = undefined;
+    submitBtn.removeEventListener("click", restart);
+    submitBtn.addEventListener("click", submitCaptcha);
+    let submitIcon = document.getElementById("neoCaptcha-submitIcon") as HTMLSpanElement;
+    submitIcon.innerText = "check";
+
+    if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
+    image.style.display = "none";
+    overlay.style.display = "none";
 }
 
 function drawCheckMark(size: number, x: number, y: number) {
@@ -623,5 +685,34 @@ function reset() {
     if (isMobile) {
         overlayBg.style.background = mobileRed;
         signalIcon.innerText = "do_not_touch";
+    }
+    document.getElementById("neoCaptcha-guess")!.style.display = "grid";
+    document.getElementById("neoCaptcha-submit")!.style.display = "block";
+    if (variantNs) {
+        document.getElementById("neoCaptcha-submit")!.style.display = "none";
+        canvas!.style.cursor = "auto";
+        interactive = false;
+        (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
+            ? 'https://neo-captcha.com/assets/icon_see_shape_dark.png'
+            : 'https://neo-captcha.com/assets/icon_see_shape.png';
+        document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_2;
+        document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_2_text;
+    } else {
+        document.getElementById("neoCaptcha-guess")!.style.display = "none";
+        canvas!.style.cursor = "crosshair";
+        interactive = true;
+        (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
+            ? 'https://neo-captcha.com/assets/icon_find_corner_dark.png'
+            : 'https://neo-captcha.com/assets/icon_find_corner.png';
+        document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
+        document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
+    }
+
+    if (interactive) {
+        canvas.addEventListener("mousedown", down);
+        canvas.addEventListener("touchstart", down, {passive: false});
+    } else {
+        canvas.removeEventListener("mousedown", down);
+        canvas.removeEventListener("touchstart", down);
     }
 }

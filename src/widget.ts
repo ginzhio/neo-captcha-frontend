@@ -228,7 +228,7 @@ const widgetStyles = `
 .neo-captcha-mode-icon {
     width: 2.5em;
     height: 2.5em;
-    margin-right: 1em;
+    margin: 0 1em 0 0;
 }
 
 .neo-captcha-how-to-footer {
@@ -254,6 +254,27 @@ const widgetStyles = `
     font-weight: bold;
     color: var(--neo-captcha-accent);
 }
+
+.neo-captcha-settings-box {
+    width: 16em;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 1em;
+    text-align: end;
+    align-items: baseline;
+    padding: 2em;
+}
+
+.neo-captcha-settings-title {
+    font-size: 1.5em;
+    grid-column: 1/-1;
+    text-align: center;
+    padding-right: 1em;
+}
+
+.neo-captcha-select {
+    height: 3em;
+}
 `;
 
 function injectStyles() {
@@ -277,8 +298,7 @@ function injectMaterialIcons() {
 }
 
 // @ts-ignore
-export function renderCaptcha(target: HTMLElement, config: any,
-                              callbacks?: { onSuccess?: () => void, onFailure?: () => void }) {
+export function renderCaptcha(target: HTMLElement) {
     injectMaterialIcons();
     injectStyles();
     target.innerHTML = `
@@ -345,17 +365,37 @@ export function renderCaptcha(target: HTMLElement, config: any,
             </button>
             <div id="neoCaptcha-guess" class="neo-captcha-guess-region">
                 <button id="neoCaptcha-guess-button-1" class="neo-captcha-button neo-captcha-multi-button" disabled>
-                    <img id="neoCaptcha-guess-icon-1" class="neo-captcha-icon-dark" src="/icon_shape_777.png"/>
+                    <img id="neoCaptcha-guess-icon-1" class="neo-captcha-icon-dark"
+                         src="https://neo-captcha.com/assets//icon_shape_undefined.png"/>
                 </button>
                 <button id="neoCaptcha-guess-button-2" class="neo-captcha-button neo-captcha-multi-button" disabled>
-                    <img id="neoCaptcha-guess-icon-2" class="neo-captcha-icon-dark" src="/icon_shape_777.png"/>
+                    <img id="neoCaptcha-guess-icon-2" class="neo-captcha-icon-dark"
+                         src="https://neo-captcha.com/assets//icon_shape_undefined.png"/>
                 </button>
                 <button id="neoCaptcha-guess-button-3" class="neo-captcha-button neo-captcha-multi-button" disabled>
-                    <img id="neoCaptcha-guess-icon-3" class="neo-captcha-icon-dark" src="/icon_shape_777.png"/>
+                    <img id="neoCaptcha-guess-icon-3" class="neo-captcha-icon-dark"
+                         src="https://neo-captcha.com/assets//icon_shape_undefined.png"/>
                 </button>
                 <button id="neoCaptcha-guess-button-4" class="neo-captcha-button neo-captcha-multi-button" disabled>
-                    <img id="neoCaptcha-guess-icon-4" class="neo-captcha-icon-dark" src="/icon_shape_777.png"/>
+                    <img id="neoCaptcha-guess-icon-4" class="neo-captcha-icon-dark"
+                         src="https://neo-captcha.com/assets//icon_shape_undefined.png"/>
                 </button>
+            </div>
+        </div>
+        <div>
+            <div class="neo-captcha-settings-box">
+                <span class="neo-captcha-settings-title" id="neoCaptcha-settings"></span>
+                <label for="neoCaptcha-selectVari" id="neoCaptcha-labelVari"></label>
+                <select id="neoCaptcha-selectVari" class="neo-captcha-select">
+                    <option id="neoCaptcha-optNs"></option>
+                    <option id="neoCaptcha-optIq"></option>
+                </select>
+                <label for="neoCaptcha-selectDiff" id="neoCaptcha-labelDiff"></label>
+                <select id="neoCaptcha-selectDiff" class="neo-captcha-select">
+                    <option id="neoCaptcha-optEasy"></option>
+                    <option id="neoCaptcha-optMedium"></option>
+                    <option id="neoCaptcha-optHard"></option>
+                </select>
             </div>
         </div>
     </div>
@@ -376,38 +416,21 @@ export function renderCaptcha(target: HTMLElement, config: any,
         throw new Error("Canvas context could not be initialized.");
     }
 
-    const variant = config?.variant || "iq";
-    const variantNs = variant === 'ns' || variant === 'ncs';
-    let interactive = true;
-    if (variantNs) {
-        document.getElementById("neoCaptcha-submit")!.style.display = "none";
-        canvas!.style.cursor = "auto";
-        interactive = false;
-    } else {
-        document.getElementById("neoCaptcha-guess")!.style.display = "none";
-    }
+    let variant: string = "ns";
+    let variantNs = variant === 'ns' || variant === 'ncs';
+    let interactive = false;
 
-    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-    const theme = (config?.theme === 'dark' || config?.theme === 'light') ? config.theme : (prefersDark ? 'dark' : 'light');
+    const theme = 'dark';
     document.getElementById("neoCaptchaRoot")!.classList.add(`neo-captcha-theme-${theme}`);
     (document.getElementById("neoCaptchaWidgetLogo") as HTMLImageElement).src = theme === 'dark'
         ? 'https://neo-captcha.com/assets/logo-dark.png'
         : 'https://neo-captcha.com/assets/logo.png';
-    if (variantNs) {
-        (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
-            ? 'https://neo-captcha.com/assets/icon_see_shape_dark.png'
-            : 'https://neo-captcha.com/assets/icon_see_shape.png';
-    } else {
-        (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
-            ? 'https://neo-captcha.com/assets/icon_find_corner_dark.png'
-            : 'https://neo-captcha.com/assets/icon_find_corner.png';
-    }
 
     const mobileRed = "#f406";
     const mobileGreen = "#0f4a";
 
     let userLang = (navigator.language || navigator.languages[0]).split("-")[0];
-    userLang = config?.lang || userLang;
+    console.log("lang: " + userLang);
     const translations: Record<string, {
         howto: string,
         step_1: string,
@@ -418,6 +441,14 @@ export function renderCaptcha(target: HTMLElement, config: any,
         mode_1_text: string,
         mode_2: string,
         mode_2_text: string,
+        settings: string,
+        settings_variant: string,
+        settings_difficulty: string,
+        opt_ns: string,
+        opt_iq: string,
+        opt_easy: string,
+        opt_medium: string,
+        opt_hard: string,
     }> = {
         en: {
             howto: '?   How-To:',
@@ -429,17 +460,33 @@ export function renderCaptcha(target: HTMLElement, config: any,
             mode_1_text: 'Mark the missing corner!',
             mode_2: 'Neon Shape:',
             mode_2_text: 'Select the shape you see!',
+            settings: 'Settings',
+            settings_variant: 'Variant:',
+            settings_difficulty: 'Difficulty:',
+            opt_ns: 'Neon Shape',
+            opt_iq: 'Implied Square',
+            opt_easy: 'Easy',
+            opt_medium: 'Medium',
+            opt_hard: 'Hard',
         },
         de: {
             howto: '?   Wie man\'s macht:',
             step_1: 'Drücke ▶ Start',
             step_2: `Tippe bei <b><span style="color: rgba(0, 160, 0)">GRÜN</span>!<b/>`,
-            step_2_s: 'Klicke beim <b>Signalton</b>',
+            step_2_s: 'Klicke beim <b>Signalton!</b>',
             step_3: '<b>Löse das CAPTCHA!</b>',
             mode_1: 'Angedeutetes Viereck:',
             mode_1_text: 'Markiere die fehlende Ecke!',
             mode_2: 'Neon-Form:',
             mode_2_text: 'Welche Form siehst du?',
+            settings: 'Einstellungen',
+            settings_variant: 'Variante:',
+            settings_difficulty: 'Schwierigkeit:',
+            opt_ns: 'Neon-Form',
+            opt_iq: 'Angedeutetes Viereck',
+            opt_easy: 'Einfach',
+            opt_medium: 'Mittel',
+            opt_hard: 'Schwer',
         },
     };
     document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
@@ -457,8 +504,38 @@ export function renderCaptcha(target: HTMLElement, config: any,
         document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
         document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
     }
+    document.getElementById("neoCaptcha-settings")!.innerHTML = (translations[userLang] || translations['en']).settings;
+    document.getElementById("neoCaptcha-labelVari")!.innerHTML = (translations[userLang] || translations['en']).settings_variant;
+    document.getElementById("neoCaptcha-labelDiff")!.innerHTML = (translations[userLang] || translations['en']).settings_difficulty;
+    document.getElementById("neoCaptcha-optNs")!.innerHTML = (translations[userLang] || translations['en']).opt_ns;
+    document.getElementById("neoCaptcha-optIq")!.innerHTML = (translations[userLang] || translations['en']).opt_iq;
+    document.getElementById("neoCaptcha-optEasy")!.innerHTML = (translations[userLang] || translations['en']).opt_easy;
+    document.getElementById("neoCaptcha-optMedium")!.innerHTML = (translations[userLang] || translations['en']).opt_medium;
+    document.getElementById("neoCaptcha-optHard")!.innerHTML = (translations[userLang] || translations['en']).opt_hard;
 
-    const minDifficulty = config?.minDifficulty || "easy";
+    let minDifficulty = "easy";
+
+    let selectVari = document.getElementById("neoCaptcha-selectVari") as HTMLSelectElement;
+    selectVari!.addEventListener("change", () => {
+        if (selectVari.selectedIndex == 0) {
+            variant = 'ns';
+        } else {
+            variant = 'iq';
+        }
+        variantNs = variant === 'ns';
+        restart();
+    })
+
+    let selectDiff = document.getElementById("neoCaptcha-selectDiff") as HTMLSelectElement;
+    selectDiff!.addEventListener("change", () => {
+        if (selectDiff.selectedIndex == 0) {
+            minDifficulty = 'easy';
+        } else if (selectDiff.selectedIndex == 1) {
+            minDifficulty = 'medium';
+        } else {
+            minDifficulty = 'hard';
+        }
+    })
 
     let totalTime = 6000;
     let color: number[] = [255, 0, 0];
@@ -477,8 +554,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
     let challenge: string | undefined = undefined;
     let hmac: string | undefined = undefined;
 
-    let howToShown = config?.showHowTo || false;
-    let howToExpanded = config?.expandHowTo || false;
+    let howToShown = true;
+    let howToExpanded = true;
     if (howToShown) {
         const howToCaption = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
         const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
@@ -507,6 +584,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
     signalIcon.innerText = isMobile ? "do_not_touch" : "hearing";
 
     startBtn.addEventListener("click", getCaptcha);
+
+    reset();
 
     async function getCaptcha() {
         console.log("version: " + VERSION);
@@ -707,11 +786,6 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 drawCurrentPos(x, y);
             }
         }
-    }
-
-    if (interactive) {
-        canvas.addEventListener("mousedown", down);
-        canvas.addEventListener("touchstart", down, {passive: false});
     }
 
     function move(e: MouseEvent | TouchEvent) {
@@ -915,16 +989,45 @@ export function renderCaptcha(target: HTMLElement, config: any,
             drawCross(size, x, y);
         }
 
-        if (valid && callbacks && callbacks.onSuccess) {
-            callbacks.onSuccess();
+        if (valid) {
+            console.log("Yippie!");
+            prepareRestart();
         } else if (retry) {
             setTimeout(() => {
                 reset();
                 getCaptcha();
             }, 500);
-        } else if (callbacks && callbacks.onFailure) {
-            callbacks.onFailure();
+        } else {
+            console.log("Womp, womp");
+            prepareRestart();
         }
+    }
+
+    function prepareRestart() {
+        document.getElementById("neoCaptcha-guess")!.style.display = "none";
+        document.getElementById("neoCaptcha-submit")!.style.display = "block";
+        submitBtn.disabled = false;
+        submitBtn.removeEventListener("click", submitCaptcha);
+        submitBtn.addEventListener("click", restart);
+        let submitIcon = document.getElementById("neoCaptcha-submitIcon") as HTMLSpanElement;
+        submitIcon.innerText = "replay";
+    }
+
+    function restart() {
+        reset();
+        challenge = undefined;
+        hmac = undefined;
+        submitBtn.removeEventListener("click", restart);
+        submitBtn.addEventListener("click", submitCaptcha);
+        let submitIcon = document.getElementById("neoCaptcha-submitIcon") as HTMLSpanElement;
+        submitIcon.innerText = "check";
+
+        if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
+        image.style.display = "none";
+        overlay.style.display = "none";
     }
 
     function drawCheckMark(size: number, x: number, y: number) {
@@ -990,6 +1093,35 @@ export function renderCaptcha(target: HTMLElement, config: any,
         if (isMobile) {
             overlayBg.style.background = mobileRed;
             signalIcon.innerText = "do_not_touch";
+        }
+        document.getElementById("neoCaptcha-guess")!.style.display = "grid";
+        document.getElementById("neoCaptcha-submit")!.style.display = "block";
+        if (variantNs) {
+            document.getElementById("neoCaptcha-submit")!.style.display = "none";
+            canvas!.style.cursor = "auto";
+            interactive = false;
+            (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
+                ? 'https://neo-captcha.com/assets/icon_see_shape_dark.png'
+                : 'https://neo-captcha.com/assets/icon_see_shape.png';
+            document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_2;
+            document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_2_text;
+        } else {
+            document.getElementById("neoCaptcha-guess")!.style.display = "none";
+            canvas!.style.cursor = "crosshair";
+            interactive = true;
+            (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
+                ? 'https://neo-captcha.com/assets/icon_find_corner_dark.png'
+                : 'https://neo-captcha.com/assets/icon_find_corner.png';
+            document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
+            document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
+        }
+
+        if (interactive) {
+            canvas.addEventListener("mousedown", down);
+            canvas.addEventListener("touchstart", down, {passive: false});
+        } else {
+            canvas.removeEventListener("mousedown", down);
+            canvas.removeEventListener("touchstart", down);
         }
     }
 

@@ -225,7 +225,7 @@
 .neo-captcha-mode-icon {
     width: 2.5em;
     height: 2.5em;
-    margin-right: 1em;
+    margin: 0 1em 0 0;
 }
 
 .neo-captcha-how-to-footer {
@@ -250,4 +250,25 @@
     vertical-align: top;
     font-weight: bold;
     color: var(--neo-captcha-accent);
+}
+
+.neo-captcha-settings-box {
+    width: 16em;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 1em;
+    text-align: end;
+    align-items: baseline;
+    padding: 2em;
+}
+
+.neo-captcha-settings-title {
+    font-size: 1.5em;
+    grid-column: 1/-1;
+    text-align: center;
+    padding-right: 1em;
+}
+
+.neo-captcha-select {
+    height: 3em;
 }
