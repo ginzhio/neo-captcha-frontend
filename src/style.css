@@ -235,6 +235,11 @@
     padding: 0;
 }
 
+.neo-captcha-how-to-text {
+    margin: 0;
+    padding: 0;
+}
+
 .neo-captcha-how-to-caption {
     font-size: 1.1em;
     font-weight: bold;
@@ -247,7 +252,7 @@
 }
 
 .neo-captcha-how-to-table {
-    padding: 0 1em 0.5em 1em;
+    padding: 0 1em 1em 1em;
     background: color-mix(in srgb, var(--neo-captcha-fg) 10%, transparent);
     margin: 0;
 }
