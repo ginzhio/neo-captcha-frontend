@@ -223,7 +223,7 @@ async function getCaptcha() {
         if (result.variant === 'ns') {
             for (let i = 1; i <= 4; i++) {
                 (document.getElementById("neoCaptcha-guess-icon-" + i) as HTMLImageElement)
-                    .src = `/icon_shape_${result.icons[i - 1]}.png`;
+                    .src = `https://neo-captcha.com/assets/icon_shape_${result.icons[i - 1]}.png`;
             }
         }
 
