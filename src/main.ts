@@ -1,7 +1,32 @@
+const config = {
+    showHowTo: true,
+    expandHowTo: false,
+    variant: 'ns',
+    theme: 'dark',
+    lang: 'en',
+    minDifficulty: 'easy',
+};
+const callbacks = {
+    onSuccess: () => {
+    },
+    onFailure: () => {
+    }
+}
+
 declare const __VERSION__: string;
 
 const VERSION = __VERSION__;
-const url = "http://localhost:8080/api"; // "https://neo-captcha.com/api/v1";
+const url = "https://neo-captcha.com/api/v1"; // "http://localhost:8080/api";
+
+const variant = config?.variant || "ns";
+const variantNs = variant === 'ns' || variant === 'ncs';
+const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+const theme = (config?.theme === 'dark' || config?.theme === 'light') ? config.theme : (prefersDark ? 'dark' : 'light');
+let userLang = (navigator.language || navigator.languages[0]).split("-")[0];
+userLang = config?.lang || userLang;
+const minDifficulty = config?.minDifficulty || "easy";
+const showHowTo = config?.showHowTo || false;
+let howToExpanded = config?.expandHowTo || false;
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const overlay = document.getElementById("neoCaptcha-startOverlay") as HTMLDivElement;
@@ -15,19 +40,16 @@ if (!ctx || !bar) {
     throw new Error("Canvas context could not be initialized.");
 }
 
-const variant: string = "ns";
-const variantNs = variant === 'ns' || variant === 'ncs';
-let interactive = true;
+let interactive: boolean;
 if (variantNs) {
     document.getElementById("neoCaptcha-submit")!.style.display = "none";
     canvas!.style.cursor = "auto";
     interactive = false;
 } else {
     document.getElementById("neoCaptcha-guess")!.style.display = "none";
+    interactive = true;
 }
 
-const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-const theme = (prefersDark ? 'dark' : 'light');
 document.getElementById("neoCaptchaRoot")!.classList.add(`neo-captcha-theme-${theme}`);
 (document.getElementById("neoCaptchaWidgetLogo") as HTMLImageElement).src = theme === 'dark'
     ? 'https://neo-captcha.com/assets/logo-dark.png'
@@ -45,9 +67,6 @@ if (variantNs) {
 const mobileRed = "#f406";
 const mobileGreen = "#0f4a";
 
-let userLang = (navigator.language || navigator.languages[0]).split("-")[0];
-// userLang = 'en';
-console.log("lang: " + userLang);
 const translations: Record<string, {
     howto: string,
     step_1: string,
@@ -98,8 +117,6 @@ if (variantNs) {
     document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
 }
 
-const minDifficulty = "easy";
-
 let totalTime = 6000;
 let color: number[] = [255, 0, 0];
 
@@ -117,9 +134,7 @@ let thumbSize: number = 0;
 let challenge: string | undefined = undefined;
 let hmac: string | undefined = undefined;
 
-let howToShown = true;
-let howToExpanded = false;
-if (howToShown) {
+if (showHowTo) {
     const howToCaption = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
     const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
     const howToIcon = document.getElementById("neoCaptcha-howToIcon") as HTMLSpanElement;
@@ -185,7 +200,7 @@ async function getCaptcha() {
         if (result.variant === 'ns') {
             for (let i = 1; i <= 4; i++) {
                 (document.getElementById("neoCaptcha-guess-icon-" + i) as HTMLImageElement)
-                    .src = `/icon_shape_${result.icons[i - 1]}.png`;
+                    .src = `https://neo-captcha.com/assets/icon_shape_${result.icons[i - 1]}.png`;
             }
         }
 
@@ -334,7 +349,7 @@ function drawTimerBar() {
 }
 
 function down(e: MouseEvent | TouchEvent) {
-    e.preventDefault();
+    if (interactive) e.preventDefault();
     if (ignoreNext) return;
 
     if (startTime > 0) {
@@ -342,7 +357,7 @@ function down(e: MouseEvent | TouchEvent) {
         let {x, y} = getCoords(e, rect);
         activity.push({action: "down", enabled: enabled, x: x, y: y, time: Date.now() - startTime});
 
-        if (enabled) {
+        if (enabled && interactive) {
             drawing = true;
             drawCurrentPos(x, y);
         }
@@ -355,7 +370,7 @@ if (interactive) {
 }
 
 function move(e: MouseEvent | TouchEvent) {
-    e.preventDefault();
+    if (interactive) e.preventDefault();
     if (ignoreNext) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -373,12 +388,12 @@ canvas.addEventListener("mousemove", move);
 canvas.addEventListener("touchmove", move, {passive: false});
 
 function up(e: MouseEvent | TouchEvent) {
-    e.preventDefault();
+    if (interactive) e.preventDefault();
     if (ignoreNext) {
         ignoreNext = false;
         return;
     }
-    if (!drawing) return;
+    if (interactive && !drawing) return;
 
     const rect = canvas.getBoundingClientRect();
     let {x, y} = getCoords(e, rect);
@@ -386,7 +401,7 @@ function up(e: MouseEvent | TouchEvent) {
         activity.push({action: "up", enabled: enabled, x: x, y: y, time: Date.now() - startTime});
     }
 
-    if (startTime >= 0 && enabled) {
+    if (startTime >= 0 && enabled && drawing) {
         drawing = false;
         activity.push({action: "point", x: x / canvas.width, y: y / canvas.height, time: Date.now() - startTime});
         submitBtn.disabled = false;
@@ -431,7 +446,19 @@ function getCoords(e: MouseEvent | TouchEvent, rect: DOMRect) {
 }
 
 for (let i = 1; i <= 4; i++) {
-    document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("click", () => submitGuess(i));
+    if (isMobile) {
+        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("touchstart", down);
+        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("touchend", e => {
+            up(e);
+            submitGuess(i);
+        });
+    } else {
+        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("mousedown", down);
+        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("mouseup", e => {
+            up(e);
+            submitGuess(i);
+        });
+    }
 }
 
 function submitGuess(id: number) {
@@ -548,15 +575,15 @@ async function submitCaptcha() {
         drawCross(size, x, y);
     }
 
-    if (valid && true && true) {
-        console.log("Yippie!");
+    if (valid && callbacks && callbacks.onSuccess) {
+        callbacks.onSuccess();
     } else if (retry) {
         setTimeout(() => {
             reset();
             getCaptcha();
         }, 500);
-    } else if (true && true) {
-        console.log("Womp, womp");
+    } else if (callbacks && callbacks.onFailure) {
+        callbacks.onFailure();
     }
 }
 
