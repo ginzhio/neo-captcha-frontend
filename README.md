@@ -35,7 +35,7 @@
 <script>
     window.NeoCAPTCHA.renderCaptcha(document.getElementById("neo-captcha"), {
         showHowTo: true,
-        expandHowTo: true,
+        expandHowTo: false,
     }, {
         onSuccess: () => {
             console.log("CAPTCHA passed!");
@@ -57,14 +57,16 @@ Use the callback methods ```onSuccess``` and ```onFailure``` to grant or deny ac
     minDifficulty: 'easy', // ['easy', 'medium', 'hard'] default is 'easy'
     lang: 'en',            // currently: ['en', 'de'] forces the text to be in that language, omit for browser-default
     theme: 'dark',         // ['light', 'dark'] forces ui theme, omit for browser-default
+    variant: 'ns',         // ['ns', 'iq'] 'ns' = Neon Shape, 'iq' = Implied Square, default is 'ns'
 }
 ```
+→ [Help with translations](docs/translations.xlsx)
 
 ## Preview
 
-<p align="center">
-  <img src="docs/neo-captcha-screenshot.png" alt="NeoCAPTCHA preview" width="386" />
-</p>
+| Neon Shape | Implied Square |
+|:----------:|:----------:|
+| ![Neon Shape](docs/neo-captcha-screenshot-ns.png) | ![Implied Square](docs/neo-captcha-screenshot-iq.png) |
 
 ## About
 
@@ -77,7 +79,7 @@ The frontend widget is open source. The backend is hosted and stateless, using s
 ✅ Interactive widget (click-to-reveal, [Kanizsa](https://en.wikipedia.org/wiki/Illusory_contours)-based challenge)  
 ✅ Mobile & touch support  
 ✅ Sound / visual start signal  
-⬜ How-To translations or gif  
+✅ How-To translations or gif → [Help with translations](docs/translations.xlsx)  
 ⬜ Customization / branding options  
 ⬜ Licence API keys for even more security  
 ⬜ Mode for visually impaired  
@@ -99,5 +101,5 @@ Commercial use requires permission – contact hello@neo-captcha.com
 
 ---
 
-> Made with focus & no cookies  
+> People-first security made with :heart:  
 > by [@ginzhio](https://github.com/ginzhio)
