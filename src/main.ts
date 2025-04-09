@@ -1,7 +1,7 @@
 declare const __VERSION__: string;
 
 const VERSION = __VERSION__;
-const url = "https://neo-captcha.com/api/v1";
+const url = "http://localhost:8080/api";//https://neo-captcha.com/api/v1";
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const overlay = document.getElementById("neoCaptcha-startOverlay") as HTMLDivElement;
@@ -372,7 +372,7 @@ function drawTimerBar() {
 }
 
 function down(e: MouseEvent | TouchEvent) {
-    e.preventDefault();
+    if (interactive) e.preventDefault();
     if (ignoreNext) return;
 
     if (startTime > 0) {
@@ -380,7 +380,7 @@ function down(e: MouseEvent | TouchEvent) {
         let {x, y} = getCoords(e, rect);
         activity.push({action: "down", enabled: enabled, x: x, y: y, time: Date.now() - startTime});
 
-        if (enabled) {
+        if (enabled && interactive) {
             drawing = true;
             drawCurrentPos(x, y);
         }
@@ -388,7 +388,7 @@ function down(e: MouseEvent | TouchEvent) {
 }
 
 function move(e: MouseEvent | TouchEvent) {
-    e.preventDefault();
+    if (interactive) e.preventDefault();
     if (ignoreNext) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -406,12 +406,12 @@ canvas.addEventListener("mousemove", move);
 canvas.addEventListener("touchmove", move, {passive: false});
 
 function up(e: MouseEvent | TouchEvent) {
-    e.preventDefault();
+    if (interactive) e.preventDefault();
     if (ignoreNext) {
         ignoreNext = false;
         return;
     }
-    if (!drawing) return;
+    if (interactive && !drawing) return;
 
     const rect = canvas.getBoundingClientRect();
     let {x, y} = getCoords(e, rect);
@@ -419,7 +419,7 @@ function up(e: MouseEvent | TouchEvent) {
         activity.push({action: "up", enabled: enabled, x: x, y: y, time: Date.now() - startTime});
     }
 
-    if (startTime >= 0 && enabled) {
+    if (startTime >= 0 && enabled && drawing) {
         drawing = false;
         activity.push({action: "point", x: x / canvas.width, y: y / canvas.height, time: Date.now() - startTime});
         submitBtn.disabled = false;
@@ -464,7 +464,19 @@ function getCoords(e: MouseEvent | TouchEvent, rect: DOMRect) {
 }
 
 for (let i = 1; i <= 4; i++) {
-    document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("click", () => submitGuess(i));
+    if (isMobile) {
+        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("touchstart", down);
+        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("touchend", e => {
+            up(e);
+            submitGuess(i);
+        });
+    } else {
+        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("mousedown", down);
+        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("mouseup", e => {
+            up(e);
+            submitGuess(i);
+        });
+    }
 }
 
 function submitGuess(id: number) {

@@ -829,7 +829,7 @@ export function renderCaptcha(target: HTMLElement) {
     }
 
     function down(e: MouseEvent | TouchEvent) {
-        e.preventDefault();
+        if (interactive) e.preventDefault();
         if (ignoreNext) return;
 
         if (startTime > 0) {
@@ -837,7 +837,7 @@ export function renderCaptcha(target: HTMLElement) {
             let {x, y} = getCoords(e, rect);
             activity.push({action: "down", enabled: enabled, x: x, y: y, time: Date.now() - startTime});
 
-            if (enabled) {
+            if (enabled && interactive) {
                 drawing = true;
                 drawCurrentPos(x, y);
             }
@@ -845,7 +845,7 @@ export function renderCaptcha(target: HTMLElement) {
     }
 
     function move(e: MouseEvent | TouchEvent) {
-        e.preventDefault();
+        if (interactive) e.preventDefault();
         if (ignoreNext) return;
 
         const rect = canvas.getBoundingClientRect();
@@ -870,12 +870,12 @@ export function renderCaptcha(target: HTMLElement) {
     canvas.addEventListener("touchmove", move, {passive: false});
 
     function up(e: MouseEvent | TouchEvent) {
-        e.preventDefault();
+        if (interactive) e.preventDefault();
         if (ignoreNext) {
             ignoreNext = false;
             return;
         }
-        if (!drawing) return;
+        if (interactive && !drawing) return;
 
         const rect = canvas.getBoundingClientRect();
         let {x, y} = getCoords(e, rect);
@@ -883,7 +883,7 @@ export function renderCaptcha(target: HTMLElement) {
             activity.push({action: "up", enabled: enabled, x: x, y: y, time: Date.now() - startTime});
         }
 
-        if (startTime >= 0 && enabled) {
+        if (startTime >= 0 && enabled && drawing) {
             drawing = false;
             activity.push({action: "point", x: x / canvas.width, y: y / canvas.height, time: Date.now() - startTime});
             submitBtn.disabled = false;
@@ -928,7 +928,19 @@ export function renderCaptcha(target: HTMLElement) {
     }
 
     for (let i = 1; i <= 4; i++) {
-        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("click", () => submitGuess(i));
+        if (isMobile) {
+            document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("touchstart", down);
+            document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("touchend", e => {
+                up(e);
+                submitGuess(i);
+            });
+        } else {
+            document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("mousedown", down);
+            document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("mouseup", e => {
+                up(e);
+                submitGuess(i);
+            });
+        }
     }
 
     function submitGuess(id: number) {
