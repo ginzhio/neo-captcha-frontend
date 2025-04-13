@@ -62,10 +62,8 @@ const widgetStyles = `
     width: 20em;
     height: 20em;
     border: 1px solid var(--neo-captcha-fg);
-    cursor: crosshair;
     z-index: 2;
     position: absolute;
-    touch-action: none;
     margin: 0;
     padding: 0;
 }
@@ -604,6 +602,7 @@ export function renderCaptcha(target: HTMLElement) {
     let beepStartTime: number = 0;
     let enabled = false;
     let ignoreNext = false;
+    let dontIgnoreNext = false;
     let imgSrc: string = "";
     let pointSize: number = 0;
     let thumbSize: number = 0;
@@ -774,6 +773,7 @@ export function renderCaptcha(target: HTMLElement) {
     overlay.addEventListener("mousedown", react);
     overlay.addEventListener("touchstart", react, {passive: false});
     overlay.addEventListener("touchmove", () => {/*just consume event*/
+        dontIgnoreNext = true;
     }, {passive: false});
 
     function start() {
@@ -789,9 +789,10 @@ export function renderCaptcha(target: HTMLElement) {
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             overlay.style.display = "none";
-            if (isMobile) {
+            if (!dontIgnoreNext && isMobile) {
                 ignoreNext = true;
             }
+            dontIgnoreNext = false;
         }
     }
 
@@ -1167,6 +1168,7 @@ export function renderCaptcha(target: HTMLElement) {
         if (variantNs) {
             document.getElementById("neoCaptcha-submit")!.style.display = "none";
             canvas!.style.cursor = "auto";
+            canvas!.style.touchAction = "auto";
             interactive = false;
             (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
                 ? 'https://neo-captcha.com/assets/icon_see_shape_dark.png'
@@ -1176,6 +1178,7 @@ export function renderCaptcha(target: HTMLElement) {
         } else {
             document.getElementById("neoCaptcha-guess")!.style.display = "none";
             canvas!.style.cursor = "crosshair";
+            canvas!.style.touchAction = "none";
             interactive = true;
             (document.getElementById("neoCaptcha-modeIcon") as HTMLImageElement).src = theme === 'dark'
                 ? 'https://neo-captcha.com/assets/icon_find_corner_dark.png'
