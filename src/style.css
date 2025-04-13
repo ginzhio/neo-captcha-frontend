@@ -59,10 +59,8 @@
     width: 20em;
     height: 20em;
     border: 1px solid var(--neo-captcha-fg);
-    cursor: crosshair;
     z-index: 2;
     position: absolute;
-    touch-action: none;
     margin: 0;
     padding: 0;
 }

@@ -16,7 +16,7 @@ const callbacks = {
 declare const __VERSION__: string;
 
 const VERSION = __VERSION__;
-const url = "https://neo-captcha.com/api/v1"; // "http://localhost:8080/api";
+const url = "http://localhost:8080/api"; // "https://neo-captcha.com/api/v1";
 
 const variant = config?.variant || "ns";
 const variantNs = variant === 'ns' || variant === 'ncs';
@@ -43,10 +43,11 @@ if (!ctx || !bar) {
 let interactive: boolean;
 if (variantNs) {
     document.getElementById("neoCaptcha-submit")!.style.display = "none";
-    canvas!.style.cursor = "auto";
     interactive = false;
 } else {
     document.getElementById("neoCaptcha-guess")!.style.display = "none";
+    canvas!.style.cursor = "crosshair";
+    canvas!.style.touchAction = "none";
     interactive = true;
 }
 
@@ -128,6 +129,7 @@ let idleStartTime: number = 0;
 let beepStartTime: number = 0;
 let enabled = false;
 let ignoreNext = false;
+let dontIgnoreNext = false;
 let imgSrc: string = "";
 let pointSize: number = 0;
 let thumbSize: number = 0;
@@ -294,6 +296,7 @@ function react() {
 overlay.addEventListener("mousedown", react);
 overlay.addEventListener("touchstart", react, {passive: false});
 overlay.addEventListener("touchmove", () => {/*just consume event*/
+    dontIgnoreNext = true;
 }, {passive: false});
 
 function start() {
@@ -309,9 +312,10 @@ function start() {
         }
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         overlay.style.display = "none";
-        if (isMobile) {
+        if (!dontIgnoreNext && isMobile) {
             ignoreNext = true;
         }
+        dontIgnoreNext = false;
     }
 }
 

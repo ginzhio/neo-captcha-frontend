@@ -62,10 +62,8 @@ const widgetStyles = `
     width: 20em;
     height: 20em;
     border: 1px solid var(--neo-captcha-fg);
-    cursor: crosshair;
     z-index: 2;
     position: absolute;
-    touch-action: none;
     margin: 0;
     padding: 0;
 }
@@ -445,10 +443,11 @@ export function renderCaptcha(target: HTMLElement, config: any,
     let interactive: boolean;
     if (variantNs) {
         document.getElementById("neoCaptcha-submit")!.style.display = "none";
-        canvas!.style.cursor = "auto";
         interactive = false;
     } else {
         document.getElementById("neoCaptcha-guess")!.style.display = "none";
+        canvas!.style.cursor = "crosshair";
+        canvas!.style.touchAction = "none";
         interactive = true;
     }
 
@@ -530,6 +529,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     let beepStartTime: number = 0;
     let enabled = false;
     let ignoreNext = false;
+    let dontIgnoreNext = false;
     let imgSrc: string = "";
     let pointSize: number = 0;
     let thumbSize: number = 0;
@@ -696,6 +696,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     overlay.addEventListener("mousedown", react);
     overlay.addEventListener("touchstart", react, {passive: false});
     overlay.addEventListener("touchmove", () => {/*just consume event*/
+        dontIgnoreNext = true;
     }, {passive: false});
 
     function start() {
@@ -711,9 +712,10 @@ export function renderCaptcha(target: HTMLElement, config: any,
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             overlay.style.display = "none";
-            if (isMobile) {
+            if (!dontIgnoreNext && isMobile) {
                 ignoreNext = true;
             }
+            dontIgnoreNext = false;
         }
     }
 
