@@ -259,7 +259,7 @@ const widgetStyles = `
     font-size: 1em;
     font-weight: bold;
     cursor: pointer;
-    padding: 0.5em 1em 0.5em 1em;
+    padding: 0.6em 1em 0.4em 1em;
     background: linear-gradient(color-mix(in srgb, var(--neo-captcha-fg) 25%, transparent), color-mix(in srgb, var(--neo-captcha-fg) 5%, transparent));
     display: flex;
     flex-direction: row;
@@ -305,7 +305,6 @@ const widgetStyles = `
 .neo-captcha-wide-icon {
     flex: 1;
     text-align: end;
-    transform: translateY(0.1em);
     margin: 0;
     padding: 0;
 }
@@ -423,7 +422,7 @@ export function renderCaptcha(target: HTMLElement) {
                 <div id="neoCaptcha-startOverlay" class="neo-captcha-icon-div">
                     <div id="neoCaptcha-overlayBg" class="neo-captcha-overlay-bg"></div>
                     <span id="neoCaptcha-signalIcon" class="neo-captcha-icon material-icons">hearing</span>
-                <span id="neoCaptcha-signalText" class="neo-captcha-signal-text"></span>
+                    <span id="neoCaptcha-signalText" class="neo-captcha-signal-text"></span>
                 </div>
             </div>
             <div>
