@@ -66,6 +66,7 @@ const widgetStyles = `
     position: absolute;
     margin: 0;
     padding: 0;
+    touch-action: none;
 }
 
 .neo-captcha-time {
@@ -617,8 +618,6 @@ export function renderCaptcha(target: HTMLElement) {
     let idleStartTime: number = 0;
     let beepStartTime: number = 0;
     let enabled = false;
-    let ignoreNext = false;
-    let dontIgnoreNext = false;
     let imgSrc: string = "";
     let pointSize: number = 0;
     let thumbSize: number = 0;
@@ -787,11 +786,7 @@ export function renderCaptcha(target: HTMLElement) {
         }
     }
 
-    overlay.addEventListener("mousedown", react);
-    overlay.addEventListener("touchstart", react, {passive: false});
-    overlay.addEventListener("touchmove", () => {/*just consume event*/
-        dontIgnoreNext = true;
-    }, {passive: false});
+    overlay.addEventListener("pointerdown", react, {passive: false});
 
     function start() {
         if (beepStartTime > 0 && startTime == 0) {
@@ -806,16 +801,11 @@ export function renderCaptcha(target: HTMLElement) {
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             overlay.style.display = "none";
-            if (!dontIgnoreNext && isMobile) {
-                ignoreNext = true;
-            }
-            dontIgnoreNext = false;
         }
     }
 
-    overlay.addEventListener("mouseup", start);
-    overlay.addEventListener("touchend", start);
-    overlay.addEventListener("touchcancel", start);
+    overlay.addEventListener("pointerup", start);
+    overlay.addEventListener("pointercancel", start);
 
     function startTimer() {
         startTime = Date.now();
@@ -848,7 +838,6 @@ export function renderCaptcha(target: HTMLElement) {
 
     function down(e: MouseEvent | TouchEvent) {
         if (interactive) e.preventDefault();
-        if (ignoreNext) return;
 
         if (startTime > 0) {
             const rect = canvas.getBoundingClientRect();
@@ -864,7 +853,6 @@ export function renderCaptcha(target: HTMLElement) {
 
     function move(e: MouseEvent | TouchEvent) {
         if (interactive) e.preventDefault();
-        if (ignoreNext) return;
 
         const rect = canvas.getBoundingClientRect();
         let {x, y} = getCoords(e, rect);
@@ -884,15 +872,10 @@ export function renderCaptcha(target: HTMLElement) {
         }
     }
 
-    canvas.addEventListener("mousemove", move);
-    canvas.addEventListener("touchmove", move, {passive: false});
+    canvas.addEventListener("pointermove", move, {passive: false});
 
     function up(e: MouseEvent | TouchEvent) {
         if (interactive) e.preventDefault();
-        if (ignoreNext) {
-            ignoreNext = false;
-            return;
-        }
         if (interactive && !drawing) return;
 
         const rect = canvas.getBoundingClientRect();
@@ -917,9 +900,8 @@ export function renderCaptcha(target: HTMLElement) {
         }
     }
 
-    canvas.addEventListener("mouseup", up);
-    canvas.addEventListener("touchend", up);
-    canvas.addEventListener("touchcancel", up);
+    canvas.addEventListener("pointerup", up);
+    canvas.addEventListener("pointercancel", up);
 
     function drawCurrentPos(x: number, y: number) {
         if (!ctx) {
@@ -946,19 +928,11 @@ export function renderCaptcha(target: HTMLElement) {
     }
 
     for (let i = 1; i <= 4; i++) {
-        if (isMobile) {
-            document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("touchstart", down);
-            document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("touchend", e => {
-                up(e);
-                submitGuess(i);
-            });
-        } else {
-            document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("mousedown", down);
-            document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("mouseup", e => {
-                up(e);
-                submitGuess(i);
-            });
-        }
+        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("pointerdown", down);
+        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("pointerup", e => {
+            up(e);
+            submitGuess(i);
+        });
     }
 
     function submitGuess(id: number) {
@@ -1166,7 +1140,6 @@ export function renderCaptcha(target: HTMLElement) {
         beepStartTime = 0;
         enabled = false;
         submitBtn.disabled = true;
-        ignoreNext = false;
         imgSrc = "";
         pointSize = 0;
         thumbSize = 0;
@@ -1206,11 +1179,9 @@ export function renderCaptcha(target: HTMLElement) {
         }
 
         if (interactive) {
-            canvas.addEventListener("mousedown", down);
-            canvas.addEventListener("touchstart", down, {passive: false});
+            canvas.addEventListener("pointerdown", down, {passive: false});
         } else {
-            canvas.removeEventListener("mousedown", down);
-            canvas.removeEventListener("touchstart", down);
+            canvas.addEventListener("pointerdown", down);
         }
     }
 
