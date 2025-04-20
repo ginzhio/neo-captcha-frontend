@@ -188,11 +188,25 @@ const widgetStyles = `
     padding: 0;
 }
 
+.neo-captcha-signal-text {
+    top: 0.5em;
+    font-size: 1.5em;
+    text-shadow: #000 0 0 0.25em;
+    position: absolute;
+}
+
 .neo-captcha-icon {
-    font-size: 3em;
+    font-size: 5em;
     color: var(--neo-captcha-light);
     margin: 0;
     padding: 0;
+    animation: none;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 20%;
+    }
 }
 
 .neo-captcha-fg-icon {
@@ -242,19 +256,19 @@ const widgetStyles = `
 }
 
 .neo-captcha-how-to-caption {
-    font-size: 1.1em;
+    font-size: 1em;
     font-weight: bold;
     cursor: pointer;
-    padding: 0.5em 1em 0.5em 1em;
-    background: color-mix(in srgb, var(--neo-captcha-fg) 10%, transparent);
+    padding: 0.6em 1em 0.4em 1em;
+    background: linear-gradient(color-mix(in srgb, var(--neo-captcha-fg) 25%, transparent), color-mix(in srgb, var(--neo-captcha-fg) 5%, transparent));
     display: flex;
     flex-direction: row;
     margin: 0;
 }
 
 .neo-captcha-how-to-table {
-    padding: 0 1em 1em 1em;
-    background: color-mix(in srgb, var(--neo-captcha-fg) 10%, transparent);
+    padding: 0.5em 1em 1em 1em;
+    background: color-mix(in srgb, var(--neo-captcha-fg) 7%, transparent);
     margin: 0;
 }
 
@@ -262,19 +276,19 @@ const widgetStyles = `
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 0.5em 0.5em 0.5em 1em;
+    padding: 0.5em 0.5em 0.5em 0.75em;
     margin: 0;
 }
 
 .neo-captcha-mode-icon {
-    width: 2.5em;
-    height: 2.5em;
-    margin: 0 1em 0 0;
+    width: 2.2em;
+    height: 2.2em;
+    margin: 0 0.75em 0 0;
     padding: 0;
 }
 
 .neo-captcha-how-to-footer {
-    font-size: 1.1em;
+    font-size: 1.2em;
     display: flex;
     flex-direction: column;
     margin: 0;
@@ -291,7 +305,6 @@ const widgetStyles = `
 .neo-captcha-wide-icon {
     flex: 1;
     text-align: end;
-    transform: translateY(0.1em);
     margin: 0;
     padding: 0;
 }
@@ -385,6 +398,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 <div id="neoCaptcha-startOverlay" class="neo-captcha-icon-div">
                     <div id="neoCaptcha-overlayBg" class="neo-captcha-overlay-bg"></div>
                     <span id="neoCaptcha-signalIcon" class="neo-captcha-icon material-icons">hearing</span>
+                    <span id="neoCaptcha-signalText" class="neo-captcha-signal-text"></span>
                 </div>
             </div>
             <div>
@@ -427,6 +441,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     const minDifficulty = config?.minDifficulty || "easy";
     const showHowTo = config?.showHowTo || false;
     let howToExpanded = config?.expandHowTo || false;
+    const visualOnDesktop = config?.visualOnDesktop || false;
 
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const overlay = document.getElementById("neoCaptcha-startOverlay") as HTMLDivElement;
@@ -483,7 +498,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
             howto: '?   How-To:',
             step_1: 'Hit ▶ Play',
             step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
-            step_2_s: `Click when you <b>hear a signal!</b>`,
+            step_2_s: `Click at the <b>signal tone!</b>`,
             step_3: '<b>Solve the CAPTCHA</b>',
             mode_1: 'Implied square:',
             mode_1_text: 'Mark the missing corner!',
@@ -494,7 +509,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
             howto: '?   Wie man\'s macht:',
             step_1: 'Drücke ▶ Start',
             step_2: `Tippe bei <b><span style="color: rgba(0, 160, 0)">GRÜN</span>!<b/>`,
-            step_2_s: 'Klicke beim <b>Signalton</b>',
+            step_2_s: 'Klicke beim <b>Signalton!</b>',
             step_3: '<b>Löse das CAPTCHA!</b>',
             mode_1: 'Angedeutetes Viereck:',
             mode_1_text: 'Markiere die fehlende Ecke!',
@@ -504,10 +519,12 @@ export function renderCaptcha(target: HTMLElement, config: any,
     };
     document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
     document.getElementById("neoCaptcha-step_1")!.innerHTML = (translations[userLang] || translations['en']).step_1;
-    if (isMobile) {
+    if (isMobile || visualOnDesktop) {
         document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2;
+        document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2;
     } else {
         document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
+        document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
     }
     document.getElementById("neoCaptcha-step_3")!.innerHTML = (translations[userLang] || translations['en']).step_3;
     if (variantNs) {
@@ -555,13 +572,13 @@ export function renderCaptcha(target: HTMLElement, config: any,
     }
 
     const overlayBg = document.getElementById("neoCaptcha-overlayBg") as HTMLDivElement;
-    if (!isMobile) {
+    if (!(isMobile || visualOnDesktop)) {
         overlayBg.style.background = "#000";
     } else {
         overlayBg.style.background = mobileRed;
     }
     const signalIcon = document.getElementById("neoCaptcha-signalIcon") as HTMLSpanElement;
-    signalIcon.innerText = isMobile ? "do_not_touch" : "hearing";
+    signalIcon.innerText = (isMobile || visualOnDesktop) ? "do_not_touch" : "hearing";
 
     startBtn.addEventListener("click", getCaptcha);
 
@@ -627,9 +644,10 @@ export function renderCaptcha(target: HTMLElement, config: any,
     }
 
     function beep() {
-        if (isMobile) {
+        if (isMobile || visualOnDesktop) {
             overlayBg.style.background = mobileGreen;
             signalIcon.innerText = "touch_app";
+            signalIcon.style.animation = "blinker 0.5s ease-in-out infinite";
             if (beepStartTime > 0) {
                 activity.push({action: "react", time: beepStartTime - Date.now()});
             } else {
@@ -1058,10 +1076,11 @@ export function renderCaptcha(target: HTMLElement, config: any,
         if (bar) {
             bar.clearRect(0, 0, timeCanvas.width, timeCanvas.height);
         }
-        if (isMobile) {
+        if (isMobile || visualOnDesktop) {
             overlayBg.style.background = mobileRed;
             signalIcon.innerText = "do_not_touch";
         }
+        signalIcon.style.animation = "none";
     }
 
 }

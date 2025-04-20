@@ -5,6 +5,7 @@ const config = {
     theme: 'dark',
     lang: 'en',
     minDifficulty: 'easy',
+    visualOnDesktop: false,
 };
 const callbacks = {
     onSuccess: () => {
@@ -16,7 +17,7 @@ const callbacks = {
 declare const __VERSION__: string;
 
 const VERSION = __VERSION__;
-const url = "http://localhost:8080/api"; // "https://neo-captcha.com/api/v1";
+const url = "https://neo-captcha.com/api/v1"; // "http://localhost:8080/api"
 
 const variant = config?.variant || "ns";
 const variantNs = variant === 'ns' || variant === 'ncs';
@@ -27,6 +28,7 @@ userLang = config?.lang || userLang;
 const minDifficulty = config?.minDifficulty || "easy";
 const showHowTo = config?.showHowTo || false;
 let howToExpanded = config?.expandHowTo || false;
+const visualOnDesktop = config?.visualOnDesktop || false;
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const overlay = document.getElementById("neoCaptcha-startOverlay") as HTMLDivElement;
@@ -83,7 +85,7 @@ const translations: Record<string, {
         howto: '?   How-To:',
         step_1: 'Hit ▶ Play',
         step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
-        step_2_s: `Click when you <b>hear a signal!</b>`,
+        step_2_s: `Click at the <b>signal tone!</b>`,
         step_3: '<b>Solve the CAPTCHA</b>',
         mode_1: 'Implied square:',
         mode_1_text: 'Mark the missing corner!',
@@ -94,7 +96,7 @@ const translations: Record<string, {
         howto: '?   Wie man\'s macht:',
         step_1: 'Drücke ▶ Start',
         step_2: `Tippe bei <b><span style="color: rgba(0, 160, 0)">GRÜN</span>!<b/>`,
-        step_2_s: 'Klicke beim <b>Signalton</b>',
+        step_2_s: 'Klicke beim <b>Signalton!</b>',
         step_3: '<b>Löse das CAPTCHA!</b>',
         mode_1: 'Angedeutetes Viereck:',
         mode_1_text: 'Markiere die fehlende Ecke!',
@@ -104,10 +106,12 @@ const translations: Record<string, {
 };
 document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
 document.getElementById("neoCaptcha-step_1")!.innerHTML = (translations[userLang] || translations['en']).step_1;
-if (isMobile) {
+if (isMobile || visualOnDesktop) {
     document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2;
+    document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2;
 } else {
     document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
+    document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
 }
 document.getElementById("neoCaptcha-step_3")!.innerHTML = (translations[userLang] || translations['en']).step_3;
 if (variantNs) {
@@ -155,13 +159,13 @@ if (showHowTo) {
 }
 
 const overlayBg = document.getElementById("neoCaptcha-overlayBg") as HTMLDivElement;
-if (!isMobile) {
+if (!(isMobile || visualOnDesktop)) {
     overlayBg.style.background = "#000";
 } else {
     overlayBg.style.background = mobileRed;
 }
 const signalIcon = document.getElementById("neoCaptcha-signalIcon") as HTMLSpanElement;
-signalIcon.innerText = isMobile ? "do_not_touch" : "hearing";
+signalIcon.innerText = (isMobile || visualOnDesktop) ? "do_not_touch" : "hearing";
 
 startBtn.addEventListener("click", getCaptcha);
 
@@ -227,9 +231,10 @@ async function getCaptcha() {
 }
 
 function beep() {
-    if (isMobile) {
+    if (isMobile || visualOnDesktop) {
         overlayBg.style.background = mobileGreen;
         signalIcon.innerText = "touch_app";
+        signalIcon.style.animation = "blinker 0.5s ease-in-out infinite";
         if (beepStartTime > 0) {
             activity.push({action: "react", time: beepStartTime - Date.now()});
         } else {
@@ -651,8 +656,9 @@ function reset() {
     if (bar) {
         bar.clearRect(0, 0, timeCanvas.width, timeCanvas.height);
     }
-    if (isMobile) {
+    if (isMobile || visualOnDesktop) {
         overlayBg.style.background = mobileRed;
         signalIcon.innerText = "do_not_touch";
     }
+    signalIcon.style.animation = "none";
 }

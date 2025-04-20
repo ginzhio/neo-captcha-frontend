@@ -12,7 +12,7 @@
   <a href="#license">License</a>
 </p>  
 
-[![latest patch](https://img.shields.io/badge/v1.1.1-00adad?label=Latest%20Patch)](https://github.com/ginzhio/neo-captcha-frontend/tree/v1.1.1)          [![current release](https://img.shields.io/github/v/release/ginzhio/neo-captcha-frontend?label=Current%20Release&color=009bb8)](https://github.com/ginzhio/neo-captcha-frontend/releases)
+[![latest patch](https://img.shields.io/badge/v1.1.2-00adad?label=Latest%20Patch)](https://github.com/ginzhio/neo-captcha-frontend/tree/v1.1.2)[![current release](https://img.shields.io/github/v/release/ginzhio/neo-captcha-frontend?label=Current%20Release&color=009bb8)](https://github.com/ginzhio/neo-captcha-frontend/releases)
 
 ---
 
@@ -54,12 +54,13 @@ Use the callback methods ```onSuccess``` and ```onFailure``` to grant or deny ac
 ##### Configuration options:
 ```ts
 {
-    showHowTo: true,       // shows instructions on how to solve the CAPTCHA
-    expandHowTo: false,    // expand or collapse the "How-To" section initially
-    minDifficulty: 'easy', // ['easy', 'medium', 'hard'] default is 'easy'
-    lang: 'en',            // currently: ['en', 'de'] forces the text to be in that language, omit for browser-default
-    theme: 'dark',         // ['light', 'dark'] forces ui theme, omit for browser-default
-    variant: 'ns',         // ['ns', 'iq'] 'ns' = Neon Shape, 'iq' = Implied Square, default is 'ns'
+    showHowTo: true,        // shows instructions on how to solve the CAPTCHA
+    expandHowTo: false,     // expand or collapse the "How-To" section initially
+    minDifficulty: 'easy',  // ['easy', 'medium', 'hard'] default is 'easy'
+    lang: 'en',             // currently: ['en', 'de'] forces the text to be in that language, omit for browser-default
+    theme: 'dark',          // ['light', 'dark'] forces ui theme, omit for browser-default
+    variant: 'ns',          // ['ns', 'iq'] 'ns' = Neon Shape, 'iq' = Implied Square, default is 'ns'
+    visualOnDesktop: false, // show visual reaction challenge ("Tap when GREEN") instead of audible one when on desktop
 }
 ```
 → [Help with translations](docs/translations.xlsx)
