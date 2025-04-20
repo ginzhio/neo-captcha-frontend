@@ -1,7 +1,7 @@
 declare const __VERSION__: string;
 
 const VERSION = __VERSION__;
-const url = "http://localhost:8080/api";//https://neo-captcha.com/api/v1";
+const url = "https://neo-captcha.com/api/v1"; // "http://localhost:8080/api"
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const overlay = document.getElementById("neoCaptcha-startOverlay") as HTMLDivElement;
@@ -29,6 +29,7 @@ const mobileRed = "#f406";
 const mobileGreen = "#0f4a";
 
 let userLang = (navigator.language || navigator.languages[0]).split("-")[0];
+// userLang = "en";
 console.log("lang: " + userLang);
 const translations: Record<string, {
     howto: string,
@@ -53,7 +54,7 @@ const translations: Record<string, {
         howto: '?   How-To:',
         step_1: 'Hit ▶ Play',
         step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
-        step_2_s: `Click when you <b>hear a signal!</b>`,
+        step_2_s: `Click at the <b>signal tone!</b>`,
         step_3: '<b>Solve the CAPTCHA</b>',
         mode_1: 'Implied square:',
         mode_1_text: 'Mark the missing corner!',
@@ -92,8 +93,10 @@ document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[user
 document.getElementById("neoCaptcha-step_1")!.innerHTML = (translations[userLang] || translations['en']).step_1;
 if (isMobile) {
     document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2;
+    document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2;
 } else {
     document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
+    document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
 }
 document.getElementById("neoCaptcha-step_3")!.innerHTML = (translations[userLang] || translations['en']).step_3;
 if (variantNs) {
@@ -155,7 +158,7 @@ let challenge: string | undefined = undefined;
 let hmac: string | undefined = undefined;
 
 let howToShown = true;
-let howToExpanded = true;
+let howToExpanded = false;
 if (howToShown) {
     const howToCaption = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
     const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
@@ -252,6 +255,7 @@ function beep() {
     if (isMobile) {
         overlayBg.style.background = mobileGreen;
         signalIcon.innerText = "touch_app";
+        signalIcon.style.animation = "blinker 0.5s ease-in-out infinite";
         if (beepStartTime > 0) {
             activity.push({action: "react", time: beepStartTime - Date.now()});
         } else {
@@ -701,6 +705,7 @@ function reset() {
         overlayBg.style.background = mobileRed;
         signalIcon.innerText = "do_not_touch";
     }
+    signalIcon.style.animation = "none";
     document.getElementById("neoCaptcha-guess")!.style.display = "grid";
     document.getElementById("neoCaptcha-submit")!.style.display = "block";
     if (variantNs) {

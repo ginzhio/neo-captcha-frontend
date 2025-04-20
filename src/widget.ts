@@ -188,11 +188,25 @@ const widgetStyles = `
     padding: 0;
 }
 
+.neo-captcha-signal-text {
+    top: 0.5em;
+    font-size: 1.5em;
+    text-shadow: #000 0 0 0.25em;
+    position: absolute;
+}
+
 .neo-captcha-icon {
-    font-size: 3em;
+    font-size: 5em;
     color: var(--neo-captcha-light);
     margin: 0;
     padding: 0;
+    animation: none;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 20%;
+    }
 }
 
 .neo-captcha-fg-icon {
@@ -242,19 +256,19 @@ const widgetStyles = `
 }
 
 .neo-captcha-how-to-caption {
-    font-size: 1.1em;
+    font-size: 1em;
     font-weight: bold;
     cursor: pointer;
     padding: 0.5em 1em 0.5em 1em;
-    background: color-mix(in srgb, var(--neo-captcha-fg) 10%, transparent);
+    background: linear-gradient(color-mix(in srgb, var(--neo-captcha-fg) 25%, transparent), color-mix(in srgb, var(--neo-captcha-fg) 5%, transparent));
     display: flex;
     flex-direction: row;
     margin: 0;
 }
 
 .neo-captcha-how-to-table {
-    padding: 0 1em 1em 1em;
-    background: color-mix(in srgb, var(--neo-captcha-fg) 10%, transparent);
+    padding: 0.5em 1em 1em 1em;
+    background: color-mix(in srgb, var(--neo-captcha-fg) 7%, transparent);
     margin: 0;
 }
 
@@ -262,19 +276,19 @@ const widgetStyles = `
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 0.5em 0.5em 0.5em 1em;
+    padding: 0.5em 0.5em 0.5em 0.75em;
     margin: 0;
 }
 
 .neo-captcha-mode-icon {
-    width: 2.5em;
-    height: 2.5em;
-    margin: 0 1em 0 0;
+    width: 2.2em;
+    height: 2.2em;
+    margin: 0 0.75em 0 0;
     padding: 0;
 }
 
 .neo-captcha-how-to-footer {
-    font-size: 1.1em;
+    font-size: 1.2em;
     display: flex;
     flex-direction: column;
     margin: 0;
@@ -409,6 +423,7 @@ export function renderCaptcha(target: HTMLElement) {
                 <div id="neoCaptcha-startOverlay" class="neo-captcha-icon-div">
                     <div id="neoCaptcha-overlayBg" class="neo-captcha-overlay-bg"></div>
                     <span id="neoCaptcha-signalIcon" class="neo-captcha-icon material-icons">hearing</span>
+                <span id="neoCaptcha-signalText" class="neo-captcha-signal-text"></span>
                 </div>
             </div>
             <div>
@@ -508,7 +523,7 @@ export function renderCaptcha(target: HTMLElement) {
             howto: '?   How-To:',
             step_1: 'Hit ▶ Play',
             step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
-            step_2_s: `Click when you <b>hear a signal!</b>`,
+            step_2_s: `Click at the <b>signal tone!</b>`,
             step_3: '<b>Solve the CAPTCHA</b>',
             mode_1: 'Implied square:',
             mode_1_text: 'Mark the missing corner!',
@@ -547,8 +562,10 @@ export function renderCaptcha(target: HTMLElement) {
     document.getElementById("neoCaptcha-step_1")!.innerHTML = (translations[userLang] || translations['en']).step_1;
     if (isMobile) {
         document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2;
+        document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2;
     } else {
         document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
+        document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
     }
     document.getElementById("neoCaptcha-step_3")!.innerHTML = (translations[userLang] || translations['en']).step_3;
     if (variantNs) {
@@ -610,7 +627,7 @@ export function renderCaptcha(target: HTMLElement) {
     let hmac: string | undefined = undefined;
 
     let howToShown = true;
-    let howToExpanded = true;
+    let howToExpanded = false;
     if (howToShown) {
         const howToCaption = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
         const howToText = document.getElementById("neoCaptcha-howToText") as HTMLTableElement;
@@ -707,6 +724,7 @@ export function renderCaptcha(target: HTMLElement) {
         if (isMobile) {
             overlayBg.style.background = mobileGreen;
             signalIcon.innerText = "touch_app";
+            signalIcon.style.animation = "blinker 0.5s ease-in-out infinite";
             if (beepStartTime > 0) {
                 activity.push({action: "react", time: beepStartTime - Date.now()});
             } else {
@@ -1163,6 +1181,7 @@ export function renderCaptcha(target: HTMLElement) {
             overlayBg.style.background = mobileRed;
             signalIcon.innerText = "do_not_touch";
         }
+        signalIcon.style.animation = "none";
         document.getElementById("neoCaptcha-guess")!.style.display = "grid";
         document.getElementById("neoCaptcha-submit")!.style.display = "block";
         if (variantNs) {
