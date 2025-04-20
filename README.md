@@ -10,11 +10,13 @@
   <a href="#quick-start">Quick Start</a> •
   <a href="#about">About</a> •
   <a href="#license">License</a>
-</p>
+</p>  
+
+[![latest patch](https://img.shields.io/badge/v1.1.1-00adad?label=Latest%20Patch)](https://github.com/ginzhio/neo-captcha-frontend/tree/v1.1.1)          [![current release](https://img.shields.io/github/v/release/ginzhio/neo-captcha-frontend?label=Current%20Release&color=009bb8)](https://github.com/ginzhio/neo-captcha-frontend/releases)
 
 ---
 
-## Why neoCAPTCHA?
+## Why neoCAPTCHA? 
 
 - ✅ No tracking, no data collection  
 - 🧠 Doesn’t train AI models  
