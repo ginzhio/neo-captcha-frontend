@@ -723,11 +723,8 @@ export function renderCaptcha(target: HTMLElement) {
             overlayBg.style.background = mobileGreen;
             signalIcon.innerText = "touch_app";
             signalIcon.style.animation = "blinker 0.5s ease-in-out infinite";
-            if (beepStartTime > 0) {
-                activity.push({action: "react", time: beepStartTime - Date.now()});
-            } else {
-                beepStartTime = Date.now();
-            }
+
+            beepStartTime = Date.now();
         } else {
             playTone();
         }
@@ -737,7 +734,7 @@ export function renderCaptcha(target: HTMLElement) {
 
     const playTone = () => {
         if (audio.state === "suspended") {
-            // Wichtig für iOS/Chrome
+            // important for iOS/Chrome
             audio.resume().then(() => actuallyPlayTone());
         } else {
             actuallyPlayTone();
@@ -749,11 +746,7 @@ export function renderCaptcha(target: HTMLElement) {
         playSound(852, 0.12, 0.12);
         playSound(528, 0.12, 0.24);
 
-        if (beepStartTime > 0) {
-            activity.push({action: "react", time: beepStartTime - Date.now()});
-        } else {
-            beepStartTime = Date.now();
-        }
+        beepStartTime = Date.now();
     }
 
     function playSound(hz: number, duration: number, delay: number = 0) {
@@ -771,25 +764,34 @@ export function renderCaptcha(target: HTMLElement) {
         oscillator.stop(audio.currentTime + delay + duration);
     }
 
+    let reaction: any;
+
     function react() {
         if (startTime == 0) {
-            if (beepStartTime > 0) {
-                activity.push({action: "react", time: Date.now() - beepStartTime});
+            let time: number;
+            if (beepStartTime <= 0) {
+                time = 0;
             } else {
-                beepStartTime = Date.now();
+                time = Date.now() - beepStartTime;
             }
-            if (variantNs) {
-                for (let i = 1; i <= 4; i++) {
-                    (document.getElementById("neoCaptcha-guess-button-" + i) as HTMLButtonElement).disabled = false;
-                }
-            }
+            reaction = {action: "react", time: time};
         }
     }
 
     overlay.addEventListener("pointerdown", react, {passive: false});
+    overlay.addEventListener("pointermove", () => {
+        reaction = undefined;
+    }, {passive: false});
 
     function start() {
-        if (beepStartTime > 0 && startTime == 0) {
+        if (beepStartTime <= 0) {
+            reaction = {action: "react", time: -1};
+            beepStartTime = 1;
+        }
+        if (reaction && reaction.time === 0) return;
+
+        if (beepStartTime > 0 && startTime == 0 && reaction) {
+            activity.push(reaction);
             activity.push({action: "start", time: Date.now() - idleStartTime});
 
             enabled = true;
@@ -801,11 +803,16 @@ export function renderCaptcha(target: HTMLElement) {
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             overlay.style.display = "none";
+
+            if (variantNs) {
+                for (let i = 1; i <= 4; i++) {
+                    (document.getElementById("neoCaptcha-guess-button-" + i) as HTMLButtonElement).disabled = false;
+                }
+            }
         }
     }
 
     overlay.addEventListener("pointerup", start);
-    overlay.addEventListener("pointercancel", start);
 
     function startTimer() {
         startTime = Date.now();
