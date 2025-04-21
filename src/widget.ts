@@ -780,7 +780,9 @@ export function renderCaptcha(target: HTMLElement) {
 
     overlay.addEventListener("pointerdown", react, {passive: false});
     overlay.addEventListener("pointermove", () => {
-        reaction = undefined;
+        if (beepStartTime <= 0) {
+            reaction = undefined;
+        }
     }, {passive: false});
 
     function start() {
