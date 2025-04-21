@@ -11,7 +11,7 @@ export default defineConfig({
         lib: {
             entry: 'src/widget.ts',
             name: 'NeoCAPTCHA',
-            fileName: 'neo-captcha',
+            fileName: () => 'neo-captcha.js',
             formats: ['iife'],
         },
         rollupOptions: {

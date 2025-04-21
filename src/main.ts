@@ -132,8 +132,6 @@ let endTime: number = 0;
 let idleStartTime: number = 0;
 let beepStartTime: number = 0;
 let enabled = false;
-let ignoreNext = false;
-let dontIgnoreNext = false;
 let imgSrc: string = "";
 let pointSize: number = 0;
 let thumbSize: number = 0;
@@ -235,11 +233,8 @@ function beep() {
         overlayBg.style.background = mobileGreen;
         signalIcon.innerText = "touch_app";
         signalIcon.style.animation = "blinker 0.5s ease-in-out infinite";
-        if (beepStartTime > 0) {
-            activity.push({action: "react", time: beepStartTime - Date.now()});
-        } else {
-            beepStartTime = Date.now();
-        }
+
+        beepStartTime = Date.now();
     } else {
         playTone();
     }
@@ -261,11 +256,7 @@ const actuallyPlayTone = () => {
     playSound(852, 0.12, 0.12);
     playSound(528, 0.12, 0.24);
 
-    if (beepStartTime > 0) {
-        activity.push({action: "react", time: beepStartTime - Date.now()});
-    } else {
-        beepStartTime = Date.now();
-    }
+    beepStartTime = Date.now();
 }
 
 function playSound(hz: number, duration: number, delay: number = 0) {
@@ -283,29 +274,36 @@ function playSound(hz: number, duration: number, delay: number = 0) {
     oscillator.stop(audio.currentTime + delay + duration);
 }
 
+let reaction: any;
+
 function react() {
     if (startTime == 0) {
-        if (beepStartTime > 0) {
-            activity.push({action: "react", time: Date.now() - beepStartTime});
+        let time: number;
+        if (beepStartTime <= 0) {
+            time = 0;
         } else {
-            beepStartTime = Date.now();
+            time = Date.now() - beepStartTime;
         }
-        if (variantNs) {
-            for (let i = 1; i <= 4; i++) {
-                (document.getElementById("neoCaptcha-guess-button-" + i) as HTMLButtonElement).disabled = false;
-            }
-        }
+        reaction = {action: "react", time: time};
     }
 }
 
-overlay.addEventListener("mousedown", react);
-overlay.addEventListener("touchstart", react, {passive: false});
-overlay.addEventListener("touchmove", () => {/*just consume event*/
-    dontIgnoreNext = true;
+overlay.addEventListener("pointerdown", react, {passive: false});
+overlay.addEventListener("pointermove", () => {
+    if (beepStartTime <= 0) {
+        reaction = undefined;
+    }
 }, {passive: false});
 
 function start() {
-    if (beepStartTime > 0 && startTime == 0) {
+    if (beepStartTime <= 0) {
+        reaction = {action: "react", time: -1};
+        beepStartTime = 1;
+    }
+    if (reaction && reaction.time === 0) return;
+
+    if (beepStartTime > 0 && startTime == 0 && reaction) {
+        activity.push(reaction);
         activity.push({action: "start", time: Date.now() - idleStartTime});
 
         enabled = true;
@@ -317,16 +315,16 @@ function start() {
         }
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         overlay.style.display = "none";
-        if (!dontIgnoreNext && isMobile) {
-            ignoreNext = true;
+
+        if (variantNs) {
+            for (let i = 1; i <= 4; i++) {
+                (document.getElementById("neoCaptcha-guess-button-" + i) as HTMLButtonElement).disabled = false;
+            }
         }
-        dontIgnoreNext = false;
     }
 }
 
-overlay.addEventListener("mouseup", start);
-overlay.addEventListener("touchend", start);
-overlay.addEventListener("touchcancel", start);
+overlay.addEventListener("pointerup", start);
 
 function startTimer() {
     startTime = Date.now();
@@ -359,7 +357,6 @@ function drawTimerBar() {
 
 function down(e: MouseEvent | TouchEvent) {
     if (interactive) e.preventDefault();
-    if (ignoreNext) return;
 
     if (startTime > 0) {
         const rect = canvas.getBoundingClientRect();
@@ -374,13 +371,15 @@ function down(e: MouseEvent | TouchEvent) {
 }
 
 if (interactive) {
-    canvas.addEventListener("mousedown", down);
-    canvas.addEventListener("touchstart", down, {passive: false});
+    canvas!.style.touchAction = "none";
+    canvas.addEventListener("pointerdown", down, {passive: false});
+} else {
+    canvas!.style.touchAction = "auto";
+    canvas.addEventListener("pointerdown", down);
 }
 
 function move(e: MouseEvent | TouchEvent) {
     if (interactive) e.preventDefault();
-    if (ignoreNext) return;
 
     const rect = canvas.getBoundingClientRect();
     let {x, y} = getCoords(e, rect);
@@ -393,15 +392,10 @@ function move(e: MouseEvent | TouchEvent) {
     }
 }
 
-canvas.addEventListener("mousemove", move);
-canvas.addEventListener("touchmove", move, {passive: false});
+canvas.addEventListener("pointermove", move, {passive: false});
 
 function up(e: MouseEvent | TouchEvent) {
     if (interactive) e.preventDefault();
-    if (ignoreNext) {
-        ignoreNext = false;
-        return;
-    }
     if (interactive && !drawing) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -426,9 +420,8 @@ function up(e: MouseEvent | TouchEvent) {
     }
 }
 
-canvas.addEventListener("mouseup", up);
-canvas.addEventListener("touchend", up);
-canvas.addEventListener("touchcancel", up);
+canvas.addEventListener("pointerup", up);
+canvas.addEventListener("pointercancel", up);
 
 function drawCurrentPos(x: number, y: number) {
     if (!ctx) {
@@ -455,19 +448,11 @@ function getCoords(e: MouseEvent | TouchEvent, rect: DOMRect) {
 }
 
 for (let i = 1; i <= 4; i++) {
-    if (isMobile) {
-        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("touchstart", down);
-        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("touchend", e => {
-            up(e);
-            submitGuess(i);
-        });
-    } else {
-        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("mousedown", down);
-        document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("mouseup", e => {
-            up(e);
-            submitGuess(i);
-        });
-    }
+    document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("pointerdown", down);
+    document.getElementById("neoCaptcha-guess-button-" + i)?.addEventListener("pointerup", e => {
+        up(e);
+        submitGuess(i);
+    });
 }
 
 function submitGuess(id: number) {
@@ -646,7 +631,6 @@ function reset() {
     beepStartTime = 0;
     enabled = false;
     submitBtn.disabled = true;
-    ignoreNext = false;
     imgSrc = "";
     pointSize = 0;
     thumbSize = 0;
