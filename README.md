@@ -51,6 +51,12 @@
 
 That’s it.  
 Use the callback methods ```onSuccess``` and ```onFailure``` to grant or deny access to the features you wanna protect from bots.  
+
+##### Script:
+| Current v1.x Release | ```https://neo-captcha.com/widget/v1/neo-captcha.js``` |
+|:-------------------:|:------------------------------------------------------:|
+| Latest Patch | ```https://neo-captcha.com/widget/latest/neo-captcha.js``` |
+ 
 ##### Configuration options:
 ```ts
 {
