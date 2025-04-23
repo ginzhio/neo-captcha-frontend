@@ -17,12 +17,14 @@
     --neo-captcha-bg: var(--neo-captcha-bg-light);
     --neo-captcha-bg2: var(--neo-captcha-bg2-light);
     --neo-captcha-fg: var(--neo-captcha-fg-light);
+    --neo-captcha-gradient: linear-gradient(color-mix(in srgb, var(--neo-captcha-fg) 2%, transparent), color-mix(in srgb, var(--neo-captcha-fg) 15%, transparent));
 }
 
 .neo-captcha-theme-dark {
     --neo-captcha-bg: var(--neo-captcha-bg-dark);
     --neo-captcha-bg2: var(--neo-captcha-bg2-dark);
     --neo-captcha-fg: var(--neo-captcha-fg-dark);
+    --neo-captcha-gradient: linear-gradient(color-mix(in srgb, var(--neo-captcha-fg) 25%, transparent), color-mix(in srgb, var(--neo-captcha-fg) 5%, transparent));
 }
 
 .neo-captcha-box {
@@ -189,6 +191,7 @@
 .neo-captcha-signal-text {
     top: 0.5em;
     font-size: 1.5em;
+    color: var(--neo-captcha-light);
     text-shadow: #000 0 0 0.25em;
     position: absolute;
 }
@@ -206,6 +209,19 @@
         opacity: 20%;
     }
 }
+
+@keyframes shake {
+    0% {
+        transform: rotate(-10deg) translateX(-0.25em);
+    }
+    50% {
+        transform: rotate(10deg) translateX(0.25em);
+    }
+    100% {
+        transform: rotate(-10deg) translateX(-0.25em);
+    }
+}
+
 
 .neo-captcha-fg-icon {
     font-size: 3em;
@@ -258,7 +274,7 @@
     font-weight: bold;
     cursor: pointer;
     padding: 0.6em 1em 0.4em 1em;
-    background: linear-gradient(color-mix(in srgb, var(--neo-captcha-fg) 25%, transparent), color-mix(in srgb, var(--neo-captcha-fg) 5%, transparent));
+    background: var(--neo-captcha-gradient);
     display: flex;
     flex-direction: row;
     margin: 0;
