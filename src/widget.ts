@@ -515,7 +515,7 @@ export function renderCaptcha(target: HTMLElement) {
     const mobileGreen = "#0f4a";
 
     let userLang = (navigator.language || navigator.languages[0]).split("-")[0];
-    console.log("lang: " + userLang);
+    log("lang: " + userLang);
     const translations: Record<string, {
         howto: string,
         step_1: string,
@@ -686,13 +686,49 @@ export function renderCaptcha(target: HTMLElement) {
     const signalIcon = document.getElementById("neoCaptcha-signalIcon") as HTMLSpanElement;
     signalIcon.innerText = isMobile ? "do_not_touch" : "hearing";
 
-    startBtn.addEventListener("click", getCaptcha);
+    startBtn.addEventListener("click", requestMotion);
+
+    let motionAllowed = isMobile;
+
+    function requestMotion() {
+        if (isMobile && window.DeviceMotionEvent) {
+            if ('requestPermission' in DeviceMotionEvent) {
+                (DeviceMotionEvent as any).requestPermission()
+                    .then((response: any) => {
+                        if (response === 'granted') {
+                            log("motion permission granted");
+                            motionAllowed = true;
+                            window.addEventListener('devicemotion', handleMotion);
+                        } else {
+                            log("motion permission denied");
+                            motionAllowed = false;
+                        }
+                        getCaptcha();
+                    })
+                    .catch((e: any) => {
+                        log("motion permission error");
+                        error(e);
+                        motionAllowed = false;
+                        getCaptcha();
+                    });
+            } else {
+                log("motion allowed by default");
+                motionAllowed = true;
+                window.addEventListener('devicemotion', handleMotion);
+                getCaptcha();
+            }
+        } else {
+            log("no motion available");
+            motionAllowed = false;
+            getCaptcha();
+        }
+    }
 
     reset();
 
     async function getCaptcha() {
-        console.log("version: " + VERSION);
-        console.log("userAgent: " + navigator.userAgent);
+        log("version: " + VERSION);
+        log("userAgent: " + navigator.userAgent);
 
         const wrapper = document.getElementById("neoCaptcha-wrapper") as HTMLDivElement;
         wrapper.style.display = "flex";
@@ -712,7 +748,7 @@ export function renderCaptcha(target: HTMLElement) {
             body: JSON.stringify(payload)
         });
         const result = await response.json();
-        console.log(result);
+        // log(result);
         if (result.img) {
             const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
             image.style.display = "inline-block";
@@ -749,28 +785,11 @@ export function renderCaptcha(target: HTMLElement) {
 
             idleStartTime = Date.now();
 
-            if (isMobile && window.DeviceMotionEvent) {
-                // request permission first (if needed)
-                if ('requestPermission' in DeviceMotionEvent) {
-                    (DeviceMotionEvent as any).requestPermission()
-                        .then((response: any) => {
-                            if (response === 'granted') {
-                                window.addEventListener('devicemotion', handleMotion);
-                                console.log("beepIfNoMotion timeout, permission");
-                                setTimeout(() => beepIfNoMotion(), 1000);
-                            } else {
-                                console.log("beep timeout, no motion permission");
-                                setTimeout(() => beep(), suspense);
-                            }
-                        })
-                        .catch(console.error);
-                } else {
-                    window.addEventListener('devicemotion', handleMotion);
-                    console.log("beepIfNoMotion timeout, regular");
-                    setTimeout(() => beepIfNoMotion(), 1000);
-                }
+            log("isMobile", isMobile, "motionAllowed", motionAllowed);
+            if (isMobile && motionAllowed) {
+                setTimeout(() => beepIfNoMotion(), 1000);
             } else {
-                console.log("beep timeout, no motion available");
+                log("beep timeout, no motion available");
                 setTimeout(() => beep(), suspense);
             }
         }
@@ -802,13 +821,13 @@ export function renderCaptcha(target: HTMLElement) {
     }
 
     async function handleMotion(event: DeviceMotionEvent) {
-        if (!motionEnabled) console.log("handleMotion");
+        if (!motionEnabled) log("handleMotion");
         if (!(event instanceof DeviceMotionEvent)) return;
 
         // throttle
         const now = Date.now();
         if (lastMotionTime > 0 && now - lastMotionTime < motionThrottle) return;
-        if (!motionEnabled) console.log("there is motion");
+        if (!motionEnabled) log("there is motion");
         lastMotionTime = now;
 
         const acc = event.accelerationIncludingGravity;
@@ -884,7 +903,7 @@ export function renderCaptcha(target: HTMLElement) {
             if (Math.abs(acc.x) > 2) {
                 if (acc.x < last.x) {
                     // move left
-                    if (logs) console.log(i - minAccs, "<left", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
+                    if (logs) log(i - minAccs, "<left", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
 
                     if (dir === 1) directionChanged = true
                     else consecutive++;
@@ -892,7 +911,7 @@ export function renderCaptcha(target: HTMLElement) {
 
                 } else {
                     // move right
-                    if (logs) console.log(i - minAccs, "right>", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
+                    if (logs) log(i - minAccs, "right>", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
 
                     if (dir === -1) directionChanged = true
                     else consecutive++;
@@ -903,7 +922,7 @@ export function renderCaptcha(target: HTMLElement) {
                 minMove = Math.min(minMove, Math.sign(acc.x) * acc.move);
                 maxMove = Math.max(maxMove, Math.sign(acc.x) * acc.move);
             } else if (acc.mag > g) {
-                if (logs) console.log(i - minAccs, "idle");
+                if (logs) log(i - minAccs, "idle");
                 resetShakeVals();
                 shakes = 0;
             }
@@ -934,10 +953,10 @@ export function renderCaptcha(target: HTMLElement) {
 
     function beepIfNoMotion() {
         if (!motionEnabled || lastMotionTime <= 0) {
-            console.log("beep timeout, regular", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
+            log("beep timeout, regular", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
             setTimeout(() => beep(), suspense);
         } else {
-            console.log("no beep", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
+            log("no beep", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
         }
     }
 
@@ -1066,7 +1085,7 @@ export function renderCaptcha(target: HTMLElement) {
         if (remaining > 0 && enabled) {
             requestAnimationFrame(drawTimerBar);
         } else if (remaining <= 0 && enabled) {
-            console.log("Time's up!");
+            log("Time's up!");
             endTime = startTime + totalTime;
             submitCaptcha();
         } else {
@@ -1289,15 +1308,15 @@ export function renderCaptcha(target: HTMLElement) {
         }
 
         if (valid) {
-            console.log("Yippie!");
+            log("Yippie!");
             prepareRestart();
         } else if (retry) {
             setTimeout(() => {
                 reset();
-                getCaptcha();
+                requestMotion();
             }, 500);
         } else {
-            console.log("Womp, womp");
+            log("Womp, womp");
             prepareRestart();
         }
     }
@@ -1431,6 +1450,27 @@ export function renderCaptcha(target: HTMLElement) {
             canvas.addEventListener("pointerdown", down, {passive: false});
         } else {
             canvas.addEventListener("pointerdown", down);
+        }
+    }
+
+    function log(message?: any, ...data: any[]) {
+        addLog(" > ", message, data);
+        console.log(message, data);
+    }
+
+    function error(message?: any, ...data: any[]) {
+        addLog("!!! ERROR: ", message, data);
+        console.error(message, data);
+    }
+
+    function addLog(prefix: string, message: any, data: any[]) {
+        let logs = document.getElementById("testLogs");
+        if (logs) {
+            let newLog: string = JSON.stringify(message) + " ";
+            if (data) newLog += data.map((value) => JSON.stringify(value)).join(" ");
+            let textArea = (logs as HTMLTextAreaElement);
+            textArea.value += prefix + newLog + "\n";
+            textArea.scrollTop = textArea.scrollHeight;
         }
     }
 
