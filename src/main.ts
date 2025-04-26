@@ -1,8 +1,8 @@
 const config = {
-    showHowTo: true,
+    showHowTo: false,
     expandHowTo: false,
     variant: 'ns',
-    theme: 'dark',
+    theme: 'light',
     lang: 'en',
     minDifficulty: 'easy',
     visualOnDesktop: false,
@@ -74,7 +74,8 @@ const translations: Record<string, {
     howto: string,
     step_1: string,
     step_2: string,
-    step_2_s: string,
+    step_2_desktop: string,
+    step_2_motion: string,
     step_3: string,
     mode_1: string,
     mode_1_text: string,
@@ -85,7 +86,8 @@ const translations: Record<string, {
         howto: '?   How-To:',
         step_1: 'Hit ▶ Play',
         step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
-        step_2_s: `Click at the <b>signal tone!</b>`,
+        step_2_desktop: `Click after the <b>sound cue!</b>`,
+        step_2_motion: `<b>Shake</b> your phone!`,
         step_3: '<b>Solve the CAPTCHA</b>',
         mode_1: 'Implied square:',
         mode_1_text: 'Mark the missing corner!',
@@ -96,7 +98,8 @@ const translations: Record<string, {
         howto: '?   Wie man\'s macht:',
         step_1: 'Drücke ▶ Start',
         step_2: `Tippe bei <b><span style="color: rgba(0, 160, 0)">GRÜN</span>!<b/>`,
-        step_2_s: 'Klicke beim <b>Signalton!</b>',
+        step_2_desktop: 'Klicke beim <b>Signalton!</b>',
+        step_2_motion: '<b>Schüttel</b> dein Handy!',
         step_3: '<b>Löse das CAPTCHA!</b>',
         mode_1: 'Angedeutetes Viereck:',
         mode_1_text: 'Markiere die fehlende Ecke!',
@@ -110,8 +113,8 @@ if (isMobile || visualOnDesktop) {
     document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2;
     document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2;
 } else {
-    document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
-    document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_s;
+    document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_desktop;
+    document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_desktop;
 }
 document.getElementById("neoCaptcha-step_3")!.innerHTML = (translations[userLang] || translations['en']).step_3;
 if (variantNs) {
@@ -137,6 +140,20 @@ let pointSize: number = 0;
 let thumbSize: number = 0;
 let challenge: string | undefined = undefined;
 let hmac: string | undefined = undefined;
+let suspense: number = 0;
+
+// stuff for shake
+const motionThrottle = 50;
+const minAccs = 500 / motionThrottle; // half a second of data points
+const alpha = 0.6; // higher for more smoothing
+let lastMotionTime = 0;
+let smoothX = 0, smoothY = 0, smoothZ = 0;
+let lastAcc: {
+    mag: number, move: number, x: number, y: number, z: number,
+    dmag: number, dx: number, dy: number, dz: number
+} | undefined = undefined;
+let accs: any[] = [];
+let motionEnabled = false;
 
 if (showHowTo) {
     const howToCaption = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
@@ -165,11 +182,47 @@ if (!(isMobile || visualOnDesktop)) {
 const signalIcon = document.getElementById("neoCaptcha-signalIcon") as HTMLSpanElement;
 signalIcon.innerText = (isMobile || visualOnDesktop) ? "do_not_touch" : "hearing";
 
-startBtn.addEventListener("click", getCaptcha);
+startBtn.addEventListener("click", requestMotion);
+
+let motionAllowed = isMobile;
+
+function requestMotion() {
+    if (isMobile && window.DeviceMotionEvent) {
+        if ('requestPermission' in DeviceMotionEvent) {
+            (DeviceMotionEvent as any).requestPermission()
+                .then((response: any) => {
+                    if (response === 'granted') {
+                        log("motion permission granted");
+                        motionAllowed = true;
+                        window.addEventListener('devicemotion', handleMotion);
+                    } else {
+                        log("motion permission denied");
+                        motionAllowed = false;
+                    }
+                    getCaptcha();
+                })
+                .catch((e: any) => {
+                    log("motion permission error");
+                    error(e);
+                    motionAllowed = false;
+                    getCaptcha();
+                });
+        } else {
+            log("motion allowed by default");
+            motionAllowed = true;
+            window.addEventListener('devicemotion', handleMotion);
+            getCaptcha();
+        }
+    } else {
+        log("no motion available");
+        motionAllowed = false;
+        getCaptcha();
+    }
+}
 
 async function getCaptcha() {
-    console.log("version: " + VERSION);
-    console.log("userAgent: " + navigator.userAgent);
+    log("version: " + VERSION);
+    log("userAgent: " + navigator.userAgent);
 
     const wrapper = document.getElementById("neoCaptcha-wrapper") as HTMLDivElement;
     wrapper.style.display = "flex";
@@ -189,7 +242,7 @@ async function getCaptcha() {
         body: JSON.stringify(payload)
     });
     const result = await response.json();
-    console.log(result);
+    // log(result);
     if (result.img) {
         const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
         image.style.display = "inline-block";
@@ -199,6 +252,7 @@ async function getCaptcha() {
         challenge = result.challenge;
         hmac = result.hmac;
         totalTime = result.totalTime || totalTime;
+        suspense = result.suspense;
         const container = document.getElementById("neoCaptcha-container") as HTMLDivElement;
         container.style.height = "20em";
         if (result.variant === 'ns') {
@@ -224,7 +278,179 @@ async function getCaptcha() {
         bar.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]})`;
 
         idleStartTime = Date.now();
-        setTimeout(() => beep(), result.suspense);
+
+        log("isMobile", isMobile, "motionAllowed", motionAllowed);
+        if (isMobile && motionAllowed) {
+            setTimeout(() => beepIfNoMotion(), 1000);
+        } else {
+            log("beep timeout, no motion available");
+            setTimeout(() => beep(), suspense);
+        }
+    }
+}
+
+function setShakeEnabled(enabled: boolean) {
+    motionEnabled = enabled;
+    if (isMobile) {
+        if (motionEnabled) {
+            overlayBg.style.background = mobileRed;
+            signalIcon.innerText = "edgesensor_low";
+            signalIcon.style.animation = "shake 0.4s ease-in-out infinite";
+            document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_motion;
+            document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_motion;
+            overlay.removeEventListener("pointerdown", react);
+            overlay.removeEventListener("pointermove", consumeMove);
+            overlay.removeEventListener("pointerup", start);
+        } else {
+            overlayBg.style.background = mobileRed;
+            signalIcon.innerText = "do_not_touch";
+            signalIcon.style.animation = "none";
+            document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2;
+            document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2;
+            overlay.addEventListener("pointerdown", react, {passive: false});
+            overlay.addEventListener("pointermove", consumeMove, {passive: false});
+            overlay.addEventListener("pointerup", start);
+        }
+    }
+}
+
+async function handleMotion(event: DeviceMotionEvent) {
+    if (!motionEnabled) log("handleMotion");
+    if (!(event instanceof DeviceMotionEvent)) return;
+
+    // throttle
+    const now = Date.now();
+    if (lastMotionTime > 0 && now - lastMotionTime < motionThrottle) return;
+    if (!motionEnabled) log("there is motion");
+    lastMotionTime = now;
+
+    const acc = event.accelerationIncludingGravity;
+    if (acc && acc.x !== null && acc.y !== null && acc.z !== null) {
+        if (!motionEnabled) {
+            setShakeEnabled(true);
+        }
+        // simple low-pass filter (weighted average)
+        smoothX = alpha * smoothX + (1 - alpha) * acc.x;
+        smoothY = alpha * smoothY + (1 - alpha) * acc.y;
+        smoothZ = alpha * smoothZ + (1 - alpha) * acc.z;
+        let mag = Math.sqrt(smoothX * smoothX + smoothY * smoothY + smoothZ * smoothZ);
+        let move = Math.sqrt(smoothX * smoothX + smoothY * smoothY);
+        if (lastAcc) {
+            let dmag = mag - lastAcc.mag;
+            let dx = smoothX - lastAcc.x;
+            let dy = smoothY - lastAcc.y;
+            let dz = smoothZ - lastAcc.z;
+            lastAcc = {
+                mag: mag,
+                move: move,
+                x: smoothX,
+                y: smoothY,
+                z: smoothZ,
+                dmag: dmag,
+                dx: dx,
+                dy: dy,
+                dz: dz
+            };
+            accs.push(lastAcc);
+            if (accs.length > minAccs) {
+                if (beepStartTime <= 0) beepStartTime = Date.now();
+                if (evaluateShake()) {
+                    react();
+                    start();
+                }
+            }
+        } else {
+            lastAcc = {mag: mag, move: move, x: smoothX, y: smoothY, z: smoothZ, dmag: 0, dx: 0, dy: 0, dz: 0};
+        }
+    }
+}
+
+function evaluateShake(logs: boolean = false) {
+    const g = 9;
+    const minMag = 7;
+
+    let dir = 0;
+    let consecutive = 0;
+    let sumMag = 0;
+    let minMove = 99
+    let maxMove = -99;
+
+    function resetShakeVals() {
+        dir = 0;
+        consecutive = 0;
+        sumMag = 0;
+        minMove = 99
+        maxMove = -99;
+    }
+
+    let shakes = 0;
+    let i = 0;
+    let last: any;
+    for (const acc of accs) {
+        i++;
+        if (i < minAccs) {
+            last = acc;
+            continue;
+        }
+
+        let directionChanged = false;
+        if (Math.abs(acc.x) > 2) {
+            if (acc.x < last.x) {
+                // move left
+                if (logs) log(i - minAccs, "<left", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
+
+                if (dir === 1) directionChanged = true
+                else consecutive++;
+                dir = -1;
+
+            } else {
+                // move right
+                if (logs) log(i - minAccs, "right>", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
+
+                if (dir === -1) directionChanged = true
+                else consecutive++;
+                dir = 1;
+
+            }
+            sumMag += acc.mag;
+            minMove = Math.min(minMove, Math.sign(acc.x) * acc.move);
+            maxMove = Math.max(maxMove, Math.sign(acc.x) * acc.move);
+        } else if (acc.mag > g) {
+            if (logs) log(i - minAccs, "idle");
+            resetShakeVals();
+            shakes = 0;
+        }
+        // detect shake
+        if (directionChanged) {
+            let validMoveLength = 2 <= consecutive && consecutive <= 5;
+            let avgMag = sumMag / consecutive;
+            let dMove = Math.abs(maxMove - minMove);
+            if (validMoveLength && avgMag > minMag && dMove > minMag) {
+                shakes++;
+            }
+            resetShakeVals();
+        }
+
+        last = acc;
+        if (shakes >= 2) break;
+    }
+    if (shakes >= 1) {
+        // shaking
+        overlayBg.style.background = mobileGreen;
+    } else if (dir === 0) {
+        // idle
+        overlayBg.style.background = mobileRed;
+        beepStartTime = Date.now();
+    }
+    return shakes >= 2;
+}
+
+function beepIfNoMotion() {
+    if (!motionEnabled || lastMotionTime <= 0) {
+        log("beep timeout, regular", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
+        setTimeout(() => beep(), suspense);
+    } else {
+        log("no beep", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
     }
 }
 
@@ -289,11 +515,13 @@ function react() {
 }
 
 overlay.addEventListener("pointerdown", react, {passive: false});
-overlay.addEventListener("pointermove", () => {
+overlay.addEventListener("pointermove", consumeMove, {passive: false});
+
+function consumeMove() {
     if (beepStartTime <= 0) {
         reaction = undefined;
     }
-}, {passive: false});
+}
 
 function start() {
     if (beepStartTime <= 0) {
@@ -303,6 +531,11 @@ function start() {
     if (reaction && reaction.time === 0) return;
 
     if (beepStartTime > 0 && startTime == 0 && reaction) {
+        if (lastMotionTime > 0) {
+            window.removeEventListener('devicemotion', handleMotion);
+            evaluateShake(true);
+        }
+
         activity.push(reaction);
         activity.push({action: "start", time: Date.now() - idleStartTime});
 
@@ -346,7 +579,7 @@ function drawTimerBar() {
     if (remaining > 0 && enabled) {
         requestAnimationFrame(drawTimerBar);
     } else if (remaining <= 0 && enabled) {
-        console.log("Time's up!");
+        log("Time's up!");
         endTime = startTime + totalTime;
         submitCaptcha();
     } else {
@@ -574,7 +807,7 @@ async function submitCaptcha() {
     } else if (retry) {
         setTimeout(() => {
             reset();
-            getCaptcha();
+            requestMotion();
         }, 500);
     } else if (callbacks && callbacks.onFailure) {
         callbacks.onFailure();
@@ -641,8 +874,39 @@ function reset() {
         bar.clearRect(0, 0, timeCanvas.width, timeCanvas.height);
     }
     if (isMobile || visualOnDesktop) {
-        overlayBg.style.background = mobileRed;
-        signalIcon.innerText = "do_not_touch";
+        if (!visualOnDesktop && motionEnabled) {
+            lastMotionTime = 0;
+            smoothX = 0;
+            smoothY = 0;
+            smoothZ = 0;
+            lastAcc = undefined;
+            accs = [];
+            setShakeEnabled(true);
+        } else {
+            overlayBg.style.background = mobileRed;
+            signalIcon.innerText = "do_not_touch";
+            signalIcon.style.animation = "none";
+        }
     }
-    signalIcon.style.animation = "none";
+}
+
+function log(message?: any, ...data: any[]) {
+    addLog(" > ", message, data);
+    console.log(message, data);
+}
+
+function error(message?: any, ...data: any[]) {
+    addLog("!!! ERROR: ", message, data);
+    console.error(message, data);
+}
+
+function addLog(prefix: string, message: any, data: any[]) {
+    let logs = document.getElementById("testLogs");
+    if (logs) {
+        let newLog: string = JSON.stringify(message) + " ";
+        if (data) newLog += data.map((value) => JSON.stringify(value)).join(" ");
+        let textArea = (logs as HTMLTextAreaElement);
+        textArea.value += prefix + newLog + "\n";
+        textArea.scrollTop = textArea.scrollHeight;
+    }
 }
