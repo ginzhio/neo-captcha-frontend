@@ -40,29 +40,29 @@ const widgetStyles = `
     justify-content: center;
     background: var(--neo-captcha-bg);
     color: var(--neo-captcha-fg);
-    padding: 1em;
+    padding: 1rem;
     margin: 0;
 }
 
 .neo-captcha-logo {
-    margin: 0 1em 0 0;
-    width: 3.5em;
-    height: 3.5em;
+    margin: 0 1rem 0 0;
+    width: 3.5rem;
+    height: 3.5rem;
     cursor: pointer;
     padding: 0;
 }
 
 .neo-captcha-caption {
-    font-size: 1.8em;
+    font-size: 1.8rem;
     font-weight: bold;
     color: var(--neo-captcha-fg);
-    margin: 0 0 0.2em 0;
+    margin: 0 0 0.2rem 0;
     padding: 0;
 }
 
 .neo-captcha-main-canvas {
-    width: 20em;
-    height: 20em;
+    width: 20rem;
+    height: 20rem;
     border: 1px solid var(--neo-captcha-fg);
     z-index: 2;
     position: absolute;
@@ -72,8 +72,8 @@ const widgetStyles = `
 }
 
 .neo-captcha-time {
-    width: 20em;
-    height: 1em;
+    width: 20rem;
+    height: 1rem;
     background: var(--neo-captcha-bg2);
     border: 1px solid var(--neo-captcha-fg);
     margin: 0;
@@ -81,8 +81,8 @@ const widgetStyles = `
 }
 
 .neo-captcha-image {
-    width: 20em;
-    height: 20em;
+    width: 20rem;
+    height: 20rem;
     border: 1px solid var(--neo-captcha-fg);
     z-index: 1;
     position: absolute;
@@ -92,8 +92,8 @@ const widgetStyles = `
 }
 
 .neo-captcha-container {
-    width: 20em;
-    height: 20em;
+    width: 20rem;
+    height: 20rem;
     position: relative;
     display: flex;
     margin: 0;
@@ -101,7 +101,7 @@ const widgetStyles = `
 }
 
 .neo-captcha-button {
-    font-size: 1em;
+    font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -110,8 +110,8 @@ const widgetStyles = `
 
     background: var(--neo-captcha-button);
     border: none;
-    border-radius: 0.5em;
-    box-shadow: 0 4px 0.5em color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 0.5rem color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
 
     &:disabled {
         opacity: 0.5;
@@ -120,7 +120,7 @@ const widgetStyles = `
 
     &:hover:enabled {
         background: color-mix(in srgb, var(--neo-captcha-button) 80%, var(--neo-captcha-light));
-        box-shadow: 0 6px 0.75em color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
+        box-shadow: 0 6px 0.75rem color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
         transform: translateY(-1px);
     }
 
@@ -131,17 +131,17 @@ const widgetStyles = `
 }
 
 .neo-captcha-submit-button {
-    width: 20em;
-    height: 4em;
+    width: 20rem;
+    height: 4rem;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-guess-region {
-    width: 20em;
+    width: 20rem;
     display: grid;
     grid-template-columns: auto auto;
-    grid-gap: 0.25em;
+    grid-gap: 0.25rem;
     margin: 0;
     padding: 0;
 }
@@ -185,6 +185,17 @@ const widgetStyles = `
     width: 20em;
     height: 20em;
     position: absolute;
+    z-index: -1;
+    transform: translateY(1px) translateX(1px);
+    margin: 0;
+    padding: 0;
+}
+
+.neo-captcha-overlay-bg-fill {
+    width: 20em;
+    height: 0;
+    position: absolute;
+    bottom: 0;
     z-index: -1;
     transform: translateY(1px) translateX(1px);
     margin: 0;
@@ -298,14 +309,14 @@ const widgetStyles = `
 }
 
 .neo-captcha-mode-icon {
-    width: 2.2em;
-    height: 2.2em;
-    margin: 0 0.75em 0 0;
+    width: 2.2rem;
+    height: 2.2rem;
+    margin: 0 0.75rem 0 0;
     padding: 0;
 }
 
 .neo-captcha-how-to-footer {
-    font-size: 1.2em;
+    font-size: 1.2rem;
     display: flex;
     flex-direction: column;
     margin: 0;
@@ -336,26 +347,26 @@ const widgetStyles = `
 }
 
 .neo-captcha-settings-box {
-    width: 16em;
+    width: 16rem;
     display: grid;
     grid-template-columns: auto auto;
-    grid-gap: 1em;
+    grid-gap: 1rem;
     text-align: end;
     align-items: baseline;
-    padding: 2em;
+    padding: 2rem;
     margin: 0;
 }
 
 .neo-captcha-settings-title {
-    font-size: 1.5em;
+    font-size: 1.5rem;
     grid-column: 1/-1;
     text-align: center;
-    padding: 0 1em 0 0;
+    padding: 0 1rem 0 0;
     margin: 0;
 }
 
 .neo-captcha-select {
-    height: 3em;
+    height: 3rem;
     margin: 0;
     padding: 0;
 }
@@ -438,6 +449,7 @@ export function renderCaptcha(target: HTMLElement) {
                 <canvas id="neoCaptcha-captchaCanvas" class="neo-captcha-main-canvas"></canvas>
                 <div id="neoCaptcha-startOverlay" class="neo-captcha-icon-div">
                     <div id="neoCaptcha-overlayBg" class="neo-captcha-overlay-bg"></div>
+                    <div id="neoCaptcha-overlayBgFill" class="neo-captcha-overlay-bg-fill"></div>
                     <span id="neoCaptcha-signalIcon" class="neo-captcha-icon material-icons">hearing</span>
                     <span id="neoCaptcha-signalText" class="neo-captcha-signal-text"></span>
                 </div>
@@ -644,7 +656,7 @@ export function renderCaptcha(target: HTMLElement) {
     let hmac: string | undefined = undefined;
     let suspense: number = 0;
 
-// stuff for shake
+    // stuff for shake
     const motionThrottle = 50;
     const minAccs = 500 / motionThrottle; // half a second of data points
     const alpha = 0.6; // higher for more smoothing
@@ -807,6 +819,8 @@ export function renderCaptcha(target: HTMLElement) {
                 overlay.removeEventListener("pointerdown", react);
                 overlay.removeEventListener("pointermove", consumeMove);
                 overlay.removeEventListener("pointerup", start);
+                fillPercent = 0;
+                requestAnimationFrame(drawBgFill);
             } else {
                 overlayBg.style.background = mobileRed;
                 signalIcon.innerText = "do_not_touch";
@@ -861,8 +875,21 @@ export function renderCaptcha(target: HTMLElement) {
                 if (accs.length > minAccs) {
                     if (beepStartTime <= 0) beepStartTime = Date.now();
                     if (evaluateShake()) {
-                        react();
-                        start();
+                        requestAnimationFrame(() => {
+                            drawBgFill();
+                            overlayBg.style.background = mobileGreen;
+                            signalIcon.style.animation = "none";
+                            signalIcon.innerText = "check";
+                            new Promise(() => setTimeout(() => {
+                                react();
+                                start();
+                            }, motionThrottle * 2));
+                        });
+                    } else {
+                        requestAnimationFrame(() => {
+                            drawBgFill();
+                            overlayBg.style.background = mobileRed;
+                        });
                     }
                 }
             } else {
@@ -871,15 +898,28 @@ export function renderCaptcha(target: HTMLElement) {
         }
     }
 
-    function evaluateShake(logs: boolean = false) {
+    let fillPercent = 0;
+
+    function drawBgFill() {
+        let bgFill = document.getElementById("neoCaptcha-overlayBgFill");
+        let fill = fillPercent / 100 * 20;
+        bgFill!.style.height = fill + "rem";
+        bgFill!.style.background = mobileGreen;
+    }
+
+    function evaluateShake() {
         const g = 9;
         const minMag = 7;
+        const minDMove = 4;
+        const minDelta = 3;
 
         let dir = 0;
         let consecutive = 0;
         let sumMag = 0;
         let minMove = 99
         let maxMove = -99;
+        let percent = 0;
+        let deltaIdleCount = 0;
 
         function resetShakeVals() {
             dir = 0;
@@ -892,63 +932,69 @@ export function renderCaptcha(target: HTMLElement) {
         let shakes = 0;
         let i = 0;
         let last: any;
+        let maxLen = 5000 / motionThrottle; // 5 seconds of data points
+        accs = accs.slice(Math.max(0, accs.length - maxLen), accs.length);
         for (const acc of accs) {
             i++;
-            if (i < minAccs) {
+            if (!last) {
                 last = acc;
                 continue;
             }
 
+            const delta = Math.abs(acc.move - last.move);
+            if (delta < minDelta) deltaIdleCount++;
+            else deltaIdleCount = 0;
             let directionChanged = false;
-            if (Math.abs(acc.x) > 2) {
+            if (Math.abs(acc.x) > 2 && deltaIdleCount < 4) {
                 if (acc.x < last.x) {
                     // move left
-                    if (logs) log(i - minAccs, "<left", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
-
                     if (dir === 1) directionChanged = true
                     else consecutive++;
                     dir = -1;
 
                 } else {
                     // move right
-                    if (logs) log(i - minAccs, "right>", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
-
                     if (dir === -1) directionChanged = true
                     else consecutive++;
                     dir = 1;
 
                 }
+                percent += Math.max(acc.x - 1, acc.move - 2);
                 sumMag += acc.mag;
                 minMove = Math.min(minMove, Math.sign(acc.x) * acc.move);
                 maxMove = Math.max(maxMove, Math.sign(acc.x) * acc.move);
             } else if (acc.mag > g) {
-                if (logs) log(i - minAccs, "idle");
+                // idle
                 resetShakeVals();
                 shakes = 0;
+                percent = Math.max(0, percent - Math.max(2, deltaIdleCount - 2));
             }
             // detect shake
             if (directionChanged) {
                 let validMoveLength = 2 <= consecutive && consecutive <= 5;
                 let avgMag = sumMag / consecutive;
                 let dMove = Math.abs(maxMove - minMove);
-                if (validMoveLength && avgMag > minMag && dMove > minMag) {
+                if (validMoveLength) percent += 1;
+                if (avgMag > minMag) percent += 1;
+                if (dMove > minDMove) percent += 1;
+                if (validMoveLength && avgMag > minMag && dMove > minDMove) {
                     shakes++;
+                    percent += 10;
                 }
                 resetShakeVals();
             }
 
             last = acc;
-            if (shakes >= 2) break;
+            if (shakes < 1) percent = Math.min(percent, 50);
+            if (percent >= 100) break;
         }
-        if (shakes >= 1) {
-            // shaking
-            overlayBg.style.background = mobileGreen;
-        } else if (dir === 0) {
+        percent = Math.max(0, Math.min(100, percent));
+        fillPercent = percent;
+        if (shakes < 1 && dir === 0) {
             // idle
-            overlayBg.style.background = mobileRed;
             beepStartTime = Date.now();
         }
-        return shakes >= 2;
+        return fillPercent == 100;
     }
 
     function beepIfNoMotion() {
@@ -1039,7 +1085,6 @@ export function renderCaptcha(target: HTMLElement) {
         if (beepStartTime > 0 && startTime == 0 && reaction) {
             if (lastMotionTime > 0) {
                 window.removeEventListener('devicemotion', handleMotion);
-                evaluateShake(true);
             }
 
             activity.push(reaction);
@@ -1050,6 +1095,7 @@ export function renderCaptcha(target: HTMLElement) {
             image.src = imgSrc;
             startTimer();
             if (!ctx) {
+                error("Canvas context could not be initialized.");
                 throw new Error("Canvas context could not be initialized.");
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);

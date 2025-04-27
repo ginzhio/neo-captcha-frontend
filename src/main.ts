@@ -30,6 +30,7 @@ const mobileGreen = "#0f4a";
 
 let userLang = (navigator.language || navigator.languages[0]).split("-")[0];
 console.log("lang: " + userLang);
+// userLang = 'en';
 const translations: Record<string, {
     howto: string,
     step_1: string,
@@ -41,6 +42,7 @@ const translations: Record<string, {
     mode_1_text: string,
     mode_2: string,
     mode_2_text: string,
+    try_mobile: string,
     settings: string,
     settings_variant: string,
     settings_difficulty: string,
@@ -61,6 +63,7 @@ const translations: Record<string, {
         mode_1_text: 'Mark the missing corner!',
         mode_2: 'Neon Shape:',
         mode_2_text: 'Select the shape you see!',
+        try_mobile: 'NeoCAPTCHA is optimized for real mobile devices!',
         settings: 'Settings',
         settings_variant: 'Variant:',
         settings_difficulty: 'Difficulty:',
@@ -81,6 +84,7 @@ const translations: Record<string, {
         mode_1_text: 'Markiere die fehlende Ecke!',
         mode_2: 'Neon-Form:',
         mode_2_text: 'Welche Form siehst du?',
+        try_mobile: 'NeoCAPTCHA ist für echte Mobilgeräte optimiert!',
         settings: 'Einstellungen',
         settings_variant: 'Variante:',
         settings_difficulty: 'Schwierigkeit:',
@@ -108,6 +112,7 @@ if (variantNs) {
     document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
     document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
 }
+document.getElementById("neoCaptcha-tryMobileHint")!.innerHTML = (translations[userLang] || translations['en']).try_mobile;
 document.getElementById("neoCaptcha-settings")!.innerHTML = (translations[userLang] || translations['en']).settings;
 document.getElementById("neoCaptcha-labelVari")!.innerHTML = (translations[userLang] || translations['en']).settings_variant;
 document.getElementById("neoCaptcha-labelDiff")!.innerHTML = (translations[userLang] || translations['en']).settings_difficulty;
@@ -321,6 +326,8 @@ function setShakeEnabled(enabled: boolean) {
             overlay.removeEventListener("pointerdown", react);
             overlay.removeEventListener("pointermove", consumeMove);
             overlay.removeEventListener("pointerup", start);
+            fillPercent = 0;
+            requestAnimationFrame(drawBgFill);
         } else {
             overlayBg.style.background = mobileRed;
             signalIcon.innerText = "do_not_touch";
@@ -375,8 +382,21 @@ async function handleMotion(event: DeviceMotionEvent) {
             if (accs.length > minAccs) {
                 if (beepStartTime <= 0) beepStartTime = Date.now();
                 if (evaluateShake()) {
-                    react();
-                    start();
+                    requestAnimationFrame(() => {
+                        drawBgFill();
+                        overlayBg.style.background = mobileGreen;
+                        signalIcon.style.animation = "none";
+                        signalIcon.innerText = "check";
+                        new Promise(() => setTimeout(() => {
+                            react();
+                            start();
+                        }, motionThrottle * 2));
+                    });
+                } else {
+                    requestAnimationFrame(() => {
+                        drawBgFill();
+                        overlayBg.style.background = mobileRed;
+                    });
                 }
             }
         } else {
@@ -385,15 +405,28 @@ async function handleMotion(event: DeviceMotionEvent) {
     }
 }
 
+let fillPercent = 0;
+
+function drawBgFill() {
+    let bgFill = document.getElementById("neoCaptcha-overlayBgFill");
+    let fill = fillPercent / 100 * 20;
+    bgFill!.style.height = fill + "rem";
+    bgFill!.style.background = mobileGreen;
+}
+
 function evaluateShake(logs: boolean = false) {
     const g = 9;
     const minMag = 7;
+    const minDMove = 4;
+    const minDelta = 3;
 
     let dir = 0;
     let consecutive = 0;
     let sumMag = 0;
     let minMove = 99
     let maxMove = -99;
+    let percent = 0;
+    let deltaIdleCount = 0;
 
     function resetShakeVals() {
         dir = 0;
@@ -406,63 +439,72 @@ function evaluateShake(logs: boolean = false) {
     let shakes = 0;
     let i = 0;
     let last: any;
+    let maxLen = 5000 / motionThrottle; // 5 seconds of data points
+    accs = accs.slice(Math.max(0, accs.length - maxLen), accs.length);
     for (const acc of accs) {
         i++;
-        if (i < minAccs) {
+        if (!last) {
             last = acc;
             continue;
         }
 
+        // detect movement
+        const delta = Math.abs(acc.move - last.move);
+        if (delta < minDelta) deltaIdleCount++;
+        else deltaIdleCount = 0;
         let directionChanged = false;
-        if (Math.abs(acc.x) > 2) {
+        if (Math.abs(acc.x) > 2 && deltaIdleCount < 4) {
             if (acc.x < last.x) {
                 // move left
-                if (logs) log(i - minAccs, "<left", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
+                if (logs) log(i, "<left", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
 
                 if (dir === 1) directionChanged = true
                 else consecutive++;
                 dir = -1;
-
             } else {
                 // move right
-                if (logs) log(i - minAccs, "right>", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
+                if (logs) log(i, "right>", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
 
                 if (dir === -1) directionChanged = true
                 else consecutive++;
                 dir = 1;
-
             }
+            percent += Math.max(acc.x - 1, acc.move - 2);
             sumMag += acc.mag;
             minMove = Math.min(minMove, Math.sign(acc.x) * acc.move);
             maxMove = Math.max(maxMove, Math.sign(acc.x) * acc.move);
         } else if (acc.mag > g) {
-            if (logs) log(i - minAccs, "idle");
+            if (logs) log(i, "idle");
             resetShakeVals();
             shakes = 0;
+            percent = Math.max(0, percent - Math.max(2, deltaIdleCount - 2));
         }
         // detect shake
         if (directionChanged) {
-            let validMoveLength = 2 <= consecutive && consecutive <= 5;
+            let validMoveLength = 2 <= consecutive && consecutive <= 5; // numbers depend on motionThrottle
             let avgMag = sumMag / consecutive;
             let dMove = Math.abs(maxMove - minMove);
-            if (validMoveLength && avgMag > minMag && dMove > minMag) {
+            if (validMoveLength) percent += 1;
+            if (avgMag > minMag) percent += 1;
+            if (dMove > minDMove) percent += 1;
+            if (validMoveLength && avgMag > minMag && dMove > minDMove) {
                 shakes++;
+                percent += 10;
             }
             resetShakeVals();
         }
 
         last = acc;
-        if (shakes >= 2) break;
+        if (shakes < 1) percent = Math.min(percent, 50);
+        if (percent >= 100) break;
     }
-    if (shakes >= 1) {
-        // shaking
-        overlayBg.style.background = mobileGreen;
-    } else if (dir === 0) {
+    percent = Math.max(0, Math.min(100, percent));
+    fillPercent = percent;
+    if (shakes < 1 && dir === 0) {
         // idle
-        overlayBg.style.background = mobileRed;
         beepStartTime = Date.now();
     }
-    return shakes >= 2;
+    return fillPercent == 100;
 }
 
 function beepIfNoMotion() {
@@ -553,7 +595,7 @@ function start() {
     if (beepStartTime > 0 && startTime == 0 && reaction) {
         if (lastMotionTime > 0) {
             window.removeEventListener('devicemotion', handleMotion);
-            evaluateShake(true);
+            // evaluateShake(true);
         }
 
         activity.push(reaction);
