@@ -21,6 +21,7 @@ const widgetStyles = `
     --neo-captcha-bg2: var(--neo-captcha-bg2-light);
     --neo-captcha-fg: var(--neo-captcha-fg-light);
     --neo-captcha-gradient: linear-gradient(color-mix(in srgb, var(--neo-captcha-fg) 2%, transparent), color-mix(in srgb, var(--neo-captcha-fg) 15%, transparent));
+    --neo-captcha-warn: #cf5d00;
 }
 
 .neo-captcha-theme-dark {
@@ -28,6 +29,7 @@ const widgetStyles = `
     --neo-captcha-bg2: var(--neo-captcha-bg2-dark);
     --neo-captcha-fg: var(--neo-captcha-fg-dark);
     --neo-captcha-gradient: linear-gradient(color-mix(in srgb, var(--neo-captcha-fg) 25%, transparent), color-mix(in srgb, var(--neo-captcha-fg) 5%, transparent));
+    --neo-captcha-warn: #fa7d00;
 }
 
 .neo-captcha-box {
@@ -46,14 +48,14 @@ const widgetStyles = `
 
 .neo-captcha-logo {
     margin: 0 1rem 0 0;
-    width: 3.5rem;
-    height: 3.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
     cursor: pointer;
     padding: 0;
 }
 
 .neo-captcha-caption {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: var(--neo-captcha-fg);
     margin: 0 0 0.2rem 0;
@@ -61,8 +63,8 @@ const widgetStyles = `
 }
 
 .neo-captcha-main-canvas {
-    width: 20rem;
-    height: 20rem;
+    width: 18rem;
+    height: 18rem;
     border: 1px solid var(--neo-captcha-fg);
     z-index: 2;
     position: absolute;
@@ -72,7 +74,7 @@ const widgetStyles = `
 }
 
 .neo-captcha-time {
-    width: 20rem;
+    width: 18rem;
     height: 1rem;
     background: var(--neo-captcha-bg2);
     border: 1px solid var(--neo-captcha-fg);
@@ -81,8 +83,8 @@ const widgetStyles = `
 }
 
 .neo-captcha-image {
-    width: 20rem;
-    height: 20rem;
+    width: 18rem;
+    height: 18rem;
     border: 1px solid var(--neo-captcha-fg);
     z-index: 1;
     position: absolute;
@@ -92,8 +94,8 @@ const widgetStyles = `
 }
 
 .neo-captcha-container {
-    width: 20rem;
-    height: 20rem;
+    width: 18rem;
+    height: 18rem;
     position: relative;
     display: flex;
     margin: 0;
@@ -108,7 +110,7 @@ const widgetStyles = `
     margin: 0;
     padding: 0;
 
-    background: var(--neo-captcha-button);
+    background: linear-gradient(color-mix(in srgb, var(--neo-captcha-button) 80%, var(--neo-captcha-light)), var(--neo-captcha-button));
     border: none;
     border-radius: 0.5rem;
     box-shadow: 0 4px 0.5rem color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
@@ -119,26 +121,26 @@ const widgetStyles = `
     }
 
     &:hover:enabled {
-        background: color-mix(in srgb, var(--neo-captcha-button) 80%, var(--neo-captcha-light));
+        background: linear-gradient(color-mix(in srgb, var(--neo-captcha-button) 80%, white), color-mix(in srgb, var(--neo-captcha-button) 80%, white));
         box-shadow: 0 6px 0.75rem color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
         transform: translateY(-1px);
     }
 
     &:active:enabled {
-        background: var(--neo-captcha-button);
+        background: linear-gradient(var(--neo-captcha-button), var(--neo-captcha-button));
         box-shadow: none;
     }
 }
 
 .neo-captcha-submit-button {
-    width: 20rem;
+    width: 18rem;
     height: 4rem;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-guess-region {
-    width: 20rem;
+    width: 18rem;
     display: grid;
     grid-template-columns: auto auto;
     grid-gap: 0.25rem;
@@ -147,21 +149,22 @@ const widgetStyles = `
 }
 
 .neo-captcha-multi-button {
+    font-size: 1rem;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-start-button {
-    width: 20rem;
+    width: 18rem;
     height: 15rem;
-    font-size: 1.5em;
-    margin: 0.25em 0 0 0;
+    font-size: 1.5rem;
+    margin: 0.25rem 0 0 0;
     padding: 0;
 }
 
 .neo-captcha-icon-div {
-    width: 20em;
-    height: 20em;
+    width: 18rem;
+    height: 18rem;
     position: absolute;
     z-index: 3;
     display: none;
@@ -182,8 +185,8 @@ const widgetStyles = `
 }
 
 .neo-captcha-overlay-bg {
-    width: 20em;
-    height: 20em;
+    width: 18rem;
+    height: 18rem;
     position: absolute;
     z-index: -1;
     transform: translateY(1px) translateX(1px);
@@ -192,7 +195,7 @@ const widgetStyles = `
 }
 
 .neo-captcha-overlay-bg-fill {
-    width: 20em;
+    width: 18rem;
     height: 0;
     position: absolute;
     bottom: 0;
@@ -203,15 +206,15 @@ const widgetStyles = `
 }
 
 .neo-captcha-signal-text {
-    top: 0.5em;
-    font-size: 1.5em;
+    top: 0.5rem;
+    font-size: 1.5rem;
     color: var(--neo-captcha-light);
-    text-shadow: #000 0 0 0.25em;
+    text-shadow: #000 0 0 0.25rem;
     position: absolute;
 }
 
 .neo-captcha-icon {
-    font-size: 5em;
+    font-size: 5rem;
     color: var(--neo-captcha-light);
     margin: 0;
     padding: 0;
@@ -226,29 +229,28 @@ const widgetStyles = `
 
 @keyframes shake {
     0% {
-        transform: rotate(-10deg) translateX(-0.25em);
+        transform: rotate(-10deg) translateX(-1rem);
     }
     50% {
-        transform: rotate(10deg) translateX(0.25em);
+        transform: rotate(10deg) translateX(1rem);
     }
     100% {
-        transform: rotate(-10deg) translateX(-0.25em);
+        transform: rotate(-10deg) translateX(-1rem);
     }
 }
 
-
 .neo-captcha-fg-icon {
-    font-size: 3em;
+    font-size: 3rem;
     color: var(--neo-captcha-fg);
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-icon-dark {
+    font-size: 3rem;
+    max-width: 3rem;
+    max-height: 3rem;
     color: var(--neo-captcha-dark);
-    font-size: 3em;
-    width: 1em;
-    height: 1em;
     margin: 0;
     padding: 0;
 }
@@ -265,12 +267,12 @@ const widgetStyles = `
     flex-direction: row;
     align-items: center;
     justify-self: center;
-    margin: 0 0 0.5em 0;
+    margin: 0 0 0.5rem 0;
     padding: 0;
 }
 
 .neo-captcha-how-to {
-    width: 20em;
+    width: 18rem;
     background: var(--neo-captcha-bg2);
     border: 1px solid var(--neo-captcha-fg);
     text-align: start;
@@ -279,23 +281,28 @@ const widgetStyles = `
 }
 
 .neo-captcha-how-to-text {
+    font-size: 0.9rem;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-how-to-caption {
-    font-size: 1em;
+    font-size: 0.75rem;
     font-weight: bold;
     cursor: pointer;
-    padding: 0.6em 1em 0.4em 1em;
+    padding: 0.1rem 1rem 0.1rem 1rem;
     background: var(--neo-captcha-gradient);
     display: flex;
     flex-direction: row;
     margin: 0;
 }
 
+.neo-captcha-how-to-title {
+    margin: 0.2rem 0 0 0;
+}
+
 .neo-captcha-how-to-table {
-    padding: 0.5em 1em 1em 1em;
+    padding: 0.25rem 1rem 0.5rem 1rem;
     background: color-mix(in srgb, var(--neo-captcha-fg) 7%, transparent);
     margin: 0;
 }
@@ -304,26 +311,27 @@ const widgetStyles = `
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 0.5em 0.5em 0.5em 0.75em;
+    padding: 0.25rem 0.75rem 0.5rem 0.75rem;
     margin: 0;
 }
 
 .neo-captcha-mode-icon {
-    width: 2.2rem;
-    height: 2.2rem;
+    width: 2rem;
+    height: 2rem;
     margin: 0 0.75rem 0 0;
     padding: 0;
 }
 
-.neo-captcha-how-to-footer {
-    font-size: 1.2rem;
+.neo-captcha-how-to-header {
+    font-size: 1rem;
     display: flex;
     flex-direction: column;
     margin: 0;
     padding: 0;
 }
 
-.neo-captcha-how-to-footer-mode {
+.neo-captcha-how-to-header-mode {
+    font-size: 1.2rem;
     color: var(--neo-captcha-accent);
     font-weight: bold;
     margin: 0;
@@ -344,6 +352,14 @@ const widgetStyles = `
     color: var(--neo-captcha-accent);
     margin: 0;
     padding: 0;
+}
+
+.neo-captcha-try-mobile-hint {
+    max-width: 19rem;
+    font-size: 1rem;
+    color: var(--neo-captcha-warn);
+    margin: 1rem 0 0 0;
+    display: none;
 }
 
 .neo-captcha-settings-box {
@@ -409,8 +425,15 @@ export function renderCaptcha(target: HTMLElement) {
             <span class="neo-captcha-caption">NeoCAPTCHA</span>
         </div>
         <div id="neoCaptcha-howTo" class="neo-captcha-how-to">
+            <div class="neo-captcha-how-to-description">
+                <img id="neoCaptcha-modeIcon" class="neo-captcha-mode-icon" alt="icon variant">
+                <div class="neo-captcha-how-to-header">
+                    <span id="neoCaptcha-mode" class="neo-captcha-how-to-header-mode"></span>
+                    <span id="neoCaptcha-modeText"></span>
+                </div>
+            </div>
             <div id="neoCaptcha-howToCaption" class="neo-captcha-how-to-caption">
-                <span id="neoCaptcha-howToTitle"></span>
+                <span id="neoCaptcha-howToTitle" class="neo-captcha-how-to-title"></span>
                 <span id="neoCaptcha-howToIcon" class="neo-captcha-wide-icon material-icons">expand_less</span>
             </div>
             <div class="neo-captcha-how-to-text">
@@ -428,13 +451,6 @@ export function renderCaptcha(target: HTMLElement) {
                         <td id="neoCaptcha-step_3"></td>
                     </tr>
                 </table>
-                <div class="neo-captcha-how-to-description">
-                    <img id="neoCaptcha-modeIcon" class="neo-captcha-mode-icon" alt="icon variant">
-                    <div class="neo-captcha-how-to-footer">
-                        <span id="neoCaptcha-mode" class="neo-captcha-how-to-footer-mode"></span>
-                        <span id="neoCaptcha-modeText"></span>
-                    </div>
-                </div>
             </div>
         </div>
         <button id="neoCaptcha-start" class="neo-captcha-button neo-captcha-start-button">
@@ -479,6 +495,7 @@ export function renderCaptcha(target: HTMLElement) {
                 </button>
             </div>
         </div>
+        <span id="neoCaptcha-tryMobileHint" class="neo-captcha-try-mobile-hint"></span>
         <div>
             <div class="neo-captcha-settings-box">
                 <span class="neo-captcha-settings-title" id="neoCaptcha-settings"></span>
@@ -527,7 +544,8 @@ export function renderCaptcha(target: HTMLElement) {
     const mobileGreen = "#0f4a";
 
     let userLang = (navigator.language || navigator.languages[0]).split("-")[0];
-    log("lang: " + userLang);
+    console.log("lang: " + userLang);
+// userLang = 'en';
     const translations: Record<string, {
         howto: string,
         step_1: string,
@@ -539,6 +557,7 @@ export function renderCaptcha(target: HTMLElement) {
         mode_1_text: string,
         mode_2: string,
         mode_2_text: string,
+        try_mobile: string,
         settings: string,
         settings_variant: string,
         settings_difficulty: string,
@@ -552,13 +571,14 @@ export function renderCaptcha(target: HTMLElement) {
             howto: '?   How-To:',
             step_1: 'Hit ▶ Play',
             step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
-            step_2_desktop: `Click at the <b>signal tone!</b>`,
+            step_2_desktop: `Click after the <b>sound cue!</b>`,
             step_2_motion: `<b>Shake</b> your phone!`,
             step_3: '<b>Solve the CAPTCHA</b>',
             mode_1: 'Implied square:',
             mode_1_text: 'Mark the missing corner!',
             mode_2: 'Neon Shape:',
             mode_2_text: 'Select the shape you see!',
+            try_mobile: 'NeoCAPTCHA is optimized for real mobile devices!',
             settings: 'Settings',
             settings_variant: 'Variant:',
             settings_difficulty: 'Difficulty:',
@@ -579,6 +599,7 @@ export function renderCaptcha(target: HTMLElement) {
             mode_1_text: 'Markiere die fehlende Ecke!',
             mode_2: 'Neon-Form:',
             mode_2_text: 'Welche Form siehst du?',
+            try_mobile: 'NeoCAPTCHA ist für echte Mobilgeräte optimiert!',
             settings: 'Einstellungen',
             settings_variant: 'Variante:',
             settings_difficulty: 'Schwierigkeit:',
@@ -592,8 +613,8 @@ export function renderCaptcha(target: HTMLElement) {
     document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
     document.getElementById("neoCaptcha-step_1")!.innerHTML = (translations[userLang] || translations['en']).step_1;
     if (isMobile) {
-        document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2;
-        document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2;
+        document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_motion;
+        document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_motion;
     } else {
         document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_desktop;
         document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_desktop;
@@ -606,6 +627,7 @@ export function renderCaptcha(target: HTMLElement) {
         document.getElementById("neoCaptcha-mode")!.innerHTML = (translations[userLang] || translations['en']).mode_1;
         document.getElementById("neoCaptcha-modeText")!.innerHTML = (translations[userLang] || translations['en']).mode_1_text;
     }
+    document.getElementById("neoCaptcha-tryMobileHint")!.innerHTML = (translations[userLang] || translations['en']).try_mobile;
     document.getElementById("neoCaptcha-settings")!.innerHTML = (translations[userLang] || translations['en']).settings;
     document.getElementById("neoCaptcha-labelVari")!.innerHTML = (translations[userLang] || translations['en']).settings_variant;
     document.getElementById("neoCaptcha-labelDiff")!.innerHTML = (translations[userLang] || translations['en']).settings_difficulty;
@@ -656,7 +678,7 @@ export function renderCaptcha(target: HTMLElement) {
     let hmac: string | undefined = undefined;
     let suspense: number = 0;
 
-    // stuff for shake
+// stuff for shake
     const motionThrottle = 50;
     const minAccs = 500 / motionThrottle; // half a second of data points
     const alpha = 0.6; // higher for more smoothing
@@ -668,6 +690,7 @@ export function renderCaptcha(target: HTMLElement) {
     } | undefined = undefined;
     let accs: any[] = [];
     let motionEnabled = false;
+    let fillPercent = 0;
 
     let howToShown = true;
     let howToExpanded = false;
@@ -690,10 +713,13 @@ export function renderCaptcha(target: HTMLElement) {
     }
 
     const overlayBg = document.getElementById("neoCaptcha-overlayBg") as HTMLDivElement;
+    const tryMobile = document.getElementById("neoCaptcha-tryMobileHint") as HTMLSpanElement;
     if (!isMobile) {
         overlayBg.style.background = "#000";
+        tryMobile.style.display = "block";
     } else {
         overlayBg.style.background = mobileRed;
+        tryMobile.style.display = "none";
     }
     const signalIcon = document.getElementById("neoCaptcha-signalIcon") as HTMLSpanElement;
     signalIcon.innerText = isMobile ? "do_not_touch" : "hearing";
@@ -704,6 +730,7 @@ export function renderCaptcha(target: HTMLElement) {
 
     function requestMotion() {
         if (isMobile && window.DeviceMotionEvent) {
+            setShakeEnabled(true);
             if ('requestPermission' in DeviceMotionEvent) {
                 (DeviceMotionEvent as any).requestPermission()
                     .then((response: any) => {
@@ -742,6 +769,10 @@ export function renderCaptcha(target: HTMLElement) {
         log("version: " + VERSION);
         log("userAgent: " + navigator.userAgent);
 
+        if (isMobile) {
+            setShakeEnabled(motionAllowed);
+        }
+
         const wrapper = document.getElementById("neoCaptcha-wrapper") as HTMLDivElement;
         wrapper.style.display = "flex";
         startBtn.style.display = "none";
@@ -772,7 +803,7 @@ export function renderCaptcha(target: HTMLElement) {
             totalTime = result.totalTime || totalTime;
             suspense = result.suspense;
             const container = document.getElementById("neoCaptcha-container") as HTMLDivElement;
-            container.style.height = "20em";
+            container.style.height = "18rem";
             if (result.variant === 'ns') {
                 for (let i = 1; i <= 4; i++) {
                     (document.getElementById("neoCaptcha-guess-icon-" + i) as HTMLImageElement)
@@ -780,8 +811,8 @@ export function renderCaptcha(target: HTMLElement) {
                 }
             }
 
-            canvas.style.width = "20em";
-            canvas.style.height = "20em";
+            canvas.style.width = "18rem";
+            canvas.style.height = "18rem";
             canvas.width = canvas.clientWidth;
             canvas.height = canvas.width;
             pointSize = canvas.width * result.pointSize;
@@ -799,7 +830,7 @@ export function renderCaptcha(target: HTMLElement) {
 
             log("isMobile", isMobile, "motionAllowed", motionAllowed);
             if (isMobile && motionAllowed) {
-                setTimeout(() => beepIfNoMotion(), 1000);
+                setTimeout(() => beepIfNoMotion(), 500);
             } else {
                 log("beep timeout, no motion available");
                 setTimeout(() => beep(), suspense);
@@ -808,9 +839,8 @@ export function renderCaptcha(target: HTMLElement) {
     }
 
     function setShakeEnabled(enabled: boolean) {
-        motionEnabled = enabled;
         if (isMobile) {
-            if (motionEnabled) {
+            if (enabled) {
                 overlayBg.style.background = mobileRed;
                 signalIcon.innerText = "edgesensor_low";
                 signalIcon.style.animation = "shake 0.4s ease-in-out infinite";
@@ -847,6 +877,7 @@ export function renderCaptcha(target: HTMLElement) {
         const acc = event.accelerationIncludingGravity;
         if (acc && acc.x !== null && acc.y !== null && acc.z !== null) {
             if (!motionEnabled) {
+                motionEnabled = true;
                 setShakeEnabled(true);
             }
             // simple low-pass filter (weighted average)
@@ -895,23 +926,24 @@ export function renderCaptcha(target: HTMLElement) {
             } else {
                 lastAcc = {mag: mag, move: move, x: smoothX, y: smoothY, z: smoothZ, dmag: 0, dx: 0, dy: 0, dz: 0};
             }
+        } else {
+            setShakeEnabled(false);
+            tryMobile.style.display = "block";
         }
     }
 
-    let fillPercent = 0;
-
     function drawBgFill() {
         let bgFill = document.getElementById("neoCaptcha-overlayBgFill");
-        let fill = fillPercent / 100 * 20;
+        let fill = fillPercent / 100 * 18;
         bgFill!.style.height = fill + "rem";
         bgFill!.style.background = mobileGreen;
     }
 
-    function evaluateShake() {
+    function evaluateShake(logs: boolean = false) {
         const g = 9;
         const minMag = 7;
         const minDMove = 4;
-        const minDelta = 3;
+        const minDelta = 2;
 
         let dir = 0;
         let consecutive = 0;
@@ -941,37 +973,40 @@ export function renderCaptcha(target: HTMLElement) {
                 continue;
             }
 
+            // detect movement
             const delta = Math.abs(acc.move - last.move);
             if (delta < minDelta) deltaIdleCount++;
             else deltaIdleCount = 0;
             let directionChanged = false;
-            if (Math.abs(acc.x) > 2 && deltaIdleCount < 4) {
+            if (Math.abs(acc.x) > 2 && deltaIdleCount < 5) {
                 if (acc.x < last.x) {
                     // move left
+                    if (logs) log(i, "<left", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
+
                     if (dir === 1) directionChanged = true
                     else consecutive++;
                     dir = -1;
-
                 } else {
                     // move right
+                    if (logs) log(i, "right>", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
+
                     if (dir === -1) directionChanged = true
                     else consecutive++;
                     dir = 1;
-
                 }
                 percent += Math.max(acc.x - 1, acc.move - 2);
                 sumMag += acc.mag;
                 minMove = Math.min(minMove, Math.sign(acc.x) * acc.move);
                 maxMove = Math.max(maxMove, Math.sign(acc.x) * acc.move);
             } else if (acc.mag > g) {
-                // idle
+                if (logs) log(i, "idle");
                 resetShakeVals();
                 shakes = 0;
                 percent = Math.max(0, percent - Math.max(2, deltaIdleCount - 2));
             }
             // detect shake
             if (directionChanged) {
-                let validMoveLength = 2 <= consecutive && consecutive <= 5;
+                let validMoveLength = 2 <= consecutive && consecutive <= 5; // numbers depend on motionThrottle
                 let avgMag = sumMag / consecutive;
                 let dMove = Math.abs(maxMove - minMove);
                 if (validMoveLength) percent += 1;
@@ -985,7 +1020,7 @@ export function renderCaptcha(target: HTMLElement) {
             }
 
             last = acc;
-            if (shakes < 1) percent = Math.min(percent, 50);
+            if (shakes < 1) percent = Math.min(percent, 60);
             if (percent >= 100) break;
         }
         percent = Math.max(0, Math.min(100, percent));
@@ -999,8 +1034,9 @@ export function renderCaptcha(target: HTMLElement) {
 
     function beepIfNoMotion() {
         if (!motionEnabled || lastMotionTime <= 0) {
-            log("beep timeout, regular", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
-            setTimeout(() => beep(), suspense);
+            log("beepIfNoMotion", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
+            setShakeEnabled(false);
+            setTimeout(() => beep(), suspense - 500);
         } else {
             log("no beep", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
         }
@@ -1085,6 +1121,7 @@ export function renderCaptcha(target: HTMLElement) {
         if (beepStartTime > 0 && startTime == 0 && reaction) {
             if (lastMotionTime > 0) {
                 window.removeEventListener('devicemotion', handleMotion);
+                // evaluateShake(true);
             }
 
             activity.push(reaction);
@@ -1095,7 +1132,6 @@ export function renderCaptcha(target: HTMLElement) {
             image.src = imgSrc;
             startTimer();
             if (!ctx) {
-                error("Canvas context could not be initialized.");
                 throw new Error("Canvas context could not be initialized.");
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1454,6 +1490,7 @@ export function renderCaptcha(target: HTMLElement) {
             bar.clearRect(0, 0, timeCanvas.width, timeCanvas.height);
         }
         if (isMobile) {
+            setShakeEnabled(true);
             if (motionEnabled) {
                 lastMotionTime = 0;
                 smoothX = 0;
@@ -1461,11 +1498,6 @@ export function renderCaptcha(target: HTMLElement) {
                 smoothZ = 0;
                 lastAcc = undefined;
                 accs = [];
-                setShakeEnabled(true);
-            } else {
-                overlayBg.style.background = mobileRed;
-                signalIcon.innerText = "do_not_touch";
-                signalIcon.style.animation = "none";
             }
         }
         document.getElementById("neoCaptcha-guess")!.style.display = "grid";

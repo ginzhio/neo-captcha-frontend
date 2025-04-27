@@ -56,7 +56,7 @@ const translations: Record<string, {
         howto: '?   How-To:',
         step_1: 'Hit ▶ Play',
         step_2: `Tap when <b><span style="color: rgba(0, 160, 0)">GREEN</span>!<b/>`,
-        step_2_desktop: `Click at the <b>signal tone!</b>`,
+        step_2_desktop: `Click after the <b>sound cue!</b>`,
         step_2_motion: `<b>Shake</b> your phone!`,
         step_3: '<b>Solve the CAPTCHA</b>',
         mode_1: 'Implied square:',
@@ -98,8 +98,8 @@ const translations: Record<string, {
 document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
 document.getElementById("neoCaptcha-step_1")!.innerHTML = (translations[userLang] || translations['en']).step_1;
 if (isMobile) {
-    document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2;
-    document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2;
+    document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_motion;
+    document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_motion;
 } else {
     document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_desktop;
     document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_desktop;
@@ -175,6 +175,7 @@ let lastAcc: {
 } | undefined = undefined;
 let accs: any[] = [];
 let motionEnabled = false;
+let fillPercent = 0;
 
 let howToShown = true;
 let howToExpanded = false;
@@ -197,10 +198,13 @@ if (howToShown) {
 }
 
 const overlayBg = document.getElementById("neoCaptcha-overlayBg") as HTMLDivElement;
+const tryMobile = document.getElementById("neoCaptcha-tryMobileHint") as HTMLSpanElement;
 if (!isMobile) {
     overlayBg.style.background = "#000";
+    tryMobile.style.display = "block";
 } else {
     overlayBg.style.background = mobileRed;
+    tryMobile.style.display = "none";
 }
 const signalIcon = document.getElementById("neoCaptcha-signalIcon") as HTMLSpanElement;
 signalIcon.innerText = isMobile ? "do_not_touch" : "hearing";
@@ -211,6 +215,7 @@ let motionAllowed = isMobile;
 
 function requestMotion() {
     if (isMobile && window.DeviceMotionEvent) {
+        setShakeEnabled(true);
         if ('requestPermission' in DeviceMotionEvent) {
             (DeviceMotionEvent as any).requestPermission()
                 .then((response: any) => {
@@ -249,6 +254,10 @@ async function getCaptcha() {
     log("version: " + VERSION);
     log("userAgent: " + navigator.userAgent);
 
+    if (isMobile) {
+        setShakeEnabled(motionAllowed);
+    }
+
     const wrapper = document.getElementById("neoCaptcha-wrapper") as HTMLDivElement;
     wrapper.style.display = "flex";
     startBtn.style.display = "none";
@@ -279,7 +288,7 @@ async function getCaptcha() {
         totalTime = result.totalTime || totalTime;
         suspense = result.suspense;
         const container = document.getElementById("neoCaptcha-container") as HTMLDivElement;
-        container.style.height = "20em";
+        container.style.height = "18rem";
         if (result.variant === 'ns') {
             for (let i = 1; i <= 4; i++) {
                 (document.getElementById("neoCaptcha-guess-icon-" + i) as HTMLImageElement)
@@ -287,8 +296,8 @@ async function getCaptcha() {
             }
         }
 
-        canvas.style.width = "20em";
-        canvas.style.height = "20em";
+        canvas.style.width = "18rem";
+        canvas.style.height = "18rem";
         canvas.width = canvas.clientWidth;
         canvas.height = canvas.width;
         pointSize = canvas.width * result.pointSize;
@@ -306,7 +315,7 @@ async function getCaptcha() {
 
         log("isMobile", isMobile, "motionAllowed", motionAllowed);
         if (isMobile && motionAllowed) {
-            setTimeout(() => beepIfNoMotion(), 1000);
+            setTimeout(() => beepIfNoMotion(), 500);
         } else {
             log("beep timeout, no motion available");
             setTimeout(() => beep(), suspense);
@@ -315,9 +324,8 @@ async function getCaptcha() {
 }
 
 function setShakeEnabled(enabled: boolean) {
-    motionEnabled = enabled;
     if (isMobile) {
-        if (motionEnabled) {
+        if (enabled) {
             overlayBg.style.background = mobileRed;
             signalIcon.innerText = "edgesensor_low";
             signalIcon.style.animation = "shake 0.4s ease-in-out infinite";
@@ -354,6 +362,7 @@ async function handleMotion(event: DeviceMotionEvent) {
     const acc = event.accelerationIncludingGravity;
     if (acc && acc.x !== null && acc.y !== null && acc.z !== null) {
         if (!motionEnabled) {
+            motionEnabled = true;
             setShakeEnabled(true);
         }
         // simple low-pass filter (weighted average)
@@ -402,14 +411,15 @@ async function handleMotion(event: DeviceMotionEvent) {
         } else {
             lastAcc = {mag: mag, move: move, x: smoothX, y: smoothY, z: smoothZ, dmag: 0, dx: 0, dy: 0, dz: 0};
         }
+    } else {
+        setShakeEnabled(false);
+        tryMobile.style.display = "block";
     }
 }
 
-let fillPercent = 0;
-
 function drawBgFill() {
     let bgFill = document.getElementById("neoCaptcha-overlayBgFill");
-    let fill = fillPercent / 100 * 20;
+    let fill = fillPercent / 100 * 18;
     bgFill!.style.height = fill + "rem";
     bgFill!.style.background = mobileGreen;
 }
@@ -418,7 +428,7 @@ function evaluateShake(logs: boolean = false) {
     const g = 9;
     const minMag = 7;
     const minDMove = 4;
-    const minDelta = 3;
+    const minDelta = 2;
 
     let dir = 0;
     let consecutive = 0;
@@ -453,7 +463,7 @@ function evaluateShake(logs: boolean = false) {
         if (delta < minDelta) deltaIdleCount++;
         else deltaIdleCount = 0;
         let directionChanged = false;
-        if (Math.abs(acc.x) > 2 && deltaIdleCount < 4) {
+        if (Math.abs(acc.x) > 2 && deltaIdleCount < 5) { // number depends on motionThrottle
             if (acc.x < last.x) {
                 // move left
                 if (logs) log(i, "<left", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
@@ -495,7 +505,7 @@ function evaluateShake(logs: boolean = false) {
         }
 
         last = acc;
-        if (shakes < 1) percent = Math.min(percent, 50);
+        if (shakes < 1) percent = Math.min(percent, 60);
         if (percent >= 100) break;
     }
     percent = Math.max(0, Math.min(100, percent));
@@ -509,8 +519,9 @@ function evaluateShake(logs: boolean = false) {
 
 function beepIfNoMotion() {
     if (!motionEnabled || lastMotionTime <= 0) {
-        log("beep timeout, regular", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
-        setTimeout(() => beep(), suspense);
+        log("beepIfNoMotion", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
+        setShakeEnabled(false);
+        setTimeout(() => beep(), suspense - 500);
     } else {
         log("no beep", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
     }
@@ -964,6 +975,7 @@ function reset() {
         bar.clearRect(0, 0, timeCanvas.width, timeCanvas.height);
     }
     if (isMobile) {
+        setShakeEnabled(true);
         if (motionEnabled) {
             lastMotionTime = 0;
             smoothX = 0;
@@ -971,11 +983,6 @@ function reset() {
             smoothZ = 0;
             lastAcc = undefined;
             accs = [];
-            setShakeEnabled(true);
-        } else {
-            overlayBg.style.background = mobileRed;
-            signalIcon.innerText = "do_not_touch";
-            signalIcon.style.animation = "none";
         }
     }
     document.getElementById("neoCaptcha-guess")!.style.display = "grid";
