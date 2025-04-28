@@ -26,8 +26,17 @@
         <span class="neo-captcha-caption">NeoCAPTCHA</span>
     </div>
     <div id="neoCaptcha-howTo" class="neo-captcha-how-to">
+        <div class="neo-captcha-how-to-header-mode">
+            <span id="neoCaptcha-mode" class="neo-captcha-how-to-header-mode-title"></span>
+        </div>
+        <div class="neo-captcha-how-to-description">
+            <img id="neoCaptcha-modeIcon" class="neo-captcha-mode-icon" alt="icon variant">
+            <div class="neo-captcha-how-to-header">
+                <span id="neoCaptcha-modeText"></span>
+            </div>
+        </div>
         <div id="neoCaptcha-howToCaption" class="neo-captcha-how-to-caption">
-            <span id="neoCaptcha-howToTitle"></span>
+            <span id="neoCaptcha-howToTitle" class="neo-captcha-how-to-title"></span>
             <span id="neoCaptcha-howToIcon" class="neo-captcha-wide-icon material-icons">expand_less</span>
         </div>
         <div class="neo-captcha-how-to-text">
@@ -45,17 +54,10 @@
                     <td id="neoCaptcha-step_3"></td>
                 </tr>
             </table>
-            <div class="neo-captcha-how-to-description">
-                <img id="neoCaptcha-modeIcon" class="neo-captcha-mode-icon" alt="icon variant">
-                <div class="neo-captcha-how-to-footer">
-                    <span id="neoCaptcha-mode" class="neo-captcha-how-to-footer-mode"></span>
-                    <span id="neoCaptcha-modeText"></span>
-                </div>
-            </div>
         </div>
     </div>
     <button id="neoCaptcha-start" class="neo-captcha-button neo-captcha-start-button">
-        <span class="neo-captcha-icon-dark material-icons">play_arrow</span>
+        <span class="neo-captcha-icon-dark neo-captcha-start-icon material-icons">play_arrow</span>
     </button>
     <div id="neoCaptcha-wrapper" class="neo-captcha-wrapper">
         <div id="neoCaptcha-container" class="neo-captcha-container">
@@ -66,6 +68,7 @@
             <canvas id="neoCaptcha-captchaCanvas" class="neo-captcha-main-canvas"></canvas>
             <div id="neoCaptcha-startOverlay" class="neo-captcha-icon-div">
                 <div id="neoCaptcha-overlayBg" class="neo-captcha-overlay-bg"></div>
+                <div id="neoCaptcha-overlayBgFill" class="neo-captcha-overlay-bg-fill"></div>
                 <span id="neoCaptcha-signalIcon" class="neo-captcha-icon material-icons">hearing</span>
                 <span id="neoCaptcha-signalText" class="neo-captcha-signal-text"></span>
             </div>

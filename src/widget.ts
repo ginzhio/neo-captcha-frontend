@@ -40,29 +40,29 @@ const widgetStyles = `
     justify-content: center;
     background: var(--neo-captcha-bg);
     color: var(--neo-captcha-fg);
-    padding: 1em;
+    padding: 1rem;
     margin: 0;
 }
 
 .neo-captcha-logo {
-    margin: 0 1em 0 0;
-    width: 3.5em;
-    height: 3.5em;
+    margin: 0 1rem 0 0;
+    width: 2.5rem;
+    height: 2.5rem;
     cursor: pointer;
     padding: 0;
 }
 
 .neo-captcha-caption {
-    font-size: 1.8em;
+    font-size: 1.5rem;
     font-weight: bold;
     color: var(--neo-captcha-fg);
-    margin: 0 0 0.2em 0;
+    margin: 0 0 0.2rem 0;
     padding: 0;
 }
 
 .neo-captcha-main-canvas {
-    width: 20em;
-    height: 20em;
+    width: 18rem;
+    height: 18rem;
     border: 1px solid var(--neo-captcha-fg);
     z-index: 2;
     position: absolute;
@@ -72,8 +72,8 @@ const widgetStyles = `
 }
 
 .neo-captcha-time {
-    width: 20em;
-    height: 1em;
+    width: 18rem;
+    height: 1rem;
     background: var(--neo-captcha-bg2);
     border: 1px solid var(--neo-captcha-fg);
     margin: 0;
@@ -81,8 +81,8 @@ const widgetStyles = `
 }
 
 .neo-captcha-image {
-    width: 20em;
-    height: 20em;
+    width: 18rem;
+    height: 18rem;
     border: 1px solid var(--neo-captcha-fg);
     z-index: 1;
     position: absolute;
@@ -92,8 +92,8 @@ const widgetStyles = `
 }
 
 .neo-captcha-container {
-    width: 20em;
-    height: 20em;
+    width: 18rem;
+    height: 18rem;
     position: relative;
     display: flex;
     margin: 0;
@@ -101,17 +101,17 @@ const widgetStyles = `
 }
 
 .neo-captcha-button {
-    font-size: 1em;
+    font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
     margin: 0;
     padding: 0;
 
-    background: var(--neo-captcha-button);
+    background: linear-gradient(color-mix(in srgb, var(--neo-captcha-button) 80%, var(--neo-captcha-light)), var(--neo-captcha-button));
     border: none;
-    border-radius: 0.5em;
-    box-shadow: 0 4px 0.5em color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 0.5rem color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
 
     &:disabled {
         opacity: 0.5;
@@ -119,49 +119,49 @@ const widgetStyles = `
     }
 
     &:hover:enabled {
-        background: color-mix(in srgb, var(--neo-captcha-button) 80%, var(--neo-captcha-light));
-        box-shadow: 0 6px 0.75em color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
+        background: linear-gradient(color-mix(in srgb, var(--neo-captcha-button) 80%, white), color-mix(in srgb, var(--neo-captcha-button) 80%, white));
+        box-shadow: 0 6px 0.75rem color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
         transform: translateY(-1px);
     }
 
     &:active:enabled {
-        background: var(--neo-captcha-button);
+        background: linear-gradient(var(--neo-captcha-button), var(--neo-captcha-button));
         box-shadow: none;
     }
 }
 
 .neo-captcha-submit-button {
-    width: 20em;
-    height: 4em;
+    width: 18rem;
+    height: 4rem;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-guess-region {
-    width: 20em;
+    width: 18rem;
     display: grid;
     grid-template-columns: auto auto;
-    grid-gap: 0.25em;
+    grid-gap: 0.25rem;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-multi-button {
+    font-size: 1rem;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-start-button {
-    width: 20rem;
+    width: 18rem;
     height: 15rem;
-    font-size: 1.5em;
-    margin: 0.25em 0 0 0;
+    margin: 0.25rem 0 0 0;
     padding: 0;
 }
 
 .neo-captcha-icon-div {
-    width: 20em;
-    height: 20em;
+    width: 18rem;
+    height: 18rem;
     position: absolute;
     z-index: 3;
     display: none;
@@ -182,8 +182,8 @@ const widgetStyles = `
 }
 
 .neo-captcha-overlay-bg {
-    width: 20em;
-    height: 20em;
+    width: 18rem;
+    height: 18rem;
     position: absolute;
     z-index: -1;
     transform: translateY(1px) translateX(1px);
@@ -191,16 +191,27 @@ const widgetStyles = `
     padding: 0;
 }
 
+.neo-captcha-overlay-bg-fill {
+    width: 18rem;
+    height: 0;
+    position: absolute;
+    bottom: 0;
+    z-index: -1;
+    transform: translateY(1px) translateX(1px);
+    margin: 0;
+    padding: 0;
+}
+
 .neo-captcha-signal-text {
-    top: 0.5em;
-    font-size: 1.5em;
+    top: 0.5rem;
+    font-size: 1.3rem;
     color: var(--neo-captcha-light);
-    text-shadow: #000 0 0 0.25em;
+    text-shadow: #000 0 0 0.25rem;
     position: absolute;
 }
 
 .neo-captcha-icon {
-    font-size: 5em;
+    font-size: 5rem;
     color: var(--neo-captcha-light);
     margin: 0;
     padding: 0;
@@ -215,31 +226,37 @@ const widgetStyles = `
 
 @keyframes shake {
     0% {
-        transform: rotate(-10deg) translateX(-0.25em);
+        transform: rotate(-10deg) translateX(-1rem);
     }
     50% {
-        transform: rotate(10deg) translateX(0.25em);
+        transform: rotate(10deg) translateX(1rem);
     }
     100% {
-        transform: rotate(-10deg) translateX(-0.25em);
+        transform: rotate(-10deg) translateX(-1rem);
     }
 }
 
 
 .neo-captcha-fg-icon {
-    font-size: 3em;
+    font-size: 3rem;
     color: var(--neo-captcha-fg);
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-icon-dark {
+    font-size: 3rem;
+    max-width: 3rem;
+    max-height: 3rem;
     color: var(--neo-captcha-dark);
-    font-size: 3em;
-    width: 1em;
-    height: 1em;
     margin: 0;
     padding: 0;
+}
+
+.neo-captcha-start-icon {
+    font-size: 5rem;
+    max-width: 5rem;
+    max-height: 5rem;
 }
 
 .neo-captcha-wrapper {
@@ -254,37 +271,42 @@ const widgetStyles = `
     flex-direction: row;
     align-items: center;
     justify-self: center;
-    margin: 0 0 0.5em 0;
+    margin: 0 0 0.5rem 0;
     padding: 0;
 }
 
 .neo-captcha-how-to {
-    width: 20em;
+    width: 18rem;
     background: var(--neo-captcha-bg2);
     border: 1px solid var(--neo-captcha-fg);
-    text-align: start;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-how-to-text {
+    font-size: 0.9rem;
+    text-align: start;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-how-to-caption {
-    font-size: 1em;
+    font-size: 0.75rem;
     font-weight: bold;
     cursor: pointer;
-    padding: 0.6em 1em 0.4em 1em;
+    padding: 0.1rem 1rem 0.1rem 1rem;
     background: var(--neo-captcha-gradient);
     display: flex;
     flex-direction: row;
     margin: 0;
 }
 
+.neo-captcha-how-to-title {
+    margin: 0.2rem 0 0 0;
+}
+
 .neo-captcha-how-to-table {
-    padding: 0.5em 1em 1em 1em;
+    padding: 0.25rem 1rem 0.5rem 1rem;
     background: color-mix(in srgb, var(--neo-captcha-fg) 7%, transparent);
     margin: 0;
 }
@@ -293,30 +315,38 @@ const widgetStyles = `
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 0.5em 0.5em 0.5em 0.75em;
+    text-align: start;
+    padding: 0.25rem 0.5rem 0.5rem 0.5rem;
     margin: 0;
 }
 
 .neo-captcha-mode-icon {
-    width: 2.2em;
-    height: 2.2em;
-    margin: 0 0.75em 0 0;
+    width: 2rem;
+    height: 2rem;
+    margin: 0 0.75rem 0 0;
     padding: 0;
 }
 
-.neo-captcha-how-to-footer {
-    font-size: 1.2em;
+.neo-captcha-how-to-header {
+    font-size: 1rem;
     display: flex;
     flex-direction: column;
     margin: 0;
     padding: 0;
 }
 
-.neo-captcha-how-to-footer-mode {
+.neo-captcha-how-to-header-mode {
+    padding: 0;
+    margin: 0.25rem 1rem 0 0.5rem;
+}
+
+.neo-captcha-how-to-header-mode-title {
+    font-size: 1.2rem;
     color: var(--neo-captcha-accent);
     font-weight: bold;
-    margin: 0;
     padding: 0;
+    margin: 0;
+    text-align: center;
 }
 
 .neo-captcha-wide-icon {
@@ -374,8 +404,17 @@ export function renderCaptcha(target: HTMLElement, config: any,
             <span class="neo-captcha-caption">NeoCAPTCHA</span>
         </div>
         <div id="neoCaptcha-howTo" class="neo-captcha-how-to">
+            <div class="neo-captcha-how-to-header-mode">
+                <span id="neoCaptcha-mode" class="neo-captcha-how-to-header-mode-title"></span>
+            </div>
+            <div class="neo-captcha-how-to-description">
+                <img id="neoCaptcha-modeIcon" class="neo-captcha-mode-icon" alt="icon variant">
+                <div class="neo-captcha-how-to-header">
+                    <span id="neoCaptcha-modeText"></span>
+                </div>
+            </div>
             <div id="neoCaptcha-howToCaption" class="neo-captcha-how-to-caption">
-                <span id="neoCaptcha-howToTitle"></span>
+                <span id="neoCaptcha-howToTitle" class="neo-captcha-how-to-title"></span>
                 <span id="neoCaptcha-howToIcon" class="neo-captcha-wide-icon material-icons">expand_less</span>
             </div>
             <div class="neo-captcha-how-to-text">
@@ -393,17 +432,10 @@ export function renderCaptcha(target: HTMLElement, config: any,
                         <td id="neoCaptcha-step_3"></td>
                     </tr>
                 </table>
-                <div class="neo-captcha-how-to-description">
-                    <img id="neoCaptcha-modeIcon" class="neo-captcha-mode-icon" alt="icon variant">
-                    <div class="neo-captcha-how-to-footer">
-                        <span id="neoCaptcha-mode" class="neo-captcha-how-to-footer-mode"></span>
-                        <span id="neoCaptcha-modeText"></span>
-                    </div>
-                </div>
             </div>
         </div>
         <button id="neoCaptcha-start" class="neo-captcha-button neo-captcha-start-button">
-            <span class="neo-captcha-icon-dark material-icons">play_arrow</span>
+            <span class="neo-captcha-icon-dark neo-captcha-start-icon material-icons">play_arrow</span>
         </button>
         <div id="neoCaptcha-wrapper" class="neo-captcha-wrapper">
             <div id="neoCaptcha-container" class="neo-captcha-container">
@@ -414,6 +446,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 <canvas id="neoCaptcha-captchaCanvas" class="neo-captcha-main-canvas"></canvas>
                 <div id="neoCaptcha-startOverlay" class="neo-captcha-icon-div">
                     <div id="neoCaptcha-overlayBg" class="neo-captcha-overlay-bg"></div>
+                    <div id="neoCaptcha-overlayBgFill" class="neo-captcha-overlay-bg-fill"></div>
                     <span id="neoCaptcha-signalIcon" class="neo-captcha-icon material-icons">hearing</span>
                     <span id="neoCaptcha-signalText" class="neo-captcha-signal-text"></span>
                 </div>
@@ -519,9 +552,9 @@ export function renderCaptcha(target: HTMLElement, config: any,
             step_2_desktop: `Click after the <b>sound cue!</b>`,
             step_2_motion: `<b>Shake</b> your phone!`,
             step_3: '<b>Solve the CAPTCHA</b>',
-            mode_1: 'Implied square:',
+            mode_1: 'Implied square',
             mode_1_text: 'Mark the missing corner!',
-            mode_2: 'Neon Shape:',
+            mode_2: 'Neon Shape',
             mode_2_text: 'Select the shape you see!',
         },
         de: {
@@ -531,17 +564,17 @@ export function renderCaptcha(target: HTMLElement, config: any,
             step_2_desktop: 'Klicke beim <b>Signalton!</b>',
             step_2_motion: '<b>Schüttel</b> dein Handy!',
             step_3: '<b>Löse das CAPTCHA!</b>',
-            mode_1: 'Angedeutetes Viereck:',
+            mode_1: 'Angedeutetes Viereck',
             mode_1_text: 'Markiere die fehlende Ecke!',
-            mode_2: 'Neon-Form:',
+            mode_2: 'Neon-Form',
             mode_2_text: 'Welche Form siehst du?',
         },
     };
     document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
     document.getElementById("neoCaptcha-step_1")!.innerHTML = (translations[userLang] || translations['en']).step_1;
     if (isMobile || visualOnDesktop) {
-        document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2;
-        document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2;
+        document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_motion;
+        document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_motion;
     } else {
         document.getElementById("neoCaptcha-step_2")!.innerHTML = (translations[userLang] || translations['en']).step_2_desktop;
         document.getElementById("neoCaptcha-signalText")!.innerHTML = (translations[userLang] || translations['en']).step_2_desktop;
@@ -584,6 +617,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     } | undefined = undefined;
     let accs: any[] = [];
     let motionEnabled = false;
+    let fillPercent = 0;
 
     if (showHowTo) {
         const howToCaption = document.getElementById("neoCaptcha-howToCaption") as HTMLDivElement;
@@ -618,6 +652,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
 
     function requestMotion() {
         if (isMobile && window.DeviceMotionEvent) {
+            setShakeEnabled(true);
             if ('requestPermission' in DeviceMotionEvent) {
                 (DeviceMotionEvent as any).requestPermission()
                     .then((response: any) => {
@@ -654,6 +689,10 @@ export function renderCaptcha(target: HTMLElement, config: any,
         log("version: " + VERSION);
         log("userAgent: " + navigator.userAgent);
 
+        if (isMobile) {
+            setShakeEnabled(motionAllowed);
+        }
+
         const wrapper = document.getElementById("neoCaptcha-wrapper") as HTMLDivElement;
         wrapper.style.display = "flex";
         startBtn.style.display = "none";
@@ -684,7 +723,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
             totalTime = result.totalTime || totalTime;
             suspense = result.suspense;
             const container = document.getElementById("neoCaptcha-container") as HTMLDivElement;
-            container.style.height = "20em";
+            container.style.height = "18rem";
             if (result.variant === 'ns') {
                 for (let i = 1; i <= 4; i++) {
                     (document.getElementById("neoCaptcha-guess-icon-" + i) as HTMLImageElement)
@@ -692,8 +731,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 }
             }
 
-            canvas.style.width = "20em";
-            canvas.style.height = "20em";
+            canvas.style.width = "18rem";
+            canvas.style.height = "18rem";
             canvas.width = canvas.clientWidth;
             canvas.height = canvas.width;
             pointSize = canvas.width * result.pointSize;
@@ -711,7 +750,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
 
             log("isMobile", isMobile, "motionAllowed", motionAllowed);
             if (isMobile && motionAllowed) {
-                setTimeout(() => beepIfNoMotion(), 1000);
+                setTimeout(() => beepIfNoMotion(), 500);
             } else {
                 log("beep timeout, no motion available");
                 setTimeout(() => beep(), suspense);
@@ -720,9 +759,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
     }
 
     function setShakeEnabled(enabled: boolean) {
-        motionEnabled = enabled;
         if (isMobile) {
-            if (motionEnabled) {
+            if (enabled) {
                 overlayBg.style.background = mobileRed;
                 signalIcon.innerText = "edgesensor_low";
                 signalIcon.style.animation = "shake 0.4s ease-in-out infinite";
@@ -731,6 +769,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 overlay.removeEventListener("pointerdown", react);
                 overlay.removeEventListener("pointermove", consumeMove);
                 overlay.removeEventListener("pointerup", start);
+                fillPercent = 0;
+                requestAnimationFrame(drawBgFill);
             } else {
                 overlayBg.style.background = mobileRed;
                 signalIcon.innerText = "do_not_touch";
@@ -757,6 +797,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         const acc = event.accelerationIncludingGravity;
         if (acc && acc.x !== null && acc.y !== null && acc.z !== null) {
             if (!motionEnabled) {
+                motionEnabled = true;
                 setShakeEnabled(true);
             }
             // simple low-pass filter (weighted average)
@@ -785,25 +826,51 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 if (accs.length > minAccs) {
                     if (beepStartTime <= 0) beepStartTime = Date.now();
                     if (evaluateShake()) {
-                        react();
-                        start();
+                        requestAnimationFrame(() => {
+                            drawBgFill();
+                            overlayBg.style.background = mobileGreen;
+                            signalIcon.style.animation = "none";
+                            signalIcon.innerText = "check";
+                            new Promise(() => setTimeout(() => {
+                                react();
+                                start();
+                            }, motionThrottle * 2));
+                        });
+                    } else {
+                        requestAnimationFrame(() => {
+                            drawBgFill();
+                            overlayBg.style.background = mobileRed;
+                        });
                     }
                 }
             } else {
                 lastAcc = {mag: mag, move: move, x: smoothX, y: smoothY, z: smoothZ, dmag: 0, dx: 0, dy: 0, dz: 0};
             }
+        } else {
+            setShakeEnabled(false);
         }
+    }
+
+    function drawBgFill() {
+        let bgFill = document.getElementById("neoCaptcha-overlayBgFill");
+        let fill = fillPercent / 100 * 18;
+        bgFill!.style.height = fill + "rem";
+        bgFill!.style.background = mobileGreen;
     }
 
     function evaluateShake(logs: boolean = false) {
         const g = 9;
         const minMag = 7;
+        const minDMove = 4;
+        const minDelta = 2;
 
         let dir = 0;
         let consecutive = 0;
         let sumMag = 0;
         let minMove = 99
         let maxMove = -99;
+        let percent = 0;
+        let deltaIdleCount = 0;
 
         function resetShakeVals() {
             dir = 0;
@@ -816,69 +883,79 @@ export function renderCaptcha(target: HTMLElement, config: any,
         let shakes = 0;
         let i = 0;
         let last: any;
+        let maxLen = 5000 / motionThrottle; // 5 seconds of data points
+        accs = accs.slice(Math.max(0, accs.length - maxLen), accs.length);
         for (const acc of accs) {
             i++;
-            if (i < minAccs) {
+            if (!last) {
                 last = acc;
                 continue;
             }
 
+            // detect movement
+            const delta = Math.abs(acc.move - last.move);
+            if (delta < minDelta) deltaIdleCount++;
+            else deltaIdleCount = 0;
             let directionChanged = false;
-            if (Math.abs(acc.x) > 2) {
+            if (Math.abs(acc.x) > 2 && deltaIdleCount < 5) { // number depends on motionThrottle
                 if (acc.x < last.x) {
                     // move left
-                    if (logs) log(i - minAccs, "<left", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
+                    if (logs) log(i, "<left", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
 
                     if (dir === 1) directionChanged = true
                     else consecutive++;
                     dir = -1;
-
                 } else {
                     // move right
-                    if (logs) log(i - minAccs, "right>", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
+                    if (logs) log(i, "right>", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
 
                     if (dir === -1) directionChanged = true
                     else consecutive++;
                     dir = 1;
-
                 }
+                percent += Math.max(acc.x - 1, acc.move - 2);
                 sumMag += acc.mag;
                 minMove = Math.min(minMove, Math.sign(acc.x) * acc.move);
                 maxMove = Math.max(maxMove, Math.sign(acc.x) * acc.move);
             } else if (acc.mag > g) {
-                if (logs) log(i - minAccs, "idle");
+                if (logs) log(i, "idle");
                 resetShakeVals();
                 shakes = 0;
+                percent = Math.max(0, percent - Math.max(2, deltaIdleCount - 2));
             }
             // detect shake
             if (directionChanged) {
-                let validMoveLength = 2 <= consecutive && consecutive <= 5;
+                let validMoveLength = 2 <= consecutive && consecutive <= 5; // numbers depend on motionThrottle
                 let avgMag = sumMag / consecutive;
                 let dMove = Math.abs(maxMove - minMove);
-                if (validMoveLength && avgMag > minMag && dMove > minMag) {
+                if (validMoveLength) percent += 1;
+                if (avgMag > minMag) percent += 1;
+                if (dMove > minDMove) percent += 1;
+                if (validMoveLength && avgMag > minMag && dMove > minDMove) {
                     shakes++;
+                    percent += 10;
                 }
                 resetShakeVals();
             }
 
             last = acc;
-            if (shakes >= 2) break;
+            if (shakes < 1) percent = Math.min(percent, 60);
+            if (percent >= 100) break;
         }
-        if (shakes >= 1) {
-            // shaking
-            overlayBg.style.background = mobileGreen;
-        } else if (dir === 0) {
+        percent = Math.max(0, Math.min(100, percent));
+        fillPercent = percent;
+        if (shakes < 1 && dir === 0) {
             // idle
-            overlayBg.style.background = mobileRed;
             beepStartTime = Date.now();
         }
-        return shakes >= 2;
+        return fillPercent == 100;
     }
 
     function beepIfNoMotion() {
         if (!motionEnabled || lastMotionTime <= 0) {
-            log("beep timeout, regular", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
-            setTimeout(() => beep(), suspense);
+            log("beepIfNoMotion", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
+            setShakeEnabled(false);
+            setTimeout(() => beep(), suspense - 500);
         } else {
             log("no beep", "motionEnabled:", motionEnabled, "lastMotionTime:", lastMotionTime);
         }
@@ -963,7 +1040,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         if (beepStartTime > 0 && startTime == 0 && reaction) {
             if (lastMotionTime > 0) {
                 window.removeEventListener('devicemotion', handleMotion);
-                evaluateShake(true);
+                // evaluateShake(true);
             }
 
             activity.push(reaction);
@@ -1311,6 +1388,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
             bar.clearRect(0, 0, timeCanvas.width, timeCanvas.height);
         }
         if (isMobile || visualOnDesktop) {
+            setShakeEnabled(true);
             if (!visualOnDesktop && motionEnabled) {
                 lastMotionTime = 0;
                 smoothX = 0;
@@ -1318,11 +1396,6 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 smoothZ = 0;
                 lastAcc = undefined;
                 accs = [];
-                setShakeEnabled(true);
-            } else {
-                overlayBg.style.background = mobileRed;
-                signalIcon.innerText = "do_not_touch";
-                signalIcon.style.animation = "none";
             }
         }
     }
@@ -1333,7 +1406,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     }
 
     function error(message?: any, ...data: any[]) {
-        addLog("\n!!! ERROR: ", message, ([] as any[]).concat(data).concat("\n"));
+        addLog("!!! ERROR: ", message, data);
         console.error(message, data);
     }
 

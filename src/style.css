@@ -37,29 +37,29 @@
     justify-content: center;
     background: var(--neo-captcha-bg);
     color: var(--neo-captcha-fg);
-    padding: 1em;
+    padding: 1rem;
     margin: 0;
 }
 
 .neo-captcha-logo {
-    margin: 0 1em 0 0;
-    width: 3.5em;
-    height: 3.5em;
+    margin: 0 1rem 0 0;
+    width: 2.5rem;
+    height: 2.5rem;
     cursor: pointer;
     padding: 0;
 }
 
 .neo-captcha-caption {
-    font-size: 1.8em;
+    font-size: 1.5rem;
     font-weight: bold;
     color: var(--neo-captcha-fg);
-    margin: 0 0 0.2em 0;
+    margin: 0 0 0.2rem 0;
     padding: 0;
 }
 
 .neo-captcha-main-canvas {
-    width: 20em;
-    height: 20em;
+    width: 18rem;
+    height: 18rem;
     border: 1px solid var(--neo-captcha-fg);
     z-index: 2;
     position: absolute;
@@ -69,8 +69,8 @@
 }
 
 .neo-captcha-time {
-    width: 20em;
-    height: 1em;
+    width: 18rem;
+    height: 1rem;
     background: var(--neo-captcha-bg2);
     border: 1px solid var(--neo-captcha-fg);
     margin: 0;
@@ -78,8 +78,8 @@
 }
 
 .neo-captcha-image {
-    width: 20em;
-    height: 20em;
+    width: 18rem;
+    height: 18rem;
     border: 1px solid var(--neo-captcha-fg);
     z-index: 1;
     position: absolute;
@@ -89,8 +89,8 @@
 }
 
 .neo-captcha-container {
-    width: 20em;
-    height: 20em;
+    width: 18rem;
+    height: 18rem;
     position: relative;
     display: flex;
     margin: 0;
@@ -98,17 +98,17 @@
 }
 
 .neo-captcha-button {
-    font-size: 1em;
+    font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
     margin: 0;
     padding: 0;
 
-    background: var(--neo-captcha-button);
+    background: linear-gradient(color-mix(in srgb, var(--neo-captcha-button) 80%, var(--neo-captcha-light)), var(--neo-captcha-button));
     border: none;
-    border-radius: 0.5em;
-    box-shadow: 0 4px 0.5em color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 0.5rem color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
 
     &:disabled {
         opacity: 0.5;
@@ -116,49 +116,49 @@
     }
 
     &:hover:enabled {
-        background: color-mix(in srgb, var(--neo-captcha-button) 80%, var(--neo-captcha-light));
-        box-shadow: 0 6px 0.75em color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
+        background: linear-gradient(color-mix(in srgb, var(--neo-captcha-button) 80%, white), color-mix(in srgb, var(--neo-captcha-button) 80%, white));
+        box-shadow: 0 6px 0.75rem color-mix(in srgb, var(--neo-captcha-fg) 30%, transparent);
         transform: translateY(-1px);
     }
 
     &:active:enabled {
-        background: var(--neo-captcha-button);
+        background: linear-gradient(var(--neo-captcha-button), var(--neo-captcha-button));
         box-shadow: none;
     }
 }
 
 .neo-captcha-submit-button {
-    width: 20em;
-    height: 4em;
+    width: 18rem;
+    height: 4rem;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-guess-region {
-    width: 20em;
+    width: 18rem;
     display: grid;
     grid-template-columns: auto auto;
-    grid-gap: 0.25em;
+    grid-gap: 0.25rem;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-multi-button {
+    font-size: 1rem;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-start-button {
-    width: 20rem;
+    width: 18rem;
     height: 15rem;
-    font-size: 1.5em;
-    margin: 0.25em 0 0 0;
+    margin: 0.25rem 0 0 0;
     padding: 0;
 }
 
 .neo-captcha-icon-div {
-    width: 20em;
-    height: 20em;
+    width: 18rem;
+    height: 18rem;
     position: absolute;
     z-index: 3;
     display: none;
@@ -179,8 +179,8 @@
 }
 
 .neo-captcha-overlay-bg {
-    width: 20em;
-    height: 20em;
+    width: 18rem;
+    height: 18rem;
     position: absolute;
     z-index: -1;
     transform: translateY(1px) translateX(1px);
@@ -188,16 +188,27 @@
     padding: 0;
 }
 
+.neo-captcha-overlay-bg-fill {
+    width: 18rem;
+    height: 0;
+    position: absolute;
+    bottom: 0;
+    z-index: -1;
+    transform: translateY(1px) translateX(1px);
+    margin: 0;
+    padding: 0;
+}
+
 .neo-captcha-signal-text {
-    top: 0.5em;
-    font-size: 1.5em;
+    top: 0.5rem;
+    font-size: 1.3rem;
     color: var(--neo-captcha-light);
-    text-shadow: #000 0 0 0.25em;
+    text-shadow: #000 0 0 0.25rem;
     position: absolute;
 }
 
 .neo-captcha-icon {
-    font-size: 5em;
+    font-size: 5rem;
     color: var(--neo-captcha-light);
     margin: 0;
     padding: 0;
@@ -212,31 +223,37 @@
 
 @keyframes shake {
     0% {
-        transform: rotate(-10deg) translateX(-0.25em);
+        transform: rotate(-10deg) translateX(-1rem);
     }
     50% {
-        transform: rotate(10deg) translateX(0.25em);
+        transform: rotate(10deg) translateX(1rem);
     }
     100% {
-        transform: rotate(-10deg) translateX(-0.25em);
+        transform: rotate(-10deg) translateX(-1rem);
     }
 }
 
 
 .neo-captcha-fg-icon {
-    font-size: 3em;
+    font-size: 3rem;
     color: var(--neo-captcha-fg);
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-icon-dark {
+    font-size: 3rem;
+    max-width: 3rem;
+    max-height: 3rem;
     color: var(--neo-captcha-dark);
-    font-size: 3em;
-    width: 1em;
-    height: 1em;
     margin: 0;
     padding: 0;
+}
+
+.neo-captcha-start-icon {
+    font-size: 5rem;
+    max-width: 5rem;
+    max-height: 5rem;
 }
 
 .neo-captcha-wrapper {
@@ -251,37 +268,42 @@
     flex-direction: row;
     align-items: center;
     justify-self: center;
-    margin: 0 0 0.5em 0;
+    margin: 0 0 0.5rem 0;
     padding: 0;
 }
 
 .neo-captcha-how-to {
-    width: 20em;
+    width: 18rem;
     background: var(--neo-captcha-bg2);
     border: 1px solid var(--neo-captcha-fg);
-    text-align: start;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-how-to-text {
+    font-size: 0.9rem;
+    text-align: start;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-how-to-caption {
-    font-size: 1em;
+    font-size: 0.75rem;
     font-weight: bold;
     cursor: pointer;
-    padding: 0.6em 1em 0.4em 1em;
+    padding: 0.1rem 1rem 0.1rem 1rem;
     background: var(--neo-captcha-gradient);
     display: flex;
     flex-direction: row;
     margin: 0;
 }
 
+.neo-captcha-how-to-title {
+    margin: 0.2rem 0 0 0;
+}
+
 .neo-captcha-how-to-table {
-    padding: 0.5em 1em 1em 1em;
+    padding: 0.25rem 1rem 0.5rem 1rem;
     background: color-mix(in srgb, var(--neo-captcha-fg) 7%, transparent);
     margin: 0;
 }
@@ -290,30 +312,38 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 0.5em 0.5em 0.5em 0.75em;
+    text-align: start;
+    padding: 0.25rem 0.5rem 0.5rem 0.5rem;
     margin: 0;
 }
 
 .neo-captcha-mode-icon {
-    width: 2.2em;
-    height: 2.2em;
-    margin: 0 0.75em 0 0;
+    width: 2rem;
+    height: 2rem;
+    margin: 0 0.75rem 0 0;
     padding: 0;
 }
 
-.neo-captcha-how-to-footer {
-    font-size: 1.2em;
+.neo-captcha-how-to-header {
+    font-size: 1rem;
     display: flex;
     flex-direction: column;
     margin: 0;
     padding: 0;
 }
 
-.neo-captcha-how-to-footer-mode {
+.neo-captcha-how-to-header-mode {
+    padding: 0;
+    margin: 0.25rem 1rem 0 0.5rem;
+}
+
+.neo-captcha-how-to-header-mode-title {
+    font-size: 1.2rem;
     color: var(--neo-captcha-accent);
     font-weight: bold;
-    margin: 0;
     padding: 0;
+    margin: 0;
+    text-align: center;
 }
 
 .neo-captcha-wide-icon {
