@@ -12,7 +12,7 @@
   <a href="#license">License</a>
 </p>  
 
-[![latest patch](https://img.shields.io/badge/v1.1.4-00adad?label=Latest%20Patch)](https://github.com/ginzhio/neo-captcha-frontend/tree/v1.1.4)     [![current release](https://img.shields.io/github/v/release/ginzhio/neo-captcha-frontend?label=Current%20Release&color=009bb8)](https://github.com/ginzhio/neo-captcha-frontend/releases)
+[![latest patch](https://img.shields.io/badge/v1.1.5-00adad?label=Latest%20Patch)](https://github.com/ginzhio/neo-captcha-frontend/tree/v1.1.5)     [![current release](https://img.shields.io/github/v/release/ginzhio/neo-captcha-frontend?label=Current%20Release&color=009bb8)](https://github.com/ginzhio/neo-captcha-frontend/releases)
 
 ---
 
