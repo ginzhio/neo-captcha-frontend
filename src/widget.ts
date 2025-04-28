@@ -157,7 +157,6 @@ const widgetStyles = `
 .neo-captcha-start-button {
     width: 18rem;
     height: 15rem;
-    font-size: 1.5rem;
     margin: 0.25rem 0 0 0;
     padding: 0;
 }
@@ -207,7 +206,7 @@ const widgetStyles = `
 
 .neo-captcha-signal-text {
     top: 0.5rem;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     color: var(--neo-captcha-light);
     text-shadow: #000 0 0 0.25rem;
     position: absolute;
@@ -239,6 +238,7 @@ const widgetStyles = `
     }
 }
 
+
 .neo-captcha-fg-icon {
     font-size: 3rem;
     color: var(--neo-captcha-fg);
@@ -253,6 +253,12 @@ const widgetStyles = `
     color: var(--neo-captcha-dark);
     margin: 0;
     padding: 0;
+}
+
+.neo-captcha-start-icon {
+    font-size: 5rem;
+    max-width: 5rem;
+    max-height: 5rem;
 }
 
 .neo-captcha-wrapper {
@@ -275,13 +281,13 @@ const widgetStyles = `
     width: 18rem;
     background: var(--neo-captcha-bg2);
     border: 1px solid var(--neo-captcha-fg);
-    text-align: start;
     margin: 0;
     padding: 0;
 }
 
 .neo-captcha-how-to-text {
     font-size: 0.9rem;
+    text-align: start;
     margin: 0;
     padding: 0;
 }
@@ -311,7 +317,8 @@ const widgetStyles = `
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 0.25rem 0.75rem 0.5rem 0.75rem;
+    text-align: start;
+    padding: 0.25rem 0.5rem 0.5rem 0.5rem;
     margin: 0;
 }
 
@@ -331,11 +338,17 @@ const widgetStyles = `
 }
 
 .neo-captcha-how-to-header-mode {
+    padding: 0;
+    margin: 0.25rem 1rem 0 0.5rem;
+}
+
+.neo-captcha-how-to-header-mode-title {
     font-size: 1.2rem;
     color: var(--neo-captcha-accent);
     font-weight: bold;
-    margin: 0;
     padding: 0;
+    margin: 0;
+    text-align: center;
 }
 
 .neo-captcha-wide-icon {
@@ -425,10 +438,12 @@ export function renderCaptcha(target: HTMLElement) {
             <span class="neo-captcha-caption">NeoCAPTCHA</span>
         </div>
         <div id="neoCaptcha-howTo" class="neo-captcha-how-to">
+            <div class="neo-captcha-how-to-header-mode">
+                <span id="neoCaptcha-mode" class="neo-captcha-how-to-header-mode-title"></span>
+            </div>
             <div class="neo-captcha-how-to-description">
                 <img id="neoCaptcha-modeIcon" class="neo-captcha-mode-icon" alt="icon variant">
                 <div class="neo-captcha-how-to-header">
-                    <span id="neoCaptcha-mode" class="neo-captcha-how-to-header-mode"></span>
                     <span id="neoCaptcha-modeText"></span>
                 </div>
             </div>
@@ -454,7 +469,7 @@ export function renderCaptcha(target: HTMLElement) {
             </div>
         </div>
         <button id="neoCaptcha-start" class="neo-captcha-button neo-captcha-start-button">
-            <span class="neo-captcha-icon-dark material-icons">play_arrow</span>
+            <span class="neo-captcha-icon-dark neo-captcha-start-icon material-icons">play_arrow</span>
         </button>
         <div id="neoCaptcha-wrapper" class="neo-captcha-wrapper">
             <div id="neoCaptcha-container" class="neo-captcha-container">
@@ -574,9 +589,9 @@ export function renderCaptcha(target: HTMLElement) {
             step_2_desktop: `Click after the <b>sound cue!</b>`,
             step_2_motion: `<b>Shake</b> your phone!`,
             step_3: '<b>Solve the CAPTCHA</b>',
-            mode_1: 'Implied square:',
+            mode_1: 'Implied square',
             mode_1_text: 'Mark the missing corner!',
-            mode_2: 'Neon Shape:',
+            mode_2: 'Neon Shape',
             mode_2_text: 'Select the shape you see!',
             try_mobile: 'NeoCAPTCHA is optimized for real mobile devices!',
             settings: 'Settings',
@@ -595,9 +610,9 @@ export function renderCaptcha(target: HTMLElement) {
             step_2_desktop: 'Klicke beim <b>Signalton!</b>',
             step_2_motion: '<b>Schüttel</b> dein Handy!',
             step_3: '<b>Löse das CAPTCHA!</b>',
-            mode_1: 'Angedeutetes Viereck:',
+            mode_1: 'Angedeutetes Viereck',
             mode_1_text: 'Markiere die fehlende Ecke!',
-            mode_2: 'Neon-Form:',
+            mode_2: 'Neon-Form',
             mode_2_text: 'Welche Form siehst du?',
             try_mobile: 'NeoCAPTCHA ist für echte Mobilgeräte optimiert!',
             settings: 'Einstellungen',
