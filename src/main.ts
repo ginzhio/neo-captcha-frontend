@@ -150,7 +150,7 @@ let lastMotionTime = 0;
 let smoothX = 0, smoothY = 0, smoothZ = 0;
 let lastAcc: {
     mag: number, move: number, x: number, y: number, z: number,
-    dmag: number, dx: number, dy: number, dz: number
+    dmag: number, dx: number, dy: number, dz: number, time: number
 } | undefined = undefined;
 let accs: any[] = [];
 let motionEnabled = false;
@@ -357,7 +357,8 @@ async function handleMotion(event: DeviceMotionEvent) {
                 dmag: dmag,
                 dx: dx,
                 dy: dy,
-                dz: dz
+                dz: dz,
+                time: now - idleStartTime
             };
             accs.push(lastAcc);
             if (accs.length > minAccs) {
@@ -381,7 +382,18 @@ async function handleMotion(event: DeviceMotionEvent) {
                 }
             }
         } else {
-            lastAcc = {mag: mag, move: move, x: smoothX, y: smoothY, z: smoothZ, dmag: 0, dx: 0, dy: 0, dz: 0};
+            lastAcc = {
+                mag: mag,
+                move: move,
+                x: smoothX,
+                y: smoothY,
+                z: smoothZ,
+                dmag: 0,
+                dx: 0,
+                dy: 0,
+                dz: 0,
+                time: now - idleStartTime
+            };
         }
     } else {
         setShakeEnabled(false);
@@ -404,7 +416,7 @@ function evaluateShake(logs: boolean = false) {
     let dir = 0;
     let consecutive = 0;
     let sumMag = 0;
-    let minMove = 99
+    let minMove = 99;
     let maxMove = -99;
     let percent = 0;
     let deltaIdleCount = 0;
@@ -413,7 +425,7 @@ function evaluateShake(logs: boolean = false) {
         dir = 0;
         consecutive = 0;
         sumMag = 0;
-        minMove = 99
+        minMove = 99;
         maxMove = -99;
     }
 
@@ -577,6 +589,11 @@ function start() {
     if (beepStartTime > 0 && startTime == 0 && reaction) {
         if (lastMotionTime > 0) {
             window.removeEventListener('devicemotion', handleMotion);
+            for (const acc of accs) {
+                let act: any = Object.assign({}, acc);
+                act.action = "motion";
+                activity.push(act);
+            }
             // evaluateShake(true);
         }
 
@@ -766,7 +783,10 @@ async function submitCaptcha() {
     const payload = {
         challenge,
         hmac,
-        activity
+        activity,
+        mobile: isMobile,
+        version: VERSION,
+        motionThrottle
     };
 
     const response = await fetch(url + "/validate-captcha", {

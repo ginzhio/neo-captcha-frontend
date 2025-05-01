@@ -605,7 +605,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     let hmac: string | undefined = undefined;
     let suspense: number = 0;
 
-// stuff for shake
+    // stuff for shake
     const motionThrottle = 50;
     const minAccs = 500 / motionThrottle; // half a second of data points
     const alpha = 0.6; // higher for more smoothing
@@ -613,7 +613,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     let smoothX = 0, smoothY = 0, smoothZ = 0;
     let lastAcc: {
         mag: number, move: number, x: number, y: number, z: number,
-        dmag: number, dx: number, dy: number, dz: number
+        dmag: number, dx: number, dy: number, dz: number, time: number
     } | undefined = undefined;
     let accs: any[] = [];
     let motionEnabled = false;
@@ -820,7 +820,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
                     dmag: dmag,
                     dx: dx,
                     dy: dy,
-                    dz: dz
+                    dz: dz,
+                    time: now - idleStartTime
                 };
                 accs.push(lastAcc);
                 if (accs.length > minAccs) {
@@ -844,7 +845,18 @@ export function renderCaptcha(target: HTMLElement, config: any,
                     }
                 }
             } else {
-                lastAcc = {mag: mag, move: move, x: smoothX, y: smoothY, z: smoothZ, dmag: 0, dx: 0, dy: 0, dz: 0};
+                lastAcc = {
+                    mag: mag,
+                    move: move,
+                    x: smoothX,
+                    y: smoothY,
+                    z: smoothZ,
+                    dmag: 0,
+                    dx: 0,
+                    dy: 0,
+                    dz: 0,
+                    time: now - idleStartTime
+                };
             }
         } else {
             setShakeEnabled(false);
@@ -867,7 +879,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         let dir = 0;
         let consecutive = 0;
         let sumMag = 0;
-        let minMove = 99
+        let minMove = 99;
         let maxMove = -99;
         let percent = 0;
         let deltaIdleCount = 0;
@@ -876,7 +888,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
             dir = 0;
             consecutive = 0;
             sumMag = 0;
-            minMove = 99
+            minMove = 99;
             maxMove = -99;
         }
 
@@ -1040,6 +1052,11 @@ export function renderCaptcha(target: HTMLElement, config: any,
         if (beepStartTime > 0 && startTime == 0 && reaction) {
             if (lastMotionTime > 0) {
                 window.removeEventListener('devicemotion', handleMotion);
+                for (const acc of accs) {
+                    let act: any = Object.assign({}, acc);
+                    act.action = "motion";
+                    activity.push(act);
+                }
                 // evaluateShake(true);
             }
 
@@ -1236,7 +1253,10 @@ export function renderCaptcha(target: HTMLElement, config: any,
         const payload = {
             challenge,
             hmac,
-            activity
+            activity,
+            mobile: isMobile,
+            version: VERSION,
+            motionThrottle
         };
 
         const response = await fetch(url + "/validate-captcha", {
