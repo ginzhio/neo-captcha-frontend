@@ -31,7 +31,9 @@
 <div id="neo-captcha"></div>
 
 <!-- 2. Include the script -->
-<script src="https://neo-captcha.com/widget/v1/neo-captcha.js"></script>
+<script src="https://neo-captcha.com/widget/v1/neo-captcha.js"
+        integrity="sha256-vReSO09jMrQdTyw0A2KYkVFMIQpeyF0VdnA392rOA8I="
+        crossorigin="anonymous"></script>
 
 <!-- 3. Render the CAPTCHA -->
 <script>
@@ -53,9 +55,10 @@ That’s it.
 Use the callback methods ```onSuccess``` and ```onFailure``` to grant or deny access to the features you wanna protect from bots.  
 
 ##### Script:
-| Current v1.x Release | ```https://neo-captcha.com/widget/v1/neo-captcha.js``` |
-|:-------------------:|:------------------------------------------------------:|
-| Latest Patch | ```https://neo-captcha.com/widget/latest/neo-captcha.js``` |
+|       Version        |                            Link                            |                          SHA-256                          |
+|:--------------------:|:----------------------------------------------------------:|:---------------------------------------------------------:|
+| Current v1.x Release |   ```https://neo-captcha.com/widget/v1/neo-captcha.js```   | ```sha256-vReSO09jMrQdTyw0A2KYkVFMIQpeyF0VdnA392rOA8I=``` |
+| Latest Patch (1.1.6) | ```https://neo-captcha.com/widget/latest/neo-captcha.js``` | ```sha256-ljcZrt7NKgHVxb2OpgpBhJNKt6+g8ZOCrcIoKd1inFc=``` |
  
 ##### Configuration options:
 ```ts
