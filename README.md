@@ -76,8 +76,8 @@ Use the callback methods ```onSuccess``` and ```onFailure``` to grant or deny ac
 
 ## Preview
 
-| Neon Shape | Implied Square |
-|:----------:|:----------:|
+|            Neon Shape (theme: 'dark')             |            Implied Square (theme: 'light')            |
+|:-------------------------------------------------:|:-----------------------------------------------------:|
 | ![Neon Shape](docs/neo-captcha-screenshot-ns.png) | ![Implied Square](docs/neo-captcha-screenshot-iq.png) |
 
 ## About
