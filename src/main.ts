@@ -11,6 +11,9 @@ const callbacks = {
     onSuccess: () => {
     },
     onFailure: () => {
+    },
+    onError: (e: any) => {
+        console.log(e);
     }
 }
 
@@ -81,6 +84,7 @@ const translations: Record<string, {
     mode_1_text: string,
     mode_2: string,
     mode_2_text: string,
+    too_many_requests: string,
 }> = {
     en: {
         howto: '?   How-To:',
@@ -93,6 +97,7 @@ const translations: Record<string, {
         mode_1_text: 'Mark the missing corner!',
         mode_2: 'Neon Shape',
         mode_2_text: 'Select the shape you see!',
+        too_many_requests: 'Please wait a minute before trying again.',
     },
     de: {
         howto: '?   Wie man\'s macht:',
@@ -105,6 +110,7 @@ const translations: Record<string, {
         mode_1_text: 'Markiere die fehlende Ecke!',
         mode_2: 'Neon-Form',
         mode_2_text: 'Welche Form siehst du?',
+        too_many_requests: 'Bitte warte eine Minute, bevor du es erneut versuchst.',
     },
 };
 document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
@@ -242,13 +248,13 @@ async function getCaptcha() {
         minDifficulty,
         variant
     };
-    const response = await fetch(url + "/generate-captcha", {
+    const response = await call(fetch(url + "/generate-captcha", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload)
-    });
+    }));
+    if (!response?.ok) return;
     const result = await response.json();
-    // log(result);
     if (result.img) {
         const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
         image.style.display = "inline-block";
@@ -789,11 +795,12 @@ async function submitCaptcha() {
         motionThrottle
     };
 
-    const response = await fetch(url + "/validate-captcha", {
+    const response = await call(fetch(url + "/validate-captcha", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload)
-    });
+    }));
+    if (!response?.ok) return;
 
     let valid = false;
     let retry = false;
@@ -866,14 +873,14 @@ async function submitCaptcha() {
         drawCross(size, x, y);
     }
 
-    if (valid && callbacks && callbacks.onSuccess) {
+    if (valid && callbacks?.onSuccess) {
         callbacks.onSuccess();
     } else if (retry) {
         setTimeout(() => {
             reset();
             requestMotion();
         }, 500);
-    } else if (callbacks && callbacks.onFailure) {
+    } else if (callbacks?.onFailure) {
         callbacks.onFailure();
     }
 }
@@ -948,6 +955,31 @@ function reset() {
             accs = [];
         }
     }
+}
+
+async function call(asyncFun: Promise<Response>): Promise<Response | undefined> {
+    let response: Response | undefined;
+    try {
+        response = await asyncFun;
+        if (!response.ok) {
+            if (response.status === 429) {
+                document.getElementById("neoCaptcha-warnMessage")!.innerHTML = (translations[userLang] || translations['en']).too_many_requests;
+                document.getElementById("neoCaptcha-warnMessage")!.style.display = "block";
+                document.getElementById("neoCaptcha-wrapper")!.style.display = "none";
+            } else {
+                alert("Error " + response.status + (response.statusText ? (": " + response.statusText) : ""));
+                if (callbacks?.onError) {
+                    callbacks.onError({status: response.status, message: response.statusText});
+                }
+            }
+        }
+    } catch (e) {
+        error(e);
+        if (callbacks?.onError) {
+            callbacks.onError(e);
+        }
+    }
+    return response;
 }
 
 function log(message?: any, ...data: any[]) {

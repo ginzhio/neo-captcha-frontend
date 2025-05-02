@@ -12,7 +12,7 @@
   <a href="#license">License</a>
 </p>  
 
-[![latest patch](https://img.shields.io/badge/v1.1.6-00adad?label=Latest%20Patch)](https://github.com/ginzhio/neo-captcha-frontend/tree/v1.1.6)     [![current release](https://img.shields.io/github/v/release/ginzhio/neo-captcha-frontend?label=Current%20Release&color=009bb8)](https://github.com/ginzhio/neo-captcha-frontend/releases)
+[![latest patch](https://img.shields.io/badge/v1.1.7-00adad?label=Latest%20Patch)](https://github.com/ginzhio/neo-captcha-frontend/tree/v1.1.7)     [![current release](https://img.shields.io/github/v/release/ginzhio/neo-captcha-frontend?label=Current%20Release&color=009bb8)](https://github.com/ginzhio/neo-captcha-frontend/releases)
 
 ---
 
@@ -46,6 +46,9 @@
         },
         onFailure: () => {
             console.log("CAPTCHA failed.");
+        },
+        onError: (e) => {
+            console.error("Evaluation not possible...", e);
         }
     });
 </script>
@@ -53,12 +56,13 @@
 
 That’s it.  
 Use the callback methods ```onSuccess``` and ```onFailure``` to grant or deny access to the features you wanna protect from bots.  
+The callback ```onError(e)``` will be called when an error occurred so that neither of the other callbacks can be called. In a perfect world this will never happen :upside_down_face:
 
 ##### Script:
 |       Version        |                            Link                            |                          SHA-256                          |
 |:--------------------:|:----------------------------------------------------------:|:---------------------------------------------------------:|
 | Current v1.x Release |   ```https://neo-captcha.com/widget/v1/neo-captcha.js```   | ```sha256-vReSO09jMrQdTyw0A2KYkVFMIQpeyF0VdnA392rOA8I=``` |
-| Latest Patch (1.1.6) | ```https://neo-captcha.com/widget/latest/neo-captcha.js``` | ```sha256-ljcZrt7NKgHVxb2OpgpBhJNKt6+g8ZOCrcIoKd1inFc=``` |
+| Latest Patch (1.1.7) | ```https://neo-captcha.com/widget/latest/neo-captcha.js``` | ```sha256-hkGwPyaEqzywYVBbw//R+LyB3odFkAmN9IaJXDzhtTU=``` |
  
 ##### Configuration options:
 ```ts

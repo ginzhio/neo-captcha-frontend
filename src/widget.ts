@@ -21,6 +21,7 @@ const widgetStyles = `
     --neo-captcha-bg2: var(--neo-captcha-bg2-light);
     --neo-captcha-fg: var(--neo-captcha-fg-light);
     --neo-captcha-gradient: linear-gradient(color-mix(in srgb, var(--neo-captcha-fg) 2%, transparent), color-mix(in srgb, var(--neo-captcha-fg) 15%, transparent));
+    --neo-captcha-warn: #b14300;
 }
 
 .neo-captcha-theme-dark {
@@ -28,6 +29,7 @@ const widgetStyles = `
     --neo-captcha-bg2: var(--neo-captcha-bg2-dark);
     --neo-captcha-fg: var(--neo-captcha-fg-dark);
     --neo-captcha-gradient: linear-gradient(color-mix(in srgb, var(--neo-captcha-fg) 25%, transparent), color-mix(in srgb, var(--neo-captcha-fg) 5%, transparent));
+    --neo-captcha-warn: #fa7d00;
 }
 
 .neo-captcha-box {
@@ -364,6 +366,14 @@ const widgetStyles = `
     margin: 0;
     padding: 0;
 }
+
+.neo-captcha-warn-message {
+    max-width: 19rem;
+    font-size: 1rem;
+    color: var(--neo-captcha-warn);
+    margin: 4rem 0 3rem 0;
+    display: none;
+}
 `;
 
 function injectStyles() {
@@ -388,7 +398,11 @@ function injectMaterialIcons() {
 
 // @ts-ignore
 export function renderCaptcha(target: HTMLElement, config: any,
-                              callbacks?: { onSuccess?: () => void, onFailure?: () => void }) {
+                              callbacks?: {
+                                  onSuccess?: () => void,
+                                  onFailure?: () => void,
+                                  onError?: (e: any) => void
+                              }) {
     injectMaterialIcons();
     injectStyles();
     target.innerHTML = `
@@ -434,6 +448,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 </table>
             </div>
         </div>
+        <span id="neoCaptcha-warnMessage" class="neo-captcha-warn-message"></span>
         <button id="neoCaptcha-start" class="neo-captcha-button neo-captcha-start-button">
             <span class="neo-captcha-icon-dark neo-captcha-start-icon material-icons">play_arrow</span>
         </button>
@@ -544,6 +559,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
         mode_1_text: string,
         mode_2: string,
         mode_2_text: string,
+        too_many_requests: string,
     }> = {
         en: {
             howto: '?   How-To:',
@@ -556,6 +572,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
             mode_1_text: 'Mark the missing corner!',
             mode_2: 'Neon Shape',
             mode_2_text: 'Select the shape you see!',
+            too_many_requests: 'Please wait a minute before trying again.',
         },
         de: {
             howto: '?   Wie man\'s macht:',
@@ -568,6 +585,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
             mode_1_text: 'Markiere die fehlende Ecke!',
             mode_2: 'Neon-Form',
             mode_2_text: 'Welche Form siehst du?',
+            too_many_requests: 'Bitte warte eine Minute, bevor du es erneut versuchst.',
         },
     };
     document.getElementById("neoCaptcha-howToTitle")!.innerHTML = (translations[userLang] || translations['en']).howto;
@@ -605,7 +623,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
     let hmac: string | undefined = undefined;
     let suspense: number = 0;
 
-    // stuff for shake
+// stuff for shake
     const motionThrottle = 50;
     const minAccs = 500 / motionThrottle; // half a second of data points
     const alpha = 0.6; // higher for more smoothing
@@ -705,13 +723,13 @@ export function renderCaptcha(target: HTMLElement, config: any,
             minDifficulty,
             variant
         };
-        const response = await fetch(url + "/generate-captcha", {
+        const response = await call(fetch(url + "/generate-captcha", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(payload)
-        });
+        }));
+        if (!response?.ok) return;
         const result = await response.json();
-        // log(result);
         if (result.img) {
             const image = document.getElementById("neoCaptcha-image") as HTMLImageElement;
             image.style.display = "inline-block";
@@ -1259,11 +1277,12 @@ export function renderCaptcha(target: HTMLElement, config: any,
             motionThrottle
         };
 
-        const response = await fetch(url + "/validate-captcha", {
+        const response = await call(fetch(url + "/validate-captcha", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(payload)
-        });
+        }));
+        if (!response?.ok) return;
 
         let valid = false;
         let retry = false;
@@ -1336,14 +1355,14 @@ export function renderCaptcha(target: HTMLElement, config: any,
             drawCross(size, x, y);
         }
 
-        if (valid && callbacks && callbacks.onSuccess) {
+        if (valid && callbacks?.onSuccess) {
             callbacks.onSuccess();
         } else if (retry) {
             setTimeout(() => {
                 reset();
                 requestMotion();
             }, 500);
-        } else if (callbacks && callbacks.onFailure) {
+        } else if (callbacks?.onFailure) {
             callbacks.onFailure();
         }
     }
@@ -1418,6 +1437,31 @@ export function renderCaptcha(target: HTMLElement, config: any,
                 accs = [];
             }
         }
+    }
+
+    async function call(asyncFun: Promise<Response>): Promise<Response | undefined> {
+        let response: Response | undefined;
+        try {
+            response = await asyncFun;
+            if (!response.ok) {
+                if (response.status === 429) {
+                    document.getElementById("neoCaptcha-warnMessage")!.innerHTML = (translations[userLang] || translations['en']).too_many_requests;
+                    document.getElementById("neoCaptcha-warnMessage")!.style.display = "block";
+                    document.getElementById("neoCaptcha-wrapper")!.style.display = "none";
+                } else {
+                    alert("Error " + response.status + (response.statusText ? (": " + response.statusText) : ""));
+                    if (callbacks?.onError) {
+                        callbacks.onError({status: response.status, message: response.statusText});
+                    }
+                }
+            }
+        } catch (e) {
+            error(e);
+            if (callbacks?.onError) {
+                callbacks.onError(e);
+            }
+        }
+        return response;
     }
 
     function log(message?: any, ...data: any[]) {
