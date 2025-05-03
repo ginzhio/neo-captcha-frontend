@@ -402,6 +402,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
                                   onSuccess?: () => void,
                                   onFailure?: () => void,
                                   onError?: (e: any) => void
+                                  onResult?: (r: string) => void
                               }) {
     injectMaterialIcons();
     injectStyles();
@@ -1274,7 +1275,8 @@ export function renderCaptcha(target: HTMLElement, config: any,
             activity,
             mobile: isMobile,
             version: VERSION,
-            motionThrottle
+            motionThrottle,
+            key: config?.key
         };
 
         const response = await call(fetch(url + "/validate-captcha", {
@@ -1286,10 +1288,12 @@ export function renderCaptcha(target: HTMLElement, config: any,
 
         let valid = false;
         let retry = false;
+        let hash: string | undefined;
         try {
             const result = await response.json();
-            valid = result.valid;
-            retry = result.retry;
+            hash = result.hash;
+            valid = hash && result.valid;
+            retry = hash && result.retry;
             if (retry) {
                 challenge = result.challenge;
                 hmac = result.hmac;
@@ -1357,6 +1361,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
 
         if (valid && callbacks?.onSuccess) {
             callbacks.onSuccess();
+            if (hash && callbacks?.onResult) callbacks.onResult(hash);
         } else if (retry) {
             setTimeout(() => {
                 reset();
@@ -1364,6 +1369,7 @@ export function renderCaptcha(target: HTMLElement, config: any,
             }, 500);
         } else if (callbacks?.onFailure) {
             callbacks.onFailure();
+            if (hash && callbacks?.onResult) callbacks.onResult(hash);
         }
     }
 

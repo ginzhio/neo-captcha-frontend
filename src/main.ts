@@ -6,15 +6,39 @@ const config = {
     lang: 'de',
     minDifficulty: 'easy',
     visualOnDesktop: false,
+    key: 'secretKey',
 };
 const callbacks = {
     onSuccess: () => {
     },
     onFailure: () => {
     },
+    onResult: (r: string) => {
+        console.log("onResult", r);
+        hmacSha256("secretKey", "success").then(s => console.log("success", s));
+        hmacSha256("secretKey", "failure").then(s => console.log("failure", s));
+    },
     onError: (e: any) => {
         console.log(e);
     }
+}
+
+async function hmacSha256(key: string, message: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(key);
+    const msgData = encoder.encode(message);
+
+    const cryptoKey = await crypto.subtle.importKey(
+        "raw",
+        keyData,
+        {name: "HMAC", hash: "SHA-256"},
+        false,
+        ["sign"]
+    );
+
+    const signature = await crypto.subtle.sign("HMAC", cryptoKey, msgData);
+
+    return btoa(String.fromCharCode(...new Uint8Array(signature)));
 }
 
 declare const __VERSION__: string;
@@ -792,7 +816,8 @@ async function submitCaptcha() {
         activity,
         mobile: isMobile,
         version: VERSION,
-        motionThrottle
+        motionThrottle,
+        key: config?.key
     };
 
     const response = await call(fetch(url + "/validate-captcha", {
@@ -804,10 +829,12 @@ async function submitCaptcha() {
 
     let valid = false;
     let retry = false;
+    let hash: string | undefined;
     try {
         const result = await response.json();
-        valid = result.valid;
-        retry = result.retry;
+        hash = result.hash;
+        valid = hash && result.valid;
+        retry = hash && result.retry;
         if (retry) {
             challenge = result.challenge;
             hmac = result.hmac;
@@ -875,6 +902,7 @@ async function submitCaptcha() {
 
     if (valid && callbacks?.onSuccess) {
         callbacks.onSuccess();
+        if (hash && callbacks?.onResult) callbacks.onResult(hash);
     } else if (retry) {
         setTimeout(() => {
             reset();
@@ -882,6 +910,7 @@ async function submitCaptcha() {
         }, 500);
     } else if (callbacks?.onFailure) {
         callbacks.onFailure();
+        if (hash && callbacks?.onResult) callbacks.onResult(hash);
     }
 }
 

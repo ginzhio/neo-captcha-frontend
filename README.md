@@ -12,7 +12,7 @@
   <a href="#license">License</a>
 </p>  
 
-[![latest patch](https://img.shields.io/badge/v1.1.7-00adad?label=Latest%20Patch)](https://github.com/ginzhio/neo-captcha-frontend/tree/v1.1.7)     [![current release](https://img.shields.io/github/v/release/ginzhio/neo-captcha-frontend?label=Current%20Release&color=009bb8)](https://github.com/ginzhio/neo-captcha-frontend/releases)
+[![latest patch](https://img.shields.io/badge/v1.1.8-00adad?label=Latest%20Patch)](https://github.com/ginzhio/neo-captcha-frontend/tree/v1.1.8)     [![current release](https://img.shields.io/github/v/release/ginzhio/neo-captcha-frontend?label=Current%20Release&color=009bb8)](https://github.com/ginzhio/neo-captcha-frontend/releases)
 
 ---
 
@@ -38,7 +38,8 @@
 <!-- 3. Render the CAPTCHA -->
 <script>
     window.NeoCAPTCHA.renderCaptcha(document.getElementById("neo-captcha"), {
-        showHowTo: true,
+        <!-- more config options below -->
+        showHowTo: false,
         expandHowTo: false,
     }, {
         onSuccess: () => {
@@ -49,6 +50,9 @@
         },
         onError: (e) => {
             console.error("Evaluation not possible...", e);
+        },
+        onResult: (r) => {
+            console.log("Signed result:", r);
         }
     });
 </script>
@@ -56,13 +60,15 @@
 
 That’s it.  
 Use the callback methods ```onSuccess``` and ```onFailure``` to grant or deny access to the features you wanna protect from bots.  
-The callback ```onError(e)``` will be called when an error occurred so that neither of the other callbacks can be called. In a perfect world this will never happen :upside_down_face:
+* The callback ```onError(e)``` will be called when an error occurred, resulting in neither of the other callbacks being called. In a perfect world this will never happen :upside_down_face:  
+* The callback ```onResult(r)``` will be called **after** ```onSuccess``` or ```onFailure```. It provides the Base64 encoded bytes of the string ```'success'``` or ```'failure'``` signed with the bytes of the string you provide in the ```key``` config parameter, using ```HmacSHA256```.  
+This way you can make sure the result actually came from our backend after being called from our script.
 
 ##### Script:
 |       Version        |                            Link                            |                          SHA-256                          |
 |:--------------------:|:----------------------------------------------------------:|:---------------------------------------------------------:|
 | Current v1.x Release |   ```https://neo-captcha.com/widget/v1/neo-captcha.js```   | ```sha256-vReSO09jMrQdTyw0A2KYkVFMIQpeyF0VdnA392rOA8I=``` |
-| Latest Patch (1.1.7) | ```https://neo-captcha.com/widget/latest/neo-captcha.js``` | ```sha256-hkGwPyaEqzywYVBbw//R+LyB3odFkAmN9IaJXDzhtTU=``` |
+| Latest Patch (1.1.8) | ```https://neo-captcha.com/widget/latest/neo-captcha.js``` | ```sha256-eqYSA4D150H/v4AUM6/29b7hoSvE00xLNsM6hi+Lqi0=``` |
  
 ##### Configuration options:
 ```ts
@@ -74,6 +80,7 @@ The callback ```onError(e)``` will be called when an error occurred so that neit
     theme: 'dark',          // ['light', 'dark'] forces ui theme, omit for browser-default
     variant: 'ns',          // ['ns', 'iq'] 'ns' = Neon Shape, 'iq' = Implied Square, default is 'ns'
     visualOnDesktop: false, // show visual reaction challenge ("Tap when GREEN") instead of audible one when on desktop
+    key: '<captcha-key>',   // a secret key, the bytes of which will be used to sign the result in 'onResult'
 }
 ```
 → [Help with translations](docs/translations.xlsx)
