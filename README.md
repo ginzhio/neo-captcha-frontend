@@ -38,7 +38,7 @@
 <!-- 3. Render the CAPTCHA -->
 <script>
     window.NeoCAPTCHA.renderCaptcha(document.getElementById("neo-captcha"), {
-        <!-- more config options below -->
+        // more config options below
         showHowTo: false,
         expandHowTo: false,
     }, {
