@@ -6,9 +6,9 @@
 <p align="center"><em>What CAPTCHA was always meant to be.</em></p>
 
 <p align="center">
-  <a href="https://neo-captcha.com" target="_blank">Website</a> •
-  <a href="#quick-start">Quick Start</a> •
   <a href="#about">About</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="https://neo-captcha.com" target="_blank">Website</a> •
   <a href="#license">License</a>
 </p>  
 
@@ -16,14 +16,16 @@
 
 ---
 
-## What is NeoCAPTCHA?
+## About
 NeoCAPTCHA is a human verification tool primarily for mobile devices. The user has to
 - Click a button
 - Shake their phone
 - Solve a small visual challenge
 
-Using the motion events coming directly from the smartphone's hardware makes this virtually impossible for bots or AI to solve.  
+Using the motion events that come directly from the smartphone's hardware makes it virtually impossible for bots or AI to solve.  
 **Set it up for your website in just a few seconds!**
+
+The frontend widget is open source. The backend is hosted and stateless, using signed challenges and human interaction heuristics.
 
 ## Why NeoCAPTCHA? 
 
@@ -98,13 +100,7 @@ This way you can make sure the result actually came from our backend after being
 
 |            Neon Shape (theme: 'dark')             |            Implied Square (theme: 'light')            |
 |:-------------------------------------------------:|:-----------------------------------------------------:|
-| ![Neon Shape](docs/neo-captcha-screenshot-ns.png) | ![Implied Square](docs/neo-captcha-screenshot-iq.png) |
-
-## About
-
-**NeoCAPTCHA** is a privacy-first CAPTCHA system designed to be intuitive, satisfying, and bot-resistant.
-
-The frontend widget is open source. The backend is hosted and stateless, using signed challenges and human interaction heuristics.
+| ![Neon Shape](docs/neo-captcha-screenshot-ns.png) | ![Implied Square](docs/neo-captcha-screenshot-iq.png) | 
 
 ## Roadmap
 
