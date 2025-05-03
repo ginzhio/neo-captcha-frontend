@@ -18,7 +18,7 @@
     --neo-captcha-bg2: var(--neo-captcha-bg2-light);
     --neo-captcha-fg: var(--neo-captcha-fg-light);
     --neo-captcha-gradient: linear-gradient(color-mix(in srgb, var(--neo-captcha-fg) 2%, transparent), color-mix(in srgb, var(--neo-captcha-fg) 15%, transparent));
-    --neo-captcha-warn: #cf5d00;
+    --neo-captcha-warn: #b14300;
 }
 
 .neo-captcha-theme-dark {
@@ -362,6 +362,14 @@
     color: var(--neo-captcha-accent);
     margin: 0;
     padding: 0;
+}
+
+.neo-captcha-warn-message {
+    max-width: 19rem;
+    font-size: 1rem;
+    color: var(--neo-captcha-warn);
+    margin: 4rem 0 3rem 0;
+    display: none;
 }
 
 .neo-captcha-try-mobile-hint {

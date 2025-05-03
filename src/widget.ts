@@ -1,4 +1,5 @@
 declare const __VERSION__: string;
+declare const __BLOB__: string;
 
 const widgetStyles = `
 :root {
@@ -21,7 +22,7 @@ const widgetStyles = `
     --neo-captcha-bg2: var(--neo-captcha-bg2-light);
     --neo-captcha-fg: var(--neo-captcha-fg-light);
     --neo-captcha-gradient: linear-gradient(color-mix(in srgb, var(--neo-captcha-fg) 2%, transparent), color-mix(in srgb, var(--neo-captcha-fg) 15%, transparent));
-    --neo-captcha-warn: #cf5d00;
+    --neo-captcha-warn: #b14300;
 }
 
 .neo-captcha-theme-dark {
@@ -367,6 +368,14 @@ const widgetStyles = `
     padding: 0;
 }
 
+.neo-captcha-warn-message {
+    max-width: 19rem;
+    font-size: 1rem;
+    color: var(--neo-captcha-warn);
+    margin: 4rem 0 3rem 0;
+    display: none;
+}
+
 .neo-captcha-try-mobile-hint {
     max-width: 19rem;
     font-size: 1rem;
@@ -468,6 +477,7 @@ export function renderCaptcha(target: HTMLElement) {
                 </table>
             </div>
         </div>
+        <span id="neoCaptcha-warnMessage" class="neo-captcha-warn-message"></span>
         <button id="neoCaptcha-start" class="neo-captcha-button neo-captcha-start-button">
             <span class="neo-captcha-icon-dark neo-captcha-start-icon material-icons">play_arrow</span>
         </button>
@@ -531,6 +541,7 @@ export function renderCaptcha(target: HTMLElement) {
     `;
 
     const VERSION = __VERSION__;
+    const BLOB = __BLOB__;
     const url = "https://neo-captcha.com/api/v1";
 
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -572,6 +583,7 @@ export function renderCaptcha(target: HTMLElement) {
         mode_1_text: string,
         mode_2: string,
         mode_2_text: string,
+        too_many_requests: string,
         try_mobile: string,
         settings: string,
         settings_variant: string,
@@ -593,6 +605,7 @@ export function renderCaptcha(target: HTMLElement) {
             mode_1_text: 'Mark the missing corner!',
             mode_2: 'Neon Shape',
             mode_2_text: 'Select the shape you see!',
+            too_many_requests: 'Please wait a minute before trying again.',
             try_mobile: 'NeoCAPTCHA is optimized for real mobile devices!',
             settings: 'Settings',
             settings_variant: 'Variant:',
@@ -614,6 +627,7 @@ export function renderCaptcha(target: HTMLElement) {
             mode_1_text: 'Markiere die fehlende Ecke!',
             mode_2: 'Neon-Form',
             mode_2_text: 'Welche Form siehst du?',
+            too_many_requests: 'Bitte warte eine Minute, bevor du es erneut versuchst.',
             try_mobile: 'NeoCAPTCHA ist für echte Mobilgeräte optimiert!',
             settings: 'Einstellungen',
             settings_variant: 'Variante:',
@@ -701,7 +715,7 @@ export function renderCaptcha(target: HTMLElement) {
     let smoothX = 0, smoothY = 0, smoothZ = 0;
     let lastAcc: {
         mag: number, move: number, x: number, y: number, z: number,
-        dmag: number, dx: number, dy: number, dz: number
+        dmag: number, dx: number, dy: number, dz: number, time: number
     } | undefined = undefined;
     let accs: any[] = [];
     let motionEnabled = false;
@@ -800,11 +814,12 @@ export function renderCaptcha(target: HTMLElement) {
             minDifficulty,
             variant
         };
-        const response = await fetch(url + "/generate-captcha", {
+        const response = await call(fetch(url + "/generate-captcha", {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
+            headers: {"Content-Type": "application/json", "Authorization": "Blob " + BLOB},
             body: JSON.stringify(payload)
-        });
+        }));
+        if (!response?.ok) return;
         const result = await response.json();
         // log(result);
         if (result.img) {
@@ -915,7 +930,8 @@ export function renderCaptcha(target: HTMLElement) {
                     dmag: dmag,
                     dx: dx,
                     dy: dy,
-                    dz: dz
+                    dz: dz,
+                    time: now - idleStartTime
                 };
                 accs.push(lastAcc);
                 if (accs.length > minAccs) {
@@ -939,7 +955,18 @@ export function renderCaptcha(target: HTMLElement) {
                     }
                 }
             } else {
-                lastAcc = {mag: mag, move: move, x: smoothX, y: smoothY, z: smoothZ, dmag: 0, dx: 0, dy: 0, dz: 0};
+                lastAcc = {
+                    mag: mag,
+                    move: move,
+                    x: smoothX,
+                    y: smoothY,
+                    z: smoothZ,
+                    dmag: 0,
+                    dx: 0,
+                    dy: 0,
+                    dz: 0,
+                    time: now - idleStartTime
+                };
             }
         } else {
             setShakeEnabled(false);
@@ -963,7 +990,7 @@ export function renderCaptcha(target: HTMLElement) {
         let dir = 0;
         let consecutive = 0;
         let sumMag = 0;
-        let minMove = 99
+        let minMove = 99;
         let maxMove = -99;
         let percent = 0;
         let deltaIdleCount = 0;
@@ -972,7 +999,7 @@ export function renderCaptcha(target: HTMLElement) {
             dir = 0;
             consecutive = 0;
             sumMag = 0;
-            minMove = 99
+            minMove = 99;
             maxMove = -99;
         }
 
@@ -993,7 +1020,7 @@ export function renderCaptcha(target: HTMLElement) {
             if (delta < minDelta) deltaIdleCount++;
             else deltaIdleCount = 0;
             let directionChanged = false;
-            if (Math.abs(acc.x) > 2 && deltaIdleCount < 5) {
+            if (Math.abs(acc.x) > 2 && deltaIdleCount < 5) { // number depends on motionThrottle
                 if (acc.x < last.x) {
                     // move left
                     if (logs) log(i, "<left", "x:", acc.x, "move:", acc.move, "mag:", acc.mag);
@@ -1136,6 +1163,11 @@ export function renderCaptcha(target: HTMLElement) {
         if (beepStartTime > 0 && startTime == 0 && reaction) {
             if (lastMotionTime > 0) {
                 window.removeEventListener('devicemotion', handleMotion);
+                for (const acc of accs) {
+                    let act: any = Object.assign({}, acc);
+                    act.action = "motion";
+                    activity.push(act);
+                }
                 // evaluateShake(true);
             }
 
@@ -1324,14 +1356,18 @@ export function renderCaptcha(target: HTMLElement) {
         const payload = {
             challenge,
             hmac,
-            activity
+            activity,
+            mobile: isMobile,
+            version: VERSION,
+            motionThrottle
         };
 
-        const response = await fetch(url + "/validate-captcha", {
+        const response = await call(fetch(url + "/validate-captcha", {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
+            headers: {"Content-Type": "application/json", "Authorization": "Blob " + BLOB},
             body: JSON.stringify(payload)
-        });
+        }));
+        if (!response?.ok) return;
 
         let valid = false;
         let retry = false;
@@ -1544,6 +1580,26 @@ export function renderCaptcha(target: HTMLElement) {
         } else {
             canvas.addEventListener("pointerdown", down);
         }
+    }
+
+    async function call(asyncFun: Promise<Response>): Promise<Response | undefined> {
+        let response: Response | undefined;
+        try {
+            response = await asyncFun;
+            if (!response.ok) {
+                if (response.status === 429) {
+                    document.getElementById("neoCaptcha-warnMessage")!.innerHTML = (translations[userLang] || translations['en']).too_many_requests;
+                    document.getElementById("neoCaptcha-warnMessage")!.style.display = "block";
+                    document.getElementById("neoCaptcha-wrapper")!.style.display = "none";
+                } else {
+                    alert("Error " + response.status + (response.statusText ? (": " + response.statusText) : ""));
+                    error(response.status, response.statusText);
+                }
+            }
+        } catch (e) {
+            error(e);
+        }
+        return response;
     }
 
     function log(message?: any, ...data: any[]) {

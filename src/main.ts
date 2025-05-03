@@ -1,6 +1,8 @@
 declare const __VERSION__: string;
+declare const __BLOB__: string;
 
 const VERSION = __VERSION__;
+const BLOB = __BLOB__;
 const url = "https://neo-captcha.com/api/v1"; // "http://localhost:8080/api"
 
 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -42,6 +44,7 @@ const translations: Record<string, {
     mode_1_text: string,
     mode_2: string,
     mode_2_text: string,
+    too_many_requests: string,
     try_mobile: string,
     settings: string,
     settings_variant: string,
@@ -63,6 +66,7 @@ const translations: Record<string, {
         mode_1_text: 'Mark the missing corner!',
         mode_2: 'Neon Shape',
         mode_2_text: 'Select the shape you see!',
+        too_many_requests: 'Please wait a minute before trying again.',
         try_mobile: 'NeoCAPTCHA is optimized for real mobile devices!',
         settings: 'Settings',
         settings_variant: 'Variant:',
@@ -84,6 +88,7 @@ const translations: Record<string, {
         mode_1_text: 'Markiere die fehlende Ecke!',
         mode_2: 'Neon-Form',
         mode_2_text: 'Welche Form siehst du?',
+        too_many_requests: 'Bitte warte eine Minute, bevor du es erneut versuchst.',
         try_mobile: 'NeoCAPTCHA ist für echte Mobilgeräte optimiert!',
         settings: 'Einstellungen',
         settings_variant: 'Variante:',
@@ -171,7 +176,7 @@ let lastMotionTime = 0;
 let smoothX = 0, smoothY = 0, smoothZ = 0;
 let lastAcc: {
     mag: number, move: number, x: number, y: number, z: number,
-    dmag: number, dx: number, dy: number, dz: number
+    dmag: number, dx: number, dy: number, dz: number, time: number
 } | undefined = undefined;
 let accs: any[] = [];
 let motionEnabled = false;
@@ -270,11 +275,12 @@ async function getCaptcha() {
         minDifficulty,
         variant
     };
-    const response = await fetch(url + "/generate-captcha", {
+    const response = await call(fetch(url + "/generate-captcha", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: {"Content-Type": "application/json", "Authorization": "Blob " + BLOB},
         body: JSON.stringify(payload)
-    });
+    }));
+    if (!response?.ok) return;
     const result = await response.json();
     // log(result);
     if (result.img) {
@@ -385,7 +391,8 @@ async function handleMotion(event: DeviceMotionEvent) {
                 dmag: dmag,
                 dx: dx,
                 dy: dy,
-                dz: dz
+                dz: dz,
+                time: now - idleStartTime
             };
             accs.push(lastAcc);
             if (accs.length > minAccs) {
@@ -409,7 +416,18 @@ async function handleMotion(event: DeviceMotionEvent) {
                 }
             }
         } else {
-            lastAcc = {mag: mag, move: move, x: smoothX, y: smoothY, z: smoothZ, dmag: 0, dx: 0, dy: 0, dz: 0};
+            lastAcc = {
+                mag: mag,
+                move: move,
+                x: smoothX,
+                y: smoothY,
+                z: smoothZ,
+                dmag: 0,
+                dx: 0,
+                dy: 0,
+                dz: 0,
+                time: now - idleStartTime
+            };
         }
     } else {
         setShakeEnabled(false);
@@ -433,7 +451,7 @@ function evaluateShake(logs: boolean = false) {
     let dir = 0;
     let consecutive = 0;
     let sumMag = 0;
-    let minMove = 99
+    let minMove = 99;
     let maxMove = -99;
     let percent = 0;
     let deltaIdleCount = 0;
@@ -442,7 +460,7 @@ function evaluateShake(logs: boolean = false) {
         dir = 0;
         consecutive = 0;
         sumMag = 0;
-        minMove = 99
+        minMove = 99;
         maxMove = -99;
     }
 
@@ -606,6 +624,11 @@ function start() {
     if (beepStartTime > 0 && startTime == 0 && reaction) {
         if (lastMotionTime > 0) {
             window.removeEventListener('devicemotion', handleMotion);
+            for (const acc of accs) {
+                let act: any = Object.assign({}, acc);
+                act.action = "motion";
+                activity.push(act);
+            }
             // evaluateShake(true);
         }
 
@@ -794,14 +817,18 @@ async function submitCaptcha() {
     const payload = {
         challenge,
         hmac,
-        activity
+        activity,
+        mobile: isMobile,
+        version: VERSION,
+        motionThrottle
     };
 
-    const response = await fetch(url + "/validate-captcha", {
+    const response = await call(fetch(url + "/validate-captcha", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: {"Content-Type": "application/json", "Authorization": "Blob " + BLOB},
         body: JSON.stringify(payload)
-    });
+    }));
+    if (!response?.ok) return;
 
     let valid = false;
     let retry = false;
@@ -1014,6 +1041,26 @@ function reset() {
     } else {
         canvas.addEventListener("pointerdown", down);
     }
+}
+
+async function call(asyncFun: Promise<Response>): Promise<Response | undefined> {
+    let response: Response | undefined;
+    try {
+        response = await asyncFun;
+        if (!response.ok) {
+            if (response.status === 429) {
+                document.getElementById("neoCaptcha-warnMessage")!.innerHTML = (translations[userLang] || translations['en']).too_many_requests;
+                document.getElementById("neoCaptcha-warnMessage")!.style.display = "block";
+                document.getElementById("neoCaptcha-wrapper")!.style.display = "none";
+            } else {
+                alert("Error " + response.status + (response.statusText ? (": " + response.statusText) : ""));
+                error(response.status, response.statusText);
+            }
+        }
+    } catch (e) {
+        error(e);
+    }
+    return response;
 }
 
 function log(message?: any, ...data: any[]) {
