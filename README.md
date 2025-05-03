@@ -49,9 +49,9 @@ The frontend widget is open source. The validation backend is securely hosted, d
 <!-- 3. Render the CAPTCHA -->
 <script>
     window.NeoCAPTCHA.renderCaptcha(document.getElementById("neo-captcha"), {
-        // more config options below
         showHowTo: false,
         expandHowTo: false,
+        // more config options below
     }, {
         onSuccess: () => {
             console.log("CAPTCHA passed!");
