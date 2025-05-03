@@ -25,7 +25,7 @@ NeoCAPTCHA is a human verification tool primarily for mobile devices. The user h
 Using the motion events that come directly from the smartphone's hardware makes it virtually impossible for bots or AI to solve.  
 **Set it up for your website in just a few seconds!**
 
-The frontend widget is open source. The backend is hosted and stateless, using signed challenges and human interaction heuristics.
+The frontend widget is open source. The validation backend is securely hosted, distributed and stateless, using signed challenges and human interaction heuristics.
 
 ## Why NeoCAPTCHA? 
 
