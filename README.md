@@ -80,7 +80,7 @@ This way you can make sure the result actually came from our backend after being
     theme: 'dark',          // ['light', 'dark'] forces ui theme, omit for browser-default
     variant: 'ns',          // ['ns', 'iq'] 'ns' = Neon Shape, 'iq' = Implied Square, default is 'ns'
     visualOnDesktop: false, // show visual reaction challenge ("Tap when GREEN") instead of audible one when on desktop
-    key: '<captcha-key>',   // a secret key, the bytes of which will be used to sign the result in 'onResult'
+    key: '<captcha-key>',   // an ephemeral key used to sign the result in 'onResult', use a different one for every CAPTCHA
 }
 ```
 → [Help with translations](docs/translations.xlsx)
