@@ -16,7 +16,16 @@
 
 ---
 
-## Why neoCAPTCHA? 
+## What is NeoCAPTCHA?
+NeoCAPTCHA is a human verification tool primarily for mobile devices. The user has to
+- Click a button
+- Shake their phone
+- Solve a small visual challenge
+
+Using the motion events coming directly from the smartphone's hardware makes this virtually impossible for bots or AI to solve.  
+**Set it up for your website in just a few seconds!**
+
+## Why NeoCAPTCHA? 
 
 - ✅ No tracking, no data collection  
 - 🧠 Doesn’t train AI models  
