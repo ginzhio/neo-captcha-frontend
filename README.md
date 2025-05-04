@@ -48,7 +48,7 @@ The frontend widget is open source. The validation backend is securely hosted, d
 
 <!-- 2. Include the script -->
 <script src="https://neo-captcha.com/widget/v1/neo-captcha.js"
-        integrity="sha256-vReSO09jMrQdTyw0A2KYkVFMIQpeyF0VdnA392rOA8I="
+        integrity="sha256-v5Yo7yBHHBEZzmSqrAysnGzuqZQVo7qYbpa1w+MrK0k="
         crossorigin="anonymous"></script>
 
 <!-- 3. Render the CAPTCHA -->
