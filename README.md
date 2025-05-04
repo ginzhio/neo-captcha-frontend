@@ -6,9 +6,9 @@
 <p align="center"><em>What CAPTCHA was always meant to be.</em></p>
 
 <p align="center">
-  <a href="https://neo-captcha.com" target="_blank">Website</a> •
-  <a href="#quick-start">Quick Start</a> •
   <a href="#about">About</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="https://neo-captcha.com" target="_blank">Website</a> •
   <a href="#license">License</a>
 </p>  
 
@@ -16,7 +16,18 @@
 
 ---
 
-## Why neoCAPTCHA? 
+## About
+NeoCAPTCHA is a human verification tool primarily for mobile devices. The user has to
+- Click a button
+- Shake their phone
+- Solve a small visual challenge
+
+Using the motion events that come directly from the smartphone's hardware makes it virtually impossible for bots or AI to solve.  
+**Set it up for your website in just a few seconds!**
+
+The frontend widget is open source. The validation backend is securely hosted, distributed and stateless, using signed challenges and human interaction heuristics.
+
+## Why NeoCAPTCHA? 
 
 - ✅ No tracking, no data collection  
 - 🧠 Doesn’t train AI models  
@@ -38,9 +49,9 @@
 <!-- 3. Render the CAPTCHA -->
 <script>
     window.NeoCAPTCHA.renderCaptcha(document.getElementById("neo-captcha"), {
-        <!-- more config options below -->
         showHowTo: false,
         expandHowTo: false,
+        // more config options below
     }, {
         onSuccess: () => {
             console.log("CAPTCHA passed!");
@@ -80,7 +91,7 @@ This way you can make sure the result actually came from our backend after being
     theme: 'dark',          // ['light', 'dark'] forces ui theme, omit for browser-default
     variant: 'ns',          // ['ns', 'iq'] 'ns' = Neon Shape, 'iq' = Implied Square, default is 'ns'
     visualOnDesktop: false, // show visual reaction challenge ("Tap when GREEN") instead of audible one when on desktop
-    key: '<captcha-key>',   // a secret key, the bytes of which will be used to sign the result in 'onResult'
+    key: '<captcha-key>',   // an ephemeral key used to sign the result in 'onResult', use a different one for every CAPTCHA
 }
 ```
 → [Help with translations](docs/translations.xlsx)
@@ -89,13 +100,7 @@ This way you can make sure the result actually came from our backend after being
 
 |            Neon Shape (theme: 'dark')             |            Implied Square (theme: 'light')            |
 |:-------------------------------------------------:|:-----------------------------------------------------:|
-| ![Neon Shape](docs/neo-captcha-screenshot-ns.png) | ![Implied Square](docs/neo-captcha-screenshot-iq.png) |
-
-## About
-
-**NeoCAPTCHA** is a privacy-first CAPTCHA system designed to be intuitive, satisfying, and bot-resistant.
-
-The frontend widget is open source. The backend is hosted and stateless, using signed challenges and human interaction heuristics.
+| ![Neon Shape](docs/neo-captcha-screenshot-ns.png) | ![Implied Square](docs/neo-captcha-screenshot-iq.png) | 
 
 ## Roadmap
 
