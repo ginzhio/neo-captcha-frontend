@@ -67,7 +67,7 @@ This way you can make sure the result actually came from our backend after being
 ##### Script:
 |       Version        |                            Link                            |                          SHA-256                          |
 |:--------------------:|:----------------------------------------------------------:|:---------------------------------------------------------:|
-| Current v1.x Release |   ```https://neo-captcha.com/widget/v1/neo-captcha.js```   | ```sha256-vReSO09jMrQdTyw0A2KYkVFMIQpeyF0VdnA392rOA8I=``` |
+| Current Release v1.2 |   ```https://neo-captcha.com/widget/v1/neo-captcha.js```   | ```sha256-v5Yo7yBHHBEZzmSqrAysnGzuqZQVo7qYbpa1w+MrK0k=``` |
 | Latest Patch (1.1.8) | ```https://neo-captcha.com/widget/latest/neo-captcha.js``` | ```sha256-eqYSA4D150H/v4AUM6/29b7hoSvE00xLNsM6hi+Lqi0=``` |
  
 ##### Configuration options:
