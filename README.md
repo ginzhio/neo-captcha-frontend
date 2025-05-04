@@ -12,6 +12,12 @@
   <a href="#license">License</a>
 </p>  
 
+CAPTCHA used to stand for "**C**ompletely **A**utomated **P**ublic **T**uring test to tell **C**omputers and **H**umans **A**part". But since computers are beginning to pass turing tests with AI, we are redefining the term:  
+  
+**CAPTCHA** - **C**ontinuously **A**daptive **P**rotocol **T**hat **C**onfirms **H**uman **A**gency.
+
+<br>
+  
 [![latest patch](https://img.shields.io/badge/v1.1.8-00adad?label=Latest%20Patch)](https://github.com/ginzhio/neo-captcha-frontend/tree/v1.1.8)     [![current release](https://img.shields.io/github/v/release/ginzhio/neo-captcha-frontend?label=Current%20Release&color=009bb8)](https://github.com/ginzhio/neo-captcha-frontend/releases)
 
 ---
@@ -22,8 +28,7 @@ NeoCAPTCHA is a human verification tool primarily for mobile devices. The user h
 - Shake their phone
 - Solve a small visual challenge
 
-Using the motion events that come directly from the smartphone's hardware makes it virtually impossible for bots or AI to solve.  
-**Set it up for your website in just a few seconds!**
+Using the motion events that come directly from the smartphone's hardware/OS makes it virtually impossible for bots or AI to solve.  
 
 The frontend widget is open source. The validation backend is securely hosted, distributed and stateless, using signed challenges and human interaction heuristics.
 
@@ -36,7 +41,7 @@ The frontend widget is open source. The validation backend is securely hosted, d
 - 🔐 Hosted backend – privacy-first by design  
 
 ## Quick Start
-
+**Use it on your website in just a few seconds!**
 ```html
 <!-- 1. Add a target element -->
 <div id="neo-captcha"></div>
@@ -87,14 +92,14 @@ This way you can make sure the result actually came from our backend after being
     showHowTo: true,        // shows instructions on how to solve the CAPTCHA
     expandHowTo: false,     // expand or collapse the "How-To" section initially
     minDifficulty: 'easy',  // ['easy', 'medium', 'hard'] default is 'easy'
-    lang: 'en',             // currently: ['en', 'de'] forces the text to be in that language, omit for browser-default
+    lang: 'en',             // currently: ['en', 'de']* forces the text to be in that language, omit for browser-default
     theme: 'dark',          // ['light', 'dark'] forces ui theme, omit for browser-default
     variant: 'ns',          // ['ns', 'iq'] 'ns' = Neon Shape, 'iq' = Implied Square, default is 'ns'
     visualOnDesktop: false, // show visual reaction challenge ("Tap when GREEN") instead of audible one when on desktop
     key: '<captcha-key>',   // an ephemeral key used to sign the result in 'onResult', use a different one for every CAPTCHA
 }
 ```
-→ [Help with translations](docs/translations.xlsx)
+```*``` [Help with translations](docs/translations.xlsx)
 
 ## Preview
 
